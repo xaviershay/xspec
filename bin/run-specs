@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+ruby -Ilib spec/skeleton_spec.rb
