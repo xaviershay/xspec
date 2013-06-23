@@ -27,11 +27,10 @@ module XSpec
       # to be avilable inside the module.
       define_method(:__xspec_opts) { options }
 
-      # `run!` is where the magic happens. Typically called at the end of a file
-      # (or by `autorun!`), this method takes all the data that was accumulated
-      # by the DSL methods above and runs it through the evaluator.
+      # `run!` is where the magic happens. Typically called at the end of a
+      # file (or by `autorun!`), this method takes all the data that was
+      # accumulated by the DSL methods above and runs it through the evaluator.
       def run!
-        __xspec_context.apply_assertion_context!
         __xspec_opts.fetch(:evaluator).run(__xspec_context)
       end
 

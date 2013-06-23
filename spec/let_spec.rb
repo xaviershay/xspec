@@ -4,9 +4,9 @@ let(:root_value) { 3 }
 
 describe 'let' do
   let(:parent_value) { 1 }
-  let(:object) { Object.new }
+  let(:array)        { [] }
 
-  it('allows locals to be set') { assert parent_value == 1 }
+  it('creates an instance method') { assert parent_value == 1 }
 
   describe do
     it("inherits from parent") { assert parent_value == 1 }
@@ -30,12 +30,17 @@ describe 'let' do
     let(:my_value) { 2 }
   end
 
-  it 'memoizes the value' do
-    assert object == object
-  end
-
   it 'works with root context' do
     assert root_value == 3
+  end
+
+  it 'memorizes the value' do
+    array << 1
+    assert array == [1]
+  end
+
+  it 'resets after each spec' do
+    assert array == []
   end
 end
 

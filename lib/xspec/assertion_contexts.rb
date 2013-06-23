@@ -27,7 +27,7 @@ module XSpec
     end
 
     module RSpecExpectations
-      def self.extended(klass)
+      def self.included(klass)
         begin
           require 'rspec/expectations'
           require 'rspec/matchers'
@@ -35,7 +35,7 @@ module XSpec
           raise "RSpec is not available, cannot use RSpec assertion context."
         end
 
-        klass.extend RSpec::Matchers
+        klass.mixin(RSpec::Matchers)
       end
 
       def call(unit_of_work)
