@@ -51,30 +51,39 @@ module XSpec
     class FailuresAtEnd
       include Composable
 
-      def initialize
+      def initialize(out = $stdout)
         @errors = []
+        @out    = out
       end
 
       def run_start; end
 
       def evaluate_finish(_, errors)
-        @errors += errors
+        self.errors += errors
       end
 
       def run_finish
-        return true if @errors.empty?
+        return true if errors.empty?
 
-        puts
-        @errors.each do |error|
-          puts "%s: %s" % [error.unit_of_work.name, error.message]
+        out.puts
+        errors.each do |error|
+          out.puts "%s: %s" % [full_name(error.unit_of_work), error.message]
           error.caller.each do |line|
-            puts "  %s" % line
+            out.puts "  %s" % line
           end
-          puts
+          out.puts
         end
 
         false
       end
+
+      def full_name(unit_of_work)
+        (unit_of_work.parents + [unit_of_work]).map(&:name).compact.join(' ')
+      end
+
+      protected
+
+      attr_accessor :out, :errors
     end
 
     # Includes nicely formatted names of each test in the output.
