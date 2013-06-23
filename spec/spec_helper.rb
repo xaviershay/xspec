@@ -1,11 +1,12 @@
-require 'xspec/autorun'
+require 'xspec'
+
+extend XSpec.dsl(notifier: XSpec::Notifier::Documentation.new)
+autorun!
 
 def assert_errors_from_run(context, expected_error_messages)
-  evaluator = context.__xspec_opts.fetch(:evaluator)
-  notifier  = context.__xspec_opts.fetch(:notifier)
+  context.run!
 
-  evaluator.run(context.__xspec_context)
-
+  notifier = context.__xspec_opts.fetch(:notifier)
   assert notifier.errors.flatten.map(&:message) == expected_error_messages
 end
 

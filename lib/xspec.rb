@@ -19,7 +19,8 @@ module XSpec
       # Each DSL has its own independent context, which is described in detail
       # in `data_structures.rb`.
       def __xspec_context
-        @__xspec_context ||= XSpec::RootContext.new
+        assertion_context = __xspec_opts.fetch(:assertion_context)
+        @__xspec_context ||= XSpec::Context.root(assertion_context)
       end
 
       # Some meta-magic is needed to enable the options from local scope above
@@ -30,6 +31,7 @@ module XSpec
       # (or by `autorun!`), this method takes all the data that was accumulated
       # by the DSL methods above and runs it through the evaluator.
       def run!
+        __xspec_context.apply_assertion_context!
         __xspec_opts.fetch(:evaluator).run(__xspec_context)
       end
 

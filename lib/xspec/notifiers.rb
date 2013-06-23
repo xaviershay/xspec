@@ -77,6 +77,58 @@ module XSpec
       end
     end
 
+    # Includes nicely formatted names of each test in the output.
+    class Documentation
+      include Composable
+
+      def initialize(indent = 2)
+        self.indent          = indent
+        self.last_seen_names = []
+        self.failed          = false
+      end
+
+      def run_start; end
+
+      def evaluate_finish(unit_of_work, errors)
+        output_context_header! unit_of_work.parents.map(&:name).compact
+
+        spaces = ' ' * (last_seen_names.size * indent)
+        char   = '-'
+
+        if errors.any?
+          self.failed = true
+          char        = 'F'
+        end
+
+        puts "%s%s %s" % [spaces, char, unit_of_work.name]
+      end
+
+      def run_finish
+        puts
+        !failed
+      end
+
+      protected
+
+      attr_accessor :last_seen_names, :indent, :failed
+
+      def output_context_header!(parent_names)
+        if parent_names != last_seen_names
+          tail = parent_names - last_seen_names
+
+          puts
+          if tail.any?
+            existing_indent = parent_names.size - tail.size
+            tail.each_with_index do |name, i|
+              puts '%s%s' % [' ' * ((existing_indent + i) * indent), name]
+            end
+          end
+
+          self.last_seen_names = parent_names
+        end
+      end
+    end
+
     # A notifier that does not do anything and always returns successful.
     # Useful as a parent class for other notifiers or for testing.
     class Null
