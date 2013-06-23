@@ -1,3 +1,6 @@
+# Without a notifier, there is no way for XSpec to interact with the outside
+# world. A notifier handles progress updates as tests are executed, and
+# summarizing the run when it finished.
 module XSpec
   module Notifier
     # Many notifiers play nice with others, and can be composed together in a
@@ -81,6 +84,8 @@ module XSpec
         (unit_of_work.parents + [unit_of_work]).map(&:name).compact.join(' ')
       end
 
+      # A standard backtrace contains many entries for XSpec itself which are
+      # not useful for debugging your tests, so they are stripped out.
       def clean_backtrace(backtrace)
         lib_dir = File.dirname(File.expand_path('..', __FILE__))
 

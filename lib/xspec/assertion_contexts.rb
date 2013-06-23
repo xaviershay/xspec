@@ -26,8 +26,11 @@ module XSpec
       end
     end
 
+    # This RSpec adapter shows two useful techniques: dynamic library loading
+    # which removes RSpec as a direct dependency, and use for the `mixin`
+    # method to further extend the target context.
     module RSpecExpectations
-      def self.included(klass)
+      def self.included(context)
         begin
           require 'rspec/expectations'
           require 'rspec/matchers'
@@ -35,7 +38,7 @@ module XSpec
           raise "RSpec is not available, cannot use RSpec assertion context."
         end
 
-        klass.mixin(RSpec::Matchers)
+        context.mixin(RSpec::Matchers)
       end
 
       def call(unit_of_work)
