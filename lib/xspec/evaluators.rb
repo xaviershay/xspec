@@ -12,16 +12,12 @@ module XSpec
         notifier.run_start
 
         context.nested_units_of_work.each do |x|
-          evaluate(x)
+          errors = assertion_context.call(x)
+
+          notifier.evaluate_finish(x, errors)
         end
 
         notifier.run_finish
-      end
-
-      def evaluate(nested_unit_of_work)
-        errors = assertion_context.(nested_unit_of_work)
-
-        notifier.evaluate_finish(nested_unit_of_work, errors)
       end
 
       protected
