@@ -276,6 +276,41 @@ and <code>it</code> DSL methods respectively.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
+              <p>A shared context is a floating context that isn&#39;t part of any context
+heirachy, so its units of work will not be visible to the root node. It
+can be brought into any point in the heirachy using <code>copy_into_tree</code>
+(aliased as <code>it_behaves_like_a</code> in the DSL), and this can be done
+multiple times, which allows definitions to be reused.</p>
+<p>This is leaky abstraction, since only units of work are copied from
+shared contexts. Methods and child contexts are ignored.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">create_shared_context</span><span class="params">(&amp;block)</span></span>
+        make(<span class="keyword">nil</span>, assertion_context, &amp;block)
+      <span class="keyword">end</span>
+
+      <span class="function"><span class="keyword">def</span> <span class="title">copy_into_tree</span><span class="params">(source_context)</span></span>
+        target_context = make(
+          source_context.name,
+          source_context.assertion_context
+        )
+        source_context.nested_units_of_work.each <span class="keyword">do</span> |x|
+          target_context.units_of_work &lt;&lt; x.unit_of_work
+        <span class="keyword">end</span>
+        <span class="keyword">self</span>.children &lt;&lt; target_context
+        target_context
+      <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
               <p>The most convenient way to access all units of work is this recursive
 iteration that returns all leaf-nodes as <code>NestedUnitOfWork</code> objects.</p>
 
@@ -305,11 +340,11 @@ iteration that returns all leaf-nodes as <code>NestedUnitOfWork</code> objects.<
         </li>
         
         
-        <li id="section-12">
+        <li id="section-13">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-12">&#182;</a>
+                <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
               <p><code>include</code> is normally private, but it is useful to allow other classes
 and modules to include additional behaviour (such as assertion
@@ -324,11 +359,11 @@ contexts).</p>
         </li>
         
         
-        <li id="section-13">
+        <li id="section-14">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
+                <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
               <p>Values of memoized methods are remembered only for the duration of a
 single unit of work. These are typically creates using the <code>let</code> DSL
@@ -345,11 +380,11 @@ method.</p>
         </li>
         
         
-        <li id="section-14">
+        <li id="section-15">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-14">&#182;</a>
+                <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p>Dynamically generated classes are hard to identify in object graphs, so
 it is helpful for debugging to set an explicit name.</p>
@@ -371,11 +406,11 @@ it is helpful for debugging to set an explicit name.</p>
         </li>
         
         
-        <li id="section-15">
+        <li id="section-16">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
+                <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
               <p>Units of work can be nested inside contexts. This is the main object that
 other components of the system work with.</p>
@@ -398,11 +433,11 @@ other components of the system work with.</p>
         </li>
         
         
-        <li id="section-16">
+        <li id="section-17">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
+                <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <p>A test failure will be reported as a <code>Failure</code>, which includes contextual
 information about the failure useful for reporting to the user.</p>

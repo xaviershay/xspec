@@ -136,19 +136,23 @@ the result.</p>
             <div class="content"><div class='highlight'><pre>    <span class="class"><span class="keyword">class</span> <span class="title">Character</span></span>
       <span class="keyword">include</span> <span class="constant">Composable</span>
 
+      <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(out = <span class="variable">$stdout</span>)</span></span>
+        <span class="variable">@out</span> = out
+      <span class="keyword">end</span>
+
       <span class="function"><span class="keyword">def</span> <span class="title">run_start</span>;</span> <span class="keyword">end</span>
 
       <span class="function"><span class="keyword">def</span> <span class="title">evaluate_finish</span><span class="params">(<span class="number">_</span>, errors)</span></span>
         <span class="keyword">if</span> errors.any?
           <span class="variable">@failed</span> = <span class="keyword">true</span>
-          print <span class="string">'F'</span>
+          <span class="variable">@out</span>.print <span class="string">'F'</span>
         <span class="keyword">else</span>
-          print <span class="string">'.'</span>
+          <span class="variable">@out</span>.print <span class="string">'.'</span>
         <span class="keyword">end</span>
       <span class="keyword">end</span>
 
       <span class="function"><span class="keyword">def</span> <span class="title">run_finish</span></span>
-        puts
+        <span class="variable">@out</span>.puts
         !<span class="variable">@failed</span>
       <span class="keyword">end</span>
     <span class="keyword">end</span></pre></div></div>
@@ -242,10 +246,11 @@ not useful for debugging your tests, so they are stripped out.</p>
             <div class="content"><div class='highlight'><pre>    <span class="class"><span class="keyword">class</span> <span class="title">Documentation</span></span>
       <span class="keyword">include</span> <span class="constant">Composable</span>
 
-      <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(indent = <span class="number">2</span>)</span></span>
-        <span class="keyword">self</span>.indent          = indent
+      <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(out = <span class="variable">$stdout</span>)</span></span>
+        <span class="keyword">self</span>.indent          = <span class="number">2</span>
         <span class="keyword">self</span>.last_seen_names = []
         <span class="keyword">self</span>.failed          = <span class="keyword">false</span>
+        <span class="keyword">self</span>.out             = out
       <span class="keyword">end</span>
 
       <span class="function"><span class="keyword">def</span> <span class="title">run_start</span>;</span> <span class="keyword">end</span>
@@ -261,27 +266,27 @@ not useful for debugging your tests, so they are stripped out.</p>
           char        = <span class="string">'F'</span>
         <span class="keyword">end</span>
 
-        puts <span class="string">"%s%s %s"</span> % [spaces, char, unit_of_work.name]
+        out.puts <span class="string">"%s%s %s"</span> % [spaces, char, unit_of_work.name]
       <span class="keyword">end</span>
 
       <span class="function"><span class="keyword">def</span> <span class="title">run_finish</span></span>
-        puts
+        out.puts
         !failed
       <span class="keyword">end</span>
 
       protected
 
-      attr_accessor <span class="symbol">:last_seen_names</span>, <span class="symbol">:indent</span>, <span class="symbol">:failed</span>
+      attr_accessor <span class="symbol">:last_seen_names</span>, <span class="symbol">:indent</span>, <span class="symbol">:failed</span>, <span class="symbol">:out</span>
 
       <span class="function"><span class="keyword">def</span> <span class="title">output_context_header!</span><span class="params">(parent_names)</span></span>
         <span class="keyword">if</span> parent_names != last_seen_names
           tail = parent_names - last_seen_names
 
-          puts
+          out.puts
           <span class="keyword">if</span> tail.any?
             existing_indent = parent_names.size - tail.size
             tail.each_with_index <span class="keyword">do</span> |name, i|
-              puts <span class="string">'%s%s'</span> % [<span class="string">' '</span> * ((existing_indent + i) * indent), name]
+              out.puts <span class="string">'%s%s'</span> % [<span class="string">' '</span> * ((existing_indent + i) * indent), name]
             <span class="keyword">end</span>
           <span class="keyword">end</span>
 
