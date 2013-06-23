@@ -19,11 +19,6 @@
           <div id="jump_page">
             
               
-              <a class="source" href="xspec.html">
-                xspec.rb
-              </a>
-            
-              
               <a class="source" href="assertion_contexts.html">
                 assertion_contexts.rb
               </a>
@@ -104,7 +99,7 @@ progress or details of failing tests.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    options[<span class="symbol">:notifier</span>]  ||= <span class="constant">Notifier::Character</span>.new + <span class="constant">Notifier::FailuresAtEnd</span>.new</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    options[<span class="symbol">:notifier</span>] ||= <span class="constant">Notifier::Character</span>.new + <span class="constant">Notifier::FailuresAtEnd</span>.new</pre></div></div>
             
         </li>
         
@@ -120,7 +115,7 @@ matchers and expectation frameworks to be used.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    options[<span class="symbol">:assertion_context</span>] ||= <span class="constant">XSpec::AssertionContext::Simple</span>.new</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    options[<span class="symbol">:assertion_context</span>] ||= <span class="constant">XSpec::AssertionContext::Simple</span></pre></div></div>
             
         </li>
         

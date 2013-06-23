@@ -19,11 +19,6 @@
           <div id="jump_page">
             
               
-              <a class="source" href="xspec.html">
-                xspec.rb
-              </a>
-            
-              
               <a class="source" href="assertion_contexts.html">
                 assertion_contexts.rb
               </a>
@@ -100,7 +95,7 @@
               <p>A unit of work, usually created via <code>Describe#it</code>, is a labeled code block
 that expresses an assertion about a property of the system under test. They
 are indivisible.</p>
-<p>These are run inside an <code>XSpec::Evaluator</code>.</p>
+<p>These are run by an evaluator.</p>
 
             </div>
             
@@ -119,6 +114,12 @@ are indivisible.</p>
 <code>describe</code> DSL method, that contains other contexts and units of work.
 They are optional to use explicitly - extending <code>Xspec.dsl</code> will create
 an implicit one - but are useful for organising your tests.</p>
+<p>Extra methods (or &quot;locals&quot;) can be added throughout the lifetime of the
+context, either by a normal <code>def</code> or using <code>let</code> helper. These methods are
+inherited by nested contexts. An assertion context is extended on to this
+object as a final step to make assertion methods available as instance
+methods. The evaluator will then execute units of work inside the context,
+making all the added methods available to the test.</p>
 
             </div>
             
@@ -128,22 +129,21 @@ an implicit one - but are useful for organising your tests.</p>
     <span class="function"><span class="keyword">def</span> <span class="title">__xspec_context</span>;</span> <span class="keyword">self</span>; <span class="keyword">end</span>
     <span class="keyword">include</span> <span class="constant">::XSpec::DSL</span>
 
-    attr_reader <span class="symbol">:name</span>, <span class="symbol">:children</span>, <span class="symbol">:units_of_work</span>
+    attr_reader <span class="symbol">:name</span>, <span class="symbol">:children</span>, <span class="symbol">:units_of_work</span>, <span class="symbol">:locals</span>, <span class="symbol">:assertion_context</span>
 
-    <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(name)</span></span>
-      <span class="variable">@children</span>      = []
-      <span class="variable">@units_of_work</span> = []
-      <span class="variable">@name</span>          = name
+    <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(name, assertion_context)</span></span>
+      <span class="variable">@children</span>          = []
+      <span class="variable">@units_of_work</span>     = []
+      <span class="variable">@locals</span>            = {}
+      <span class="variable">@name</span>              = name
+      <span class="variable">@assertion_context</span> = assertion_context
     <span class="keyword">end</span>
 
-    <span class="function"><span class="keyword">def</span> <span class="title">add_child_context</span><span class="params">(name, opts = {}, &amp;block)</span></span>
-      x = <span class="constant">Context</span>.new(name)
+    <span class="function"><span class="keyword">def</span> <span class="title">add_child_context</span><span class="params">(name = <span class="keyword">nil</span>, opts = {}, &amp;block)</span></span>
+      x = <span class="constant">Class</span>.new(<span class="keyword">self</span>.<span class="keyword">class</span>).new(name, assertion_context)
       x.instance_exec(&amp;block)
+      x.apply_assertion_context!
       <span class="keyword">self</span>.children &lt;&lt; x
-    <span class="keyword">end</span>
-
-    <span class="function"><span class="keyword">def</span> <span class="title">add_unit_of_work</span><span class="params">(name, opts = {}, &amp;block)</span></span>
-      <span class="keyword">self</span>.units_of_work &lt;&lt; <span class="constant">UnitOfWork</span>.new(name, block)
     <span class="keyword">end</span></pre></div></div>
             
         </li>
@@ -154,6 +154,33 @@ an implicit one - but are useful for organising your tests.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>The assertion context should be applied after the user has had a chance
+to add their own methods. It needs to be last so that users can&#39;t clobber
+the assertion methods.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">def</span> <span class="title">apply_assertion_context!</span></span>
+      extend(assertion_context)
+    <span class="keyword">end</span>
+
+    <span class="function"><span class="keyword">def</span> <span class="title">add_unit_of_work</span><span class="params">(name = <span class="keyword">nil</span>, opts = {}, &amp;block)</span></span>
+      <span class="keyword">self</span>.units_of_work &lt;&lt; <span class="constant">UnitOfWork</span>.new(name, block)
+    <span class="keyword">end</span>
+
+    <span class="function"><span class="keyword">def</span> <span class="title">add_memoized_local</span><span class="params">(name, &amp;block)</span></span>
+      <span class="keyword">self</span>.<span class="keyword">class</span>.send(<span class="symbol">:define_method</span>, name, &amp;memoize(&amp;block))
+    <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
               <p>A recursive iteration that returns all leaf-node units of work as
 NestedUnitOfWork objects.</p>
@@ -180,25 +207,25 @@ NestedUnitOfWork objects.</p>
         enum
       <span class="keyword">end</span>
     <span class="keyword">end</span>
-  <span class="keyword">end</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-5">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-5">&#182;</a>
-              </div>
-              <p>Marker object for the root of the context tree. For most purposes it
-behaves exactly like a normal <code>Context</code>.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="class"><span class="keyword">class</span> <span class="title">RootContext</span> <span class="inheritance">&lt; <span class="parent">Context</span></span></span>
-    <span class="function"><span class="keyword">def</span> <span class="title">initialize</span></span>
-      <span class="keyword">super</span>(<span class="string">''</span>)
+    <span class="function"><span class="keyword">def</span> <span class="title"><span class="keyword">self</span></span>.<span class="title">root</span><span class="params">(assertion_context)</span></span>
+      new(<span class="keyword">nil</span>, assertion_context)
+    <span class="keyword">end</span>
+
+    private
+
+    <span class="function"><span class="keyword">def</span> <span class="title">memoize</span><span class="params">(&amp;block)</span></span>
+      called = <span class="keyword">nil</span>
+      ret    = <span class="keyword">nil</span>
+
+      -&gt; {
+        <span class="keyword">if</span> called
+          ret
+        <span class="keyword">else</span>
+          called = <span class="keyword">true</span>
+          ret    = block.call
+        <span class="keyword">end</span>
+      }
     <span class="keyword">end</span>
   <span class="keyword">end</span></pre></div></div>
             
@@ -219,6 +246,10 @@ other components of the system work with.</p>
             <div class="content"><div class='highlight'><pre>  <span class="constant">NestedUnitOfWork</span> = <span class="constant">Struct</span>.new(<span class="symbol">:parents</span>, <span class="symbol">:unit_of_work</span>) <span class="keyword">do</span>
     <span class="function"><span class="keyword">def</span> <span class="title">block</span>;</span> unit_of_work.block; <span class="keyword">end</span>
     <span class="function"><span class="keyword">def</span> <span class="title">name</span>;</span>  unit_of_work.name; <span class="keyword">end</span>
+
+    <span class="function"><span class="keyword">def</span> <span class="title">immediate_parent</span></span>
+      parents.last
+    <span class="keyword">end</span>
 
     <span class="function"><span class="keyword">def</span> <span class="title">nest_under</span><span class="params">(parent)</span></span>
       <span class="keyword">self</span>.<span class="keyword">class</span>.new([parent] + parents, unit_of_work)

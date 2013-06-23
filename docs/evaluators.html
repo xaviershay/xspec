@@ -19,11 +19,6 @@
           <div id="jump_page">
             
               
-              <a class="source" href="xspec.html">
-                xspec.rb
-              </a>
-            
-              
               <a class="source" href="assertion_contexts.html">
                 assertion_contexts.rb
               </a>
@@ -101,14 +96,13 @@ evaluator as you can imagine.</p>
             <div class="content"><div class='highlight'><pre>    <span class="class"><span class="keyword">class</span> <span class="title">Serial</span></span>
       <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(opts)</span></span>
         <span class="variable">@notifier</span>          = opts.fetch(<span class="symbol">:notifier</span>)
-        <span class="variable">@assertion_context</span> = opts.fetch(<span class="symbol">:assertion_context</span>)
       <span class="keyword">end</span>
 
       <span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(context)</span></span>
         notifier.run_start
 
         context.nested_units_of_work.each <span class="keyword">do</span> |x|
-          errors = assertion_context.call(x)
+          errors = x.immediate_parent.call(x)
 
           notifier.evaluate_finish(x, errors)
         <span class="keyword">end</span>
@@ -118,7 +112,7 @@ evaluator as you can imagine.</p>
 
       protected
 
-      attr_reader <span class="symbol">:notifier</span>, <span class="symbol">:assertion_context</span>
+      attr_reader <span class="symbol">:notifier</span>
     <span class="keyword">end</span>
   <span class="keyword">end</span>
 <span class="keyword">end</span></pre></div></div>

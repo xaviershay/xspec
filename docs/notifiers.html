@@ -19,11 +19,6 @@
           <div id="jump_page">
             
               
-              <a class="source" href="xspec.html">
-                xspec.rb
-              </a>
-            
-              
               <a class="source" href="assertion_contexts.html">
                 assertion_contexts.rb
               </a>
@@ -205,6 +200,70 @@ the result.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Includes nicely formatted names of each test in the output.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="class"><span class="keyword">class</span> <span class="title">Documentation</span></span>
+      <span class="keyword">include</span> <span class="constant">Composable</span>
+
+      <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(indent = <span class="number">2</span>)</span></span>
+        <span class="keyword">self</span>.indent          = indent
+        <span class="keyword">self</span>.last_seen_names = []
+        <span class="keyword">self</span>.failed          = <span class="keyword">false</span>
+      <span class="keyword">end</span>
+
+      <span class="function"><span class="keyword">def</span> <span class="title">run_start</span>;</span> <span class="keyword">end</span>
+
+      <span class="function"><span class="keyword">def</span> <span class="title">evaluate_finish</span><span class="params">(unit_of_work, errors)</span></span>
+        output_context_header! unit_of_work.parents.map(&amp;<span class="symbol">:name</span>).compact
+
+        spaces = <span class="string">' '</span> * (last_seen_names.size * indent)
+        char   = <span class="string">'-'</span>
+
+        <span class="keyword">if</span> errors.any?
+          <span class="keyword">self</span>.failed = <span class="keyword">true</span>
+          char        = <span class="string">'F'</span>
+        <span class="keyword">end</span>
+
+        puts <span class="string">"%s%s %s"</span> % [spaces, char, unit_of_work.name]
+      <span class="keyword">end</span>
+
+      <span class="function"><span class="keyword">def</span> <span class="title">run_finish</span></span>
+        puts
+        !failed
+      <span class="keyword">end</span>
+
+      protected
+
+      attr_accessor <span class="symbol">:last_seen_names</span>, <span class="symbol">:indent</span>, <span class="symbol">:failed</span>
+
+      <span class="function"><span class="keyword">def</span> <span class="title">output_context_header!</span><span class="params">(parent_names)</span></span>
+        <span class="keyword">if</span> parent_names != last_seen_names
+          tail = parent_names - last_seen_names
+
+          puts
+          <span class="keyword">if</span> tail.any?
+            existing_indent = parent_names.size - tail.size
+            tail.each_with_index <span class="keyword">do</span> |name, i|
+              puts <span class="string">'%s%s'</span> % [<span class="string">' '</span> * ((existing_indent + i) * indent), name]
+            <span class="keyword">end</span>
+          <span class="keyword">end</span>
+
+          <span class="keyword">self</span>.last_seen_names = parent_names
+        <span class="keyword">end</span>
+      <span class="keyword">end</span>
+    <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
               <p>A notifier that does not do anything and always returns successful.
 Useful as a parent class for other notifiers or for testing.</p>

@@ -19,11 +19,6 @@
           <div id="jump_page">
             
               
-              <a class="source" href="xspec.html">
-                xspec.rb
-              </a>
-            
-              
               <a class="source" href="assertion_contexts.html">
                 assertion_contexts.rb
               </a>
@@ -92,6 +87,10 @@ rspec, and should behave roughly the same.</p>
 
     <span class="function"><span class="keyword">def</span> <span class="title">describe</span><span class="params">(*args, &amp;block)</span></span>
       __xspec_context.add_child_context(*args, &amp;block)
+    <span class="keyword">end</span>
+
+    <span class="function"><span class="keyword">def</span> <span class="title">let</span><span class="params">(*args, &amp;block)</span></span>
+      __xspec_context.add_memoized_local(*args, &amp;block)
     <span class="keyword">end</span>
   <span class="keyword">end</span>
 <span class="keyword">end</span></pre></div></div>
