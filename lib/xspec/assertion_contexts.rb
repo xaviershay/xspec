@@ -1,9 +1,8 @@
 # Assertion contexts have a single API. They must respond to `call` sent with
 # the unit of work to be executed, and return an array of `Failure` objects.
-# Thread-safety is required.
 module XSpec
   module AssertionContext
-    class Simple
+    module Simple
       class AssertionFailed < RuntimeError
         attr_reader :message, :backtrace
 
@@ -27,16 +26,16 @@ module XSpec
       end
     end
 
-    class RSpecExpectations
-      def initialize
+    module RSpecExpectations
+      def self.extended(klass)
         begin
           require 'rspec/expectations'
           require 'rspec/matchers'
         rescue LoadError
-          raise "RSpec is not available, cannot use RSpec adapter."
+          raise "RSpec is not available, cannot use RSpec assertion context."
         end
 
-        extend RSpec::Matchers
+        klass.extend RSpec::Matchers
       end
 
       def call(unit_of_work)

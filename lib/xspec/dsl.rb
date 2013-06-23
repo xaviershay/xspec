@@ -10,5 +10,9 @@ module XSpec
     def describe(*args, &block)
       __xspec_context.add_child_context(*args, &block)
     end
+
+    def let(*args, &block)
+      __xspec_context.add_memoized_local(*args, &block)
+    end
   end
 end

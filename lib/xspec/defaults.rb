@@ -12,7 +12,7 @@ module XSpec
 
     # A context that a unit of work runs inside of. Allows for different
     # matchers and expectation frameworks to be used.
-    options[:assertion_context] ||= XSpec::AssertionContext::Simple.new
+    options[:assertion_context] ||= XSpec::AssertionContext::Simple
 
     # An evaluator is responsible for scheduling units of work and handing them
     # off to the assertion context.  Any logic regarding threads, remote
