@@ -1,9 +1,9 @@
 # These are the defaults used by `XSpec.dsl`, but feel free to specify your own
 # instead. They are set up in such a way that if you can override a component
 # down in the bowels without having to provide an entire top level evaluator.
-require 'xspec/evaluator/serial'
+require 'xspec/evaluators'
 require 'xspec/assertion_contexts'
-require 'xspec/notifier/character'
+require 'xspec/notifiers'
 module XSpec
   def add_defaults(options = {})
     # A notifier makes it possible to observe the state of the system, be that

@@ -1,7 +1,7 @@
-# Runs all units of works serially in a loop. It's about as simple an
-# evaluator as you can imagine.
 module XSpec
   module Evaluator
+    # Runs all units of works serially in a loop. It's about as simple an
+    # evaluator as you can imagine.
     class Serial
       def initialize(opts)
         @notifier          = opts.fetch(:notifier)

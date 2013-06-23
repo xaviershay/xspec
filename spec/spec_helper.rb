@@ -1,5 +1,4 @@
 require 'xspec/autorun'
-require 'xspec/notifier/null'
 
 def assert_errors_from_run(context, expected_error_messages)
   evaluator = context.__xspec_opts.fetch(:evaluator)
