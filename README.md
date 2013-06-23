@@ -44,6 +44,7 @@ Developing
 ----------
 
 Follow the idioms you find in the source, they are somewhat different than
-a traditional Ruby project. Tests are written in xspec themselves:
+a traditional Ruby project. Tests are written in XSpec, which might do your
+head in.
 
     bin/run-specs
