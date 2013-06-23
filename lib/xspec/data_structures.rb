@@ -83,9 +83,5 @@ module XSpec
 
   # A test failure will be reported as a `Failure`, which includes contextual
   # information about the failure useful for reporting to the user.
-  Failure = Struct.new(:unit_of_work, :msg, :caller) do
-    def message
-      msg || "assertion failed"
-    end
-  end
+  Failure = Struct.new(:unit_of_work, :message, :caller)
 end

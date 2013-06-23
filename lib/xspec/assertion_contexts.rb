@@ -21,6 +21,8 @@ module XSpec
       end
 
       def assert(proposition, message=nil)
+        message ||= 'assertion failed'
+
         raise AssertionFailed.new(message, caller) unless proposition
       end
     end
