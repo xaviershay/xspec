@@ -107,11 +107,16 @@ way that each notifier will have its callback run in turn.</p>
         <span class="variable">@notifiers</span> = notifiers
       <span class="keyword">end</span>
 
-      <span class="function"><span class="keyword">def</span> <span class="title">run_start</span>;</span>  notifiers.each(&amp;<span class="symbol">:run_start</span>); <span class="keyword">end</span>
-      <span class="function"><span class="keyword">def</span> <span class="title">run_finish</span>;</span> notifiers.each(&amp;<span class="symbol">:run_finish</span>); <span class="keyword">end</span>
+      <span class="function"><span class="keyword">def</span> <span class="title">run_start</span></span>
+        notifiers.each(&amp;<span class="symbol">:run_start</span>)
+      <span class="keyword">end</span>
 
       <span class="function"><span class="keyword">def</span> <span class="title">evaluate_finish</span><span class="params">(*args)</span></span>
-        notifiers.map {|x| x.evaluate_finish(*args) }.all?
+        notifiers.each {|x| x.evaluate_finish(*args) }
+      <span class="keyword">end</span>
+
+      <span class="function"><span class="keyword">def</span> <span class="title">run_finish</span></span>
+        notifiers.map(&amp;<span class="symbol">:run_finish</span>).all?
       <span class="keyword">end</span>
 
       protected
@@ -143,18 +148,25 @@ the result.</p>
       <span class="function"><span class="keyword">def</span> <span class="title">run_start</span>;</span> <span class="keyword">end</span>
 
       <span class="function"><span class="keyword">def</span> <span class="title">evaluate_finish</span><span class="params">(<span class="number">_</span>, errors)</span></span>
-        <span class="keyword">if</span> errors.any?
-          <span class="variable">@failed</span> = <span class="keyword">true</span>
-          <span class="variable">@out</span>.print <span class="string">'F'</span>
-        <span class="keyword">else</span>
-          <span class="variable">@out</span>.print <span class="string">'.'</span>
-        <span class="keyword">end</span>
+        <span class="variable">@out</span>.print label_for_failure(errors[<span class="number">0</span>])
+        <span class="variable">@failed</span> ||= errors.any?
       <span class="keyword">end</span>
 
       <span class="function"><span class="keyword">def</span> <span class="title">run_finish</span></span>
         <span class="variable">@out</span>.puts
         !<span class="variable">@failed</span>
       <span class="keyword">end</span>
+
+      protected
+
+      <span class="function"><span class="keyword">def</span> <span class="title">label_for_failure</span><span class="params">(f)</span></span>
+        <span class="keyword">case</span> f
+          <span class="keyword">when</span> <span class="constant">CodeException</span> <span class="keyword">then</span> <span class="string">'E'</span>
+          <span class="keyword">when</span> <span class="constant">Failure</span> <span class="keyword">then</span> <span class="string">'F'</span>
+          <span class="keyword">else</span> <span class="string">'.'</span>
+        <span class="keyword">end</span>
+      <span class="keyword">end</span>
+
     <span class="keyword">end</span></pre></div></div>
             
         </li>
@@ -259,12 +271,9 @@ not useful for debugging your tests, so they are stripped out.</p>
         output_context_header! unit_of_work.parents.map(&amp;<span class="symbol">:name</span>).compact
 
         spaces = <span class="string">' '</span> * (last_seen_names.size * indent)
-        char   = <span class="string">'-'</span>
+        char   = label_for_failure(errors[<span class="number">0</span>])
 
-        <span class="keyword">if</span> errors.any?
-          <span class="keyword">self</span>.failed = <span class="keyword">true</span>
-          char        = <span class="string">'F'</span>
-        <span class="keyword">end</span>
+        <span class="keyword">self</span>.failed ||= errors.any?
 
         out.puts <span class="string">"%s%s %s"</span> % [spaces, char, unit_of_work.name]
       <span class="keyword">end</span>
@@ -277,6 +286,14 @@ not useful for debugging your tests, so they are stripped out.</p>
       protected
 
       attr_accessor <span class="symbol">:last_seen_names</span>, <span class="symbol">:indent</span>, <span class="symbol">:failed</span>, <span class="symbol">:out</span>
+
+      <span class="function"><span class="keyword">def</span> <span class="title">label_for_failure</span><span class="params">(f)</span></span>
+        <span class="keyword">case</span> f
+          <span class="keyword">when</span> <span class="constant">CodeException</span> <span class="keyword">then</span> <span class="string">'E'</span>
+          <span class="keyword">when</span> <span class="constant">Failure</span> <span class="keyword">then</span> <span class="string">'F'</span>
+          <span class="keyword">else</span> <span class="string">'-'</span>
+        <span class="keyword">end</span>
+      <span class="keyword">end</span>
 
       <span class="function"><span class="keyword">def</span> <span class="title">output_context_header!</span><span class="params">(parent_names)</span></span>
         <span class="keyword">if</span> parent_names != last_seen_names

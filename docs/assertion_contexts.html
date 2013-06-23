@@ -95,6 +95,8 @@ the unit of work to be executed, and return an array of <code>Failure</code> obj
         []
       <span class="keyword">rescue</span> <span class="constant">AssertionFailed</span> =&gt; e
         [<span class="constant">Failure</span>.new(unit_of_work, e.message, e.backtrace)]
+      <span class="keyword">rescue</span> =&gt; e
+        [<span class="constant">CodeException</span>.new(unit_of_work, e.message, e.backtrace)]
       <span class="keyword">end</span>
 
       <span class="function"><span class="keyword">def</span> <span class="title">assert</span><span class="params">(proposition, message=<span class="keyword">nil</span>)</span></span>

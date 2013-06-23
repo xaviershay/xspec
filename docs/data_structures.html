@@ -444,7 +444,22 @@ information about the failure useful for reporting to the user.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="constant">Failure</span> = <span class="constant">Struct</span>.new(<span class="symbol">:unit_of_work</span>, <span class="symbol">:message</span>, <span class="symbol">:caller</span>)
+            <div class="content"><div class='highlight'><pre>  <span class="constant">Failure</span> = <span class="constant">Struct</span>.new(<span class="symbol">:unit_of_work</span>, <span class="symbol">:message</span>, <span class="symbol">:caller</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>An exception is mostly handled the same was as a failure.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="constant">CodeException</span> = <span class="constant">Class</span>.new(<span class="constant">Failure</span>)
 <span class="keyword">end</span></pre></div></div>
             
         </li>
