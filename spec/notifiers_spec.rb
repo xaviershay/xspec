@@ -55,10 +55,17 @@ describe 'character notifier' do
   end
 
   it 'outputs a F for every failed test' do
-    notifier.evaluate_finish(nil, ["failure"])
+    notifier.evaluate_finish(nil, [make_failure])
 
     assert !notifier.run_finish
     assert out.string == "F\n"
+  end
+
+  it 'outputs an E for every errored test' do
+    notifier.evaluate_finish(nil, [make_error])
+
+    assert !notifier.run_finish
+    assert out.string == "E\n"
   end
 
   it_behaves_like_a ComposableNotifier
@@ -93,9 +100,15 @@ describe 'documentation notifier' do
   end
 
   it 'prefixes tests with F when they fail' do
-    notifier.evaluate_finish(make_nested_test([], 'b'), ["failure"])
+    notifier.evaluate_finish(make_nested_test, [make_failure])
 
-    assert out.string == "F b\n"
+    assert out.string == "F \n"
+  end
+
+  it 'prefixes tests with E when they error' do
+    notifier.evaluate_finish(make_nested_test, [make_error])
+
+    assert out.string == "E \n"
   end
 
   it_behaves_like_a ComposableNotifier
@@ -111,9 +124,25 @@ describe 'null notifier' do
   it_behaves_like_a ComposableNotifier
 end
 
-def make_nested_test(parent_names, work_name)
+def make_nested_test(parent_names = [], work_name = nil)
   XSpec::NestedUnitOfWork.new(
     parent_names.map {|name| XSpec::Context.make(name, Module.new) },
     XSpec::UnitOfWork.new(work_name, ->{})
+  )
+end
+
+def make_failure
+  failure = XSpec::Failure.new(
+    make_nested_test([], 'failure'),
+    "failed",
+    []
+  )
+end
+
+def make_error
+  failure = XSpec::CodeException.new(
+    make_nested_test([], 'failure'),
+    "failed",
+    []
   )
 end
