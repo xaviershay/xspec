@@ -166,30 +166,47 @@ the result.</p>
             <div class="content"><div class='highlight'><pre>    <span class="class"><span class="keyword">class</span> <span class="title">FailuresAtEnd</span></span>
       <span class="keyword">include</span> <span class="constant">Composable</span>
 
-      <span class="function"><span class="keyword">def</span> <span class="title">initialize</span></span>
+      <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(out = <span class="variable">$stdout</span>)</span></span>
         <span class="variable">@errors</span> = []
+        <span class="variable">@out</span>    = out
       <span class="keyword">end</span>
 
       <span class="function"><span class="keyword">def</span> <span class="title">run_start</span>;</span> <span class="keyword">end</span>
 
       <span class="function"><span class="keyword">def</span> <span class="title">evaluate_finish</span><span class="params">(<span class="number">_</span>, errors)</span></span>
-        <span class="variable">@errors</span> += errors
+        <span class="keyword">self</span>.errors += errors
       <span class="keyword">end</span>
 
       <span class="function"><span class="keyword">def</span> <span class="title">run_finish</span></span>
-        <span class="keyword">return</span> <span class="keyword">true</span> <span class="keyword">if</span> <span class="variable">@errors</span>.empty?
+        <span class="keyword">return</span> <span class="keyword">true</span> <span class="keyword">if</span> errors.empty?
 
-        puts
-        <span class="variable">@errors</span>.each <span class="keyword">do</span> |error|
-          puts <span class="string">"%s: %s"</span> % [error.unit_of_work.name, error.message]
-          error.caller.each <span class="keyword">do</span> |line|
-            puts <span class="string">"  %s"</span> % line
+        out.puts
+        errors.each <span class="keyword">do</span> |error|
+          out.puts <span class="string">"%s: %s"</span> % [full_name(error.unit_of_work), error.message]
+          clean_backtrace(error.caller).each <span class="keyword">do</span> |line|
+            out.puts <span class="string">"  %s"</span> % line
           <span class="keyword">end</span>
-          puts
+          out.puts
         <span class="keyword">end</span>
 
         <span class="keyword">false</span>
       <span class="keyword">end</span>
+
+      <span class="function"><span class="keyword">def</span> <span class="title">full_name</span><span class="params">(unit_of_work)</span></span>
+        (unit_of_work.parents + [unit_of_work]).map(&amp;<span class="symbol">:name</span>).compact.join(<span class="string">' '</span>)
+      <span class="keyword">end</span>
+
+      <span class="function"><span class="keyword">def</span> <span class="title">clean_backtrace</span><span class="params">(backtrace)</span></span>
+        lib_dir = <span class="constant">File</span>.dirname(<span class="constant">File</span>.expand_path(<span class="string">'..'</span>, __FILE_<span class="number">_</span>))
+
+        backtrace.reject {|x|
+          <span class="constant">File</span>.dirname(x).start_with?(lib_dir)
+        }
+      <span class="keyword">end</span>
+
+      protected
+
+      attr_accessor <span class="symbol">:out</span>, <span class="symbol">:errors</span>
     <span class="keyword">end</span></pre></div></div>
             
         </li>

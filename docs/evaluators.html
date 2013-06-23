@@ -102,7 +102,7 @@ evaluator as you can imagine.</p>
         notifier.run_start
 
         context.nested_units_of_work.each <span class="keyword">do</span> |x|
-          errors = x.immediate_parent.call(x)
+          errors = x.immediate_parent.new.call(x)
 
           notifier.evaluate_finish(x, errors)
         <span class="keyword">end</span>
