@@ -1,6 +1,10 @@
 require 'xspec'
 
-extend XSpec.dsl(notifier: XSpec::Notifier::Documentation.new)
+extend XSpec.dsl(
+  notifier: XSpec::Notifier::Documentation.new +
+            XSpec::Notifier::FailuresAtEnd.new
+)
+
 autorun!
 
 def assert_errors_from_run(context, expected_error_messages)
