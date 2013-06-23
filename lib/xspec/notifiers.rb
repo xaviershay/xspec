@@ -33,19 +33,23 @@ module XSpec
     class Character
       include Composable
 
+      def initialize(out = $stdout)
+        @out = out
+      end
+
       def run_start; end
 
       def evaluate_finish(_, errors)
         if errors.any?
           @failed = true
-          print 'F'
+          @out.print 'F'
         else
-          print '.'
+          @out.print '.'
         end
       end
 
       def run_finish
-        puts
+        @out.puts
         !@failed
       end
     end

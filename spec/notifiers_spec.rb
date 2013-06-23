@@ -40,3 +40,23 @@ describe 'failures at end notifier' do
     )
   end
 end
+
+describe 'character notifier' do
+  let(:notifier) { XSpec::Notifier::Character.new(out) }
+  let(:out)      { StringIO.new }
+
+  it 'outputs a . for every successful test' do
+    notifier.evaluate_finish(nil, [])
+    notifier.evaluate_finish(nil, [])
+
+    assert notifier.run_finish
+    assert out.string == "..\n"
+  end
+
+  it 'outputs a F for every failed test' do
+    notifier.evaluate_finish(nil, ["failure"])
+
+    assert !notifier.run_finish
+    assert out.string == "F\n"
+  end
+end
