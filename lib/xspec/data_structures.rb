@@ -37,7 +37,7 @@ module XSpec
       @assertion_context = assertion_context
     end
 
-    def add_child_context(name, opts = {}, &block)
+    def add_child_context(name = nil, opts = {}, &block)
       x = Class.new(self.class).new(name, assertion_context)
       x.instance_exec(&block)
       x.apply_assertion_context!

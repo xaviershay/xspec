@@ -1,33 +1,31 @@
 require 'spec_helper'
 
+let(:root_value) { 3 }
+
 describe 'let' do
   let(:parent_value) { 1 }
   let(:object) { Object.new }
 
-  describe 'allows locals to be set' do
-    let(:my_value) { 2 }
+  it('allows locals to be set') { assert parent_value == 1 }
 
-    it { assert my_value == 2 }
+  describe do
+    it("inherits from parent") { assert parent_value == 1 }
   end
 
-  describe 'inheriting from parent' do
-    it { assert parent_value == 1 }
-  end
-
-  describe 'overriding parent' do
+  describe do
     let(:parent_value) { 2 }
 
-    it { assert parent_value == 2 }
+    it('allows overriding of parent') { assert parent_value == 2 }
   end
 
-  describe 'overriding parent with method' do
+  describe do
     def parent_value; 2; end
 
-    it { assert parent_value == 2 }
+    it('allows overriding of parent by method') { assert parent_value == 2 }
   end
 
-  describe 'can be defined after an it' do
-    it { assert my_value == 2 }
+  describe do
+    it('can be defined after an it') { assert my_value == 2 }
 
     let(:my_value) { 2 }
   end
@@ -35,10 +33,9 @@ describe 'let' do
   it 'memoizes the value' do
     assert object == object
   end
+
+  it 'works with root context' do
+    assert root_value == 3
+  end
 end
 
-let(:implicit_value) { 3 }
-
-it 'let works with implicit context' do
-  assert implicit_value == 3
-end

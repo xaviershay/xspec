@@ -1,4 +1,7 @@
-require 'xspec/autorun'
+require 'xspec'
+
+extend XSpec.dsl(notifier: XSpec::Notifier::Documentation.new)
+autorun!
 
 def assert_errors_from_run(context, expected_error_messages)
   context.run!

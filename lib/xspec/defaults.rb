@@ -8,7 +8,7 @@ module XSpec
   def add_defaults(options = {})
     # A notifier makes it possible to observe the state of the system, be that
     # progress or details of failing tests.
-    options[:notifier]  ||= Notifier::Character.new + Notifier::FailuresAtEnd.new
+    options[:notifier] ||= Notifier::Character.new + Notifier::FailuresAtEnd.new
 
     # A context that a unit of work runs inside of. Allows for different
     # matchers and expectation frameworks to be used.
