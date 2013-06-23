@@ -11,7 +11,7 @@ module XSpec
         notifier.run_start
 
         context.nested_units_of_work.each do |x|
-          errors = x.immediate_parent.call(x)
+          errors = x.immediate_parent.new.call(x)
 
           notifier.evaluate_finish(x, errors)
         end

@@ -12,7 +12,7 @@ module XSpec
     end
 
     def let(*args, &block)
-      __xspec_context.add_memoized_local(*args, &block)
+      __xspec_context.add_memoized_method(*args, &block)
     end
   end
 end

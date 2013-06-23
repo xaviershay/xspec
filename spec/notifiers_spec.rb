@@ -2,8 +2,8 @@ require 'spec_helper'
 require 'stringio'
 
 describe 'failures at end notifier' do
-  let(:notifier) { XSpec::Notifier::FailuresAtEnd.new(out) }
   let(:out)      { StringIO.new }
+  let(:notifier) { XSpec::Notifier::FailuresAtEnd.new(out) }
 
   it 'returns true when no errors are observed' do
     assert notifier.run_finish
@@ -35,7 +35,7 @@ describe 'failures at end notifier' do
 
   def make_nested_test(parent_names, work_name)
     XSpec::NestedUnitOfWork.new(
-      parent_names.map {|name| XSpec::Context.new(name, nil) },
+      parent_names.map {|name| XSpec::Context.make(name, Module.new) },
       XSpec::UnitOfWork.new(work_name, ->{})
     )
   end

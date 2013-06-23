@@ -10,96 +10,119 @@ module XSpec
   # These are run by an evaluator.
   UnitOfWork = Struct.new(:name, :block)
 
+
   # A context is a recursively nested structure, usually created with the
-  # `describe` DSL method, that contains other contexts and units of work.
-  # They are optional to use explicitly - extending `Xspec.dsl` will create
-  # an implicit one - but are useful for organising your tests.
+  # `describe` DSL method, that contains other contexts and units of work. Most
+  # of the logic for a context happens at the class level rather than instance,
+  # which is unusual but required for method inheritance to work correctly.
   #
-  # Extra methods (or "locals") can be added throughout the lifetime of the
-  # context, either by a normal `def` or using `let` helper. These methods are
-  # inherited by nested contexts. An assertion context is extended on to this
-  # object as a final step to make assertion methods available as instance
-  # methods. The evaluator will then execute units of work inside the context,
-  # making all the added methods available to the test.
+  # Each nested context creates a new class that inherits from the parent.
+  # Methods can be added to this class as per normal, and are correctly
+  # inherited by children. When it comes time to run tests, the evaluator will
+  # create a new instance of the context (a class) for each test, making the
+  # defined methods available and also ensuring that there is no state
+  # pollution between tests.
+  #
+  # An assertion context is always included as the final mixin to a context
+  # class, making assertion methods available as instance methods to the units
+  # of work.
   require 'xspec/dsl'
   class Context
+    class << self
+      def __xspec_context; self; end
+      include ::XSpec::DSL
 
-    def __xspec_context; self; end
-    include ::XSpec::DSL
+      attr_accessor :name, :children
+      attr_reader :units_of_work, :assertion_context
 
-    attr_reader :name, :children, :units_of_work, :locals, :assertion_context
+      # Creating a new child context inherits any methods defined on the parent
+      # and its assertion context, which is applied after user-defined methods
+      # (i.e. the body of the describe block) have been added.
+      def make(name, assertion_context, &block)
+        x = Class.new(self)
+        x.initialize!(name, assertion_context)
+        x.class_eval(&block) if block
+        x.apply_assertion_context!
+        x
+      end
 
-    def initialize(name, assertion_context)
-      @children          = []
-      @units_of_work     = []
-      @locals            = {}
-      @name              = name
-      @assertion_context = assertion_context
-    end
+      def root(assertion_context)
+        make(nil, assertion_context)
+      end
 
-    def add_child_context(name = nil, opts = {}, &block)
-      x = Class.new(self.class).new(name, assertion_context)
-      x.instance_exec(&block)
-      x.apply_assertion_context!
-      self.children << x
-    end
+      # A class cannot have an implicit initializer, but some variable
+      # inititialization is required so this method is called explicitly when
+      # ever a dynamic subclass is created.
+      def initialize!(name, assertion_context)
+        @children          = []
+        @units_of_work     = []
+        @name              = name
+        @assertion_context = assertion_context
+      end
 
-    # The assertion context should be applied after the user has had a chance
-    # to add their own methods. It needs to be last so that users can't clobber
-    # the assertion methods.
-    def apply_assertion_context!
-      extend(assertion_context)
-    end
+      # The assertion context should be applied after the user has had a chance
+      # to add their own methods. It needs to be last so that users can't
+      # clobber the assertion methods.
+      def apply_assertion_context!
+        mixin(assertion_context)
+      end
 
-    def add_unit_of_work(name = nil, opts = {}, &block)
-      self.units_of_work << UnitOfWork.new(name, block)
-    end
+      # `include` is normally private, but it is useful to allow other classes
+      # and modules to include additional behaviour (such as assertion
+      # contexts).
+      def mixin(mod)
+        include(mod)
+      end
 
-    def add_memoized_local(name, &block)
-      self.class.send(:define_method, name, &memoize(&block))
-    end
+      def add_child_context(name = nil, opts = {}, &block)
+        self.children << make(name, assertion_context, &block)
+      end
 
-    # A recursive iteration that returns all leaf-node units of work as
-    # NestedUnitOfWork objects.
-    require 'enumerator'
-    def nested_units_of_work(&block)
-      enum = Enumerator.new do |y|
-        children.each do |child|
-          child.nested_units_of_work do |x|
-            y.yield x.nest_under(self)
+      def add_unit_of_work(name = nil, opts = {}, &block)
+        self.units_of_work << UnitOfWork.new(name, block)
+      end
+
+      # Values of memoized methods are remembered only for the duration of a
+      # single unit of work. These are typically creates using the `let` DSL
+      # method.
+      def add_memoized_method(name, &block)
+        define_method(name) do
+          memoized[block] ||= instance_eval(&block)
+        end
+      end
+
+      def to_s
+        "Context:'#{name}'"
+      end
+
+      # A recursive iteration that returns all leaf-node units of work as
+      # NestedUnitOfWork objects.
+      require 'enumerator'
+      def nested_units_of_work(&block)
+        enum = Enumerator.new do |y|
+          children.each do |child|
+            child.nested_units_of_work do |x|
+              y.yield x.nest_under(self)
+            end
+          end
+
+          units_of_work.each do |x|
+            y.yield NestedUnitOfWork.new([self], x)
           end
         end
 
-        units_of_work.each do |x|
-          y.yield NestedUnitOfWork.new([self], x)
-        end
-      end
-
-      if block
-        enum.each(&block)
-      else
-        enum
-      end
-    end
-
-    def self.root(assertion_context)
-      new(nil, assertion_context)
-    end
-
-    private
-
-    def memoize(&block)
-      called = nil
-      ret    = nil
-
-      -> {
-        if called
-          ret
+        if block
+          enum.each(&block)
         else
-          called = true
-          ret    = block.call
+          enum
         end
-      }
+      end
+    end
+
+    attr_accessor :memoized
+
+    def initialize
+      @memoized = {}
     end
   end
 
