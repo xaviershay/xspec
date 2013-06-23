@@ -68,7 +68,7 @@ module XSpec
         out.puts
         errors.each do |error|
           out.puts "%s: %s" % [full_name(error.unit_of_work), error.message]
-          error.caller.each do |line|
+          clean_backtrace(error.caller).each do |line|
             out.puts "  %s" % line
           end
           out.puts
@@ -79,6 +79,14 @@ module XSpec
 
       def full_name(unit_of_work)
         (unit_of_work.parents + [unit_of_work]).map(&:name).compact.join(' ')
+      end
+
+      def clean_backtrace(backtrace)
+        lib_dir = File.dirname(File.expand_path('..', __FILE__))
+
+        backtrace.reject {|x|
+          File.dirname(x).start_with?(lib_dir)
+        }
       end
 
       protected

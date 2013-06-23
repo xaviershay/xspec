@@ -21,6 +21,18 @@ describe 'failures at end notifier' do
     assert out.string.include?('a b c: failed')
   end
 
+  it 'cleans lib entries out of backtrace' do
+    failure = XSpec::Failure.new(
+      make_nested_test([nil, 'a', nil, 'b'], 'c'),
+      "failed",
+      [File.expand_path('../../lib', __FILE__) + '/bogus.rb']
+    )
+    notifier.evaluate_finish(nil, [failure])
+
+    assert !notifier.run_finish
+    assert !out.string.include?('bogus.rb')
+  end
+
   def make_nested_test(parent_names, work_name)
     XSpec::NestedUnitOfWork.new(
       parent_names.map {|name| XSpec::Context.new(name, nil) },
