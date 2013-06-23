@@ -30,10 +30,7 @@ module XSpec
       # (or by `autorun!`), this method takes all the data that was accumulated
       # by the DSL methods above and runs it through the evaluator.
       def run!
-        notifier  = __xspec_opts.fetch(:notifier)
-        evaluator = __xspec_opts.fetch(:evaluator)
-
-        evaluator.run(__xspec_context)
+        __xspec_opts.fetch(:evaluator).run(__xspec_context)
       end
 
       # It is often convenient to trigger a run after all files have been
