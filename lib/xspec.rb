@@ -3,7 +3,7 @@
 # XSpec is an rspec-inspired testing library that is designed to be highly
 # modular and easy to extend. Let's dive right into it.
 module XSpec
-  # The DSL is the core of xspec. It dynamically generates a module that can be
+  # The DSL is the core of XSpec. It dynamically generates a module that can be
   # mixed into which ever context you choose (using `extend`), be that the
   # top-level namespace or a specific class.
   #
@@ -49,12 +49,12 @@ module XSpec
   module_function :dsl
 end
 
-# Understanding the data structures used by xspec will assist you in
+# Understanding the data structures used by XSpec will assist you in
 # understanding the behavoural components such as the evaluator and notifier.
 require 'xspec/data_structures'
 
 # To further explore the code base, dive into the defaults file, which
-# describes the different sub-components of xspec that you can use or
+# describes the different sub-components of XSpec that you can use or
 # customize.
 require 'xspec/defaults'
 

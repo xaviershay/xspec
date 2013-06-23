@@ -7,7 +7,8 @@ and designed to be highly modular and easy to extend.
 You probably do not want to actually use it, it is more interesting as
 a pedagogical piece.
 
-Open up `lib/xspec.rb` and start reading.
+Open up `lib/xspec.rb` and start reading, or use this [nicely formatted
+version](http://xaviershay.github.io/xspec/).
 
 Usage
 -----
