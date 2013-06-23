@@ -1,6 +1,12 @@
 require 'spec_helper'
 require 'stringio'
 
+ComposableNotifier = shared_context do
+  it 'can be composed with itself' do
+    assert (notifier + notifier).run_finish
+  end
+end
+
 describe 'failures at end notifier' do
   let(:out)      { StringIO.new }
   let(:notifier) { XSpec::Notifier::FailuresAtEnd.new(out) }
@@ -32,6 +38,8 @@ describe 'failures at end notifier' do
     assert !notifier.run_finish
     assert !out.string.include?('bogus.rb')
   end
+
+  it_behaves_like_a ComposableNotifier
 end
 
 describe 'character notifier' do
@@ -52,6 +60,8 @@ describe 'character notifier' do
     assert !notifier.run_finish
     assert out.string == "F\n"
   end
+
+  it_behaves_like_a ComposableNotifier
 end
 
 describe 'documentation notifier' do
@@ -87,6 +97,8 @@ describe 'documentation notifier' do
 
     assert out.string == "F b\n"
   end
+
+  it_behaves_like_a ComposableNotifier
 end
 
 describe 'null notifier' do
@@ -95,6 +107,8 @@ describe 'null notifier' do
   it 'always returns true' do
     assert notifier.run_finish
   end
+
+  it_behaves_like_a ComposableNotifier
 end
 
 def make_nested_test(parent_names, work_name)

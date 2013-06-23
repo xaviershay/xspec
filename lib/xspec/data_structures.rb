@@ -80,6 +80,30 @@ module XSpec
         self.units_of_work << UnitOfWork.new(name, block)
       end
 
+      # A shared context is a floating context that isn't part of any context
+      # heirachy, so its units of work will not be visible to the root node. It
+      # can be brought into any point in the heirachy using `copy_into_tree`
+      # (aliased as `it_behaves_like_a` in the DSL), and this can be done
+      # multiple times, which allows definitions to be reused.
+      #
+      # This is leaky abstraction, since only units of work are copied from
+      # shared contexts. Methods and child contexts are ignored.
+      def create_shared_context(&block)
+        make(nil, assertion_context, &block)
+      end
+
+      def copy_into_tree(source_context)
+        target_context = make(
+          source_context.name,
+          source_context.assertion_context
+        )
+        source_context.nested_units_of_work.each do |x|
+          target_context.units_of_work << x.unit_of_work
+        end
+        self.children << target_context
+        target_context
+      end
+
       # The most convenient way to access all units of work is this recursive
       # iteration that returns all leaf-nodes as `NestedUnitOfWork` objects.
       require 'enumerator'
