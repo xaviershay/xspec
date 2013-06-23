@@ -10,7 +10,7 @@ module XSpec
         instance_exec(&unit_of_work.block)
         []
       rescue AssertionFailed => e
-        [Failure.new(unit_of_work, message, caller)]
+        [Failure.new(unit_of_work, e.message, caller)]
       end
 
       def assert(proposition, message=nil)
