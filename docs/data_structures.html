@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>data_structures.rb</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="xspec.html">
+                xspec.rb
+              </a>
+            
+              
+              <a class="source" href="assertion_contexts.html">
+                assertion_contexts.rb
+              </a>
+            
+              
+              <a class="source" href="autorun.html">
+                autorun.rb
+              </a>
+            
+              
+              <a class="source" href="data_structures.html">
+                data_structures.rb
+              </a>
+            
+              
+              <a class="source" href="defaults.html">
+                defaults.rb
+              </a>
+            
+              
+              <a class="source" href="dsl.html">
+                dsl.rb
+              </a>
+            
+              
+              <a class="source" href="evaluators.html">
+                evaluators.rb
+              </a>
+            
+              
+              <a class="source" href="notifiers.html">
+                notifiers.rb
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>data_structures.rb</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>XSpec data structures are very dumb. They:</p>
+<ul>
+<li>Only contain iteration and creation logic.</li>
+<li>Do not store recursive references (&quot;everything flows downhill&quot;).</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="class"><span class="keyword">module</span> <span class="title">XSpec</span></span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>A unit of work, usually created via <code>Describe#it</code>, is a labeled code block
+that expresses an assertion about a property of the system under test. They
+are indivisible.</p>
+<p>These are run inside an <code>XSpec::Evaluator</code>.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="constant">UnitOfWork</span> = <span class="constant">Struct</span>.new(<span class="symbol">:name</span>, <span class="symbol">:block</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>A context is a recursively nested structure, usually created with the
+<code>describe</code> DSL method, that contains other contexts and units of work.
+They are optional to use explicitly - extending <code>Xspec.dsl</code> will create
+an implicit one - but are useful for organising your tests.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">require</span> <span class="string">'xspec/dsl'</span>
+  <span class="class"><span class="keyword">class</span> <span class="title">Context</span></span>
+
+    <span class="function"><span class="keyword">def</span> <span class="title">__xspec_context</span>;</span> <span class="keyword">self</span>; <span class="keyword">end</span>
+    <span class="keyword">include</span> <span class="constant">::XSpec::DSL</span>
+
+    attr_reader <span class="symbol">:name</span>, <span class="symbol">:children</span>, <span class="symbol">:units_of_work</span>
+
+    <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(name)</span></span>
+      <span class="variable">@children</span>      = []
+      <span class="variable">@units_of_work</span> = []
+      <span class="variable">@name</span>          = name
+    <span class="keyword">end</span>
+
+    <span class="function"><span class="keyword">def</span> <span class="title">add_child_context</span><span class="params">(name, opts = {}, &amp;block)</span></span>
+      x = <span class="constant">Context</span>.new(name)
+      x.instance_exec(&amp;block)
+      <span class="keyword">self</span>.children &lt;&lt; x
+    <span class="keyword">end</span>
+
+    <span class="function"><span class="keyword">def</span> <span class="title">add_unit_of_work</span><span class="params">(name, opts = {}, &amp;block)</span></span>
+      <span class="keyword">self</span>.units_of_work &lt;&lt; <span class="constant">UnitOfWork</span>.new(name, block)
+    <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>A recursive iteration that returns all leaf-node units of work as
+NestedUnitOfWork objects.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">require</span> <span class="string">'enumerator'</span>
+    <span class="function"><span class="keyword">def</span> <span class="title">nested_units_of_work</span><span class="params">(&amp;block)</span></span>
+      enum = <span class="constant">Enumerator</span>.new <span class="keyword">do</span> |y|
+        children.each <span class="keyword">do</span> |child|
+          child.nested_units_of_work <span class="keyword">do</span> |x|
+            y.<span class="keyword">yield</span> x.nest_under(<span class="keyword">self</span>)
+          <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+        units_of_work.each <span class="keyword">do</span> |x|
+          y.<span class="keyword">yield</span> <span class="constant">NestedUnitOfWork</span>.new([<span class="keyword">self</span>], x)
+        <span class="keyword">end</span>
+      <span class="keyword">end</span>
+
+      <span class="keyword">if</span> block
+        enum.each(&amp;block)
+      <span class="keyword">else</span>
+        enum
+      <span class="keyword">end</span>
+    <span class="keyword">end</span>
+  <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Marker object for the root of the context tree. For most purposes it
+behaves exactly like a normal <code>Context</code>.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="class"><span class="keyword">class</span> <span class="title">RootContext</span> <span class="inheritance">&lt; <span class="parent">Context</span></span></span>
+    <span class="function"><span class="keyword">def</span> <span class="title">initialize</span></span>
+      <span class="keyword">super</span>(<span class="string">''</span>)
+    <span class="keyword">end</span>
+  <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Units of work can be nested inside contexts. This is the main object that
+other components of the system work with.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="constant">NestedUnitOfWork</span> = <span class="constant">Struct</span>.new(<span class="symbol">:parents</span>, <span class="symbol">:unit_of_work</span>) <span class="keyword">do</span>
+    <span class="function"><span class="keyword">def</span> <span class="title">block</span>;</span> unit_of_work.block; <span class="keyword">end</span>
+    <span class="function"><span class="keyword">def</span> <span class="title">name</span>;</span>  unit_of_work.name; <span class="keyword">end</span>
+
+    <span class="function"><span class="keyword">def</span> <span class="title">nest_under</span><span class="params">(parent)</span></span>
+      <span class="keyword">self</span>.<span class="keyword">class</span>.new([parent] + parents, unit_of_work)
+    <span class="keyword">end</span>
+  <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>A test failure will be reported as a <code>Failure</code>, which includes contextual
+information about the failure useful for reporting to the user.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="constant">Failure</span> = <span class="constant">Struct</span>.new(<span class="symbol">:unit_of_work</span>, <span class="symbol">:msg</span>, <span class="symbol">:caller</span>) <span class="keyword">do</span>
+    <span class="function"><span class="keyword">def</span> <span class="title">message</span></span>
+      msg || <span class="string">"assertion failed"</span>
+    <span class="keyword">end</span>
+  <span class="keyword">end</span>
+<span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

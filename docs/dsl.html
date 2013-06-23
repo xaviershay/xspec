@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>dsl.rb</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="xspec.html">
+                xspec.rb
+              </a>
+            
+              
+              <a class="source" href="assertion_contexts.html">
+                assertion_contexts.rb
+              </a>
+            
+              
+              <a class="source" href="autorun.html">
+                autorun.rb
+              </a>
+            
+              
+              <a class="source" href="data_structures.html">
+                data_structures.rb
+              </a>
+            
+              
+              <a class="source" href="defaults.html">
+                defaults.rb
+              </a>
+            
+              
+              <a class="source" href="dsl.html">
+                dsl.rb
+              </a>
+            
+              
+              <a class="source" href="evaluators.html">
+                evaluators.rb
+              </a>
+            
+              
+              <a class="source" href="notifiers.html">
+                notifiers.rb
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>dsl.rb</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>Common DSL functions are provided as a module so that they can be used in
+both top-level and nested contexts. The method names are modeled after
+rspec, and should behave roughly the same.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="class"><span class="keyword">module</span> <span class="title">XSpec</span></span>
+  <span class="class"><span class="keyword">module</span> <span class="title">DSL</span></span>
+    <span class="function"><span class="keyword">def</span> <span class="title">it</span><span class="params">(*args, &amp;block)</span></span>
+      __xspec_context.add_unit_of_work(*args, &amp;block)
+    <span class="keyword">end</span>
+
+    <span class="function"><span class="keyword">def</span> <span class="title">describe</span><span class="params">(*args, &amp;block)</span></span>
+      __xspec_context.add_child_context(*args, &amp;block)
+    <span class="keyword">end</span>
+  <span class="keyword">end</span>
+<span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
