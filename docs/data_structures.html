@@ -92,10 +92,9 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <p>A unit of work, usually created via <code>Describe#it</code>, is a labeled code block
-that expresses an assertion about a property of the system under test. They
-are indivisible.</p>
-<p>These are run by an evaluator.</p>
+              <p>A unit of work, usually created by the <code>it</code> DSL method, is a labeled,
+indivisible code block that expresses an assertion about a property of the
+system under test. They are run by an evaluator.</p>
 
             </div>
             
@@ -113,27 +112,16 @@ are indivisible.</p>
               <p>A context is a recursively nested structure, usually created with the
 <code>describe</code> DSL method, that contains other contexts and units of work. Most
 of the logic for a context happens at the class level rather than instance,
-which is unusual but required for method inheritance to work correctly.</p>
-<p>Each nested context creates a new class that inherits from the parent.
-Methods can be added to this class as per normal, and are correctly
-inherited by children. When it comes time to run tests, the evaluator will
-create a new instance of the context (a class) for each test, making the
-defined methods available and also ensuring that there is no state
-pollution between tests.</p>
-<p>An assertion context is always included as the final mixin to a context
-class, making assertion methods available as instance methods to the units
-of work.</p>
+which is unusual but required for method inheritance to work correctly. It
+currently violates the logic rule specified above, more work is required to
+decouple it.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="keyword">require</span> <span class="string">'xspec/dsl'</span>
   <span class="class"><span class="keyword">class</span> <span class="title">Context</span></span>
     <span class="class"><span class="keyword">class</span> <span class="inheritance">&lt;</span><span class="inheritance">&lt; <span class="parent">self</span></span></span>
-      <span class="function"><span class="keyword">def</span> <span class="title">__xspec_context</span>;</span> <span class="keyword">self</span>; <span class="keyword">end</span>
-      <span class="keyword">include</span> <span class="constant">::XSpec::DSL</span>
-
-      attr_accessor <span class="symbol">:name</span>, <span class="symbol">:children</span>
-      attr_reader <span class="symbol">:units_of_work</span>, <span class="symbol">:assertion_context</span></pre></div></div>
+      attr_reader <span class="symbol">:name</span>, <span class="symbol">:children</span>, <span class="symbol">:units_of_work</span>, <span class="symbol">:assertion_context</span></pre></div></div>
             
         </li>
         
@@ -144,23 +132,13 @@ of work.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
-              <p>Creating a new child context inherits any methods defined on the parent
-and its assertion context, which is applied after user-defined methods
-(i.e. the body of the describe block) have been added.</p>
+              <p>A context includes the same DSL methods as the root level module, which
+enables the recursive creation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">make</span><span class="params">(name, assertion_context, &amp;block)</span></span>
-        x = <span class="constant">Class</span>.new(<span class="keyword">self</span>)
-        x.initialize!(name, assertion_context)
-        x.class_eval(&amp;block) <span class="keyword">if</span> block
-        x.apply_assertion_context!
-        x
-      <span class="keyword">end</span>
-
-      <span class="function"><span class="keyword">def</span> <span class="title">root</span><span class="params">(assertion_context)</span></span>
-        make(<span class="keyword">nil</span>, assertion_context)
-      <span class="keyword">end</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">__xspec_context</span>;</span> <span class="keyword">self</span>; <span class="keyword">end</span>
+      <span class="keyword">include</span> <span class="constant">::XSpec::DSL</span></pre></div></div>
             
         </li>
         
@@ -171,9 +149,35 @@ and its assertion context, which is applied after user-defined methods
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
+              <p>Each nested context creates a new class that inherits from the parent.
+Methods can be added to this class as per normal, and are correctly
+inherited by children. When it comes time to run tests, the evaluator will
+create a new instance of the context (a class) for each test, making the
+defined methods available and also ensuring that there is no state
+pollution between tests.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">make</span><span class="params">(name, assertion_context, &amp;block)</span></span>
+        x = <span class="constant">Class</span>.new(<span class="keyword">self</span>)
+        x.initialize!(name, assertion_context)
+        x.class_eval(&amp;block) <span class="keyword">if</span> block
+        x.apply_assertion_context!
+        x
+      <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
               <p>A class cannot have an implicit initializer, but some variable
-inititialization is required so this method is called explicitly when
-ever a dynamic subclass is created.</p>
+inititialization is required so the <code>initialize!</code> method is called
+explicitly when ever a dynamic subclass is created.</p>
 
             </div>
             
@@ -187,11 +191,11 @@ ever a dynamic subclass is created.</p>
         </li>
         
         
-        <li id="section-6">
+        <li id="section-7">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-6">&#182;</a>
+                <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
               <p>The assertion context should be applied after the user has had a chance
 to add their own methods. It needs to be last so that users can&#39;t
@@ -206,53 +210,21 @@ clobber the assertion methods.</p>
         </li>
         
         
-        <li id="section-7">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-7">&#182;</a>
-              </div>
-              <p><code>include</code> is normally private, but it is useful to allow other classes
-and modules to include additional behaviour (such as assertion
-contexts).</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">mixin</span><span class="params">(mod)</span></span>
-        <span class="keyword">include</span>(mod)
-      <span class="keyword">end</span>
-
-      <span class="function"><span class="keyword">def</span> <span class="title">add_child_context</span><span class="params">(name = <span class="keyword">nil</span>, opts = {}, &amp;block)</span></span>
-        <span class="keyword">self</span>.children &lt;&lt; make(name, assertion_context, &amp;block)
-      <span class="keyword">end</span>
-
-      <span class="function"><span class="keyword">def</span> <span class="title">add_unit_of_work</span><span class="params">(name = <span class="keyword">nil</span>, opts = {}, &amp;block)</span></span>
-        <span class="keyword">self</span>.units_of_work &lt;&lt; <span class="constant">UnitOfWork</span>.new(name, block)
-      <span class="keyword">end</span></pre></div></div>
-            
-        </li>
-        
-        
         <li id="section-8">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
-              <p>Values of memoized methods are remembered only for the duration of a
-single unit of work. These are typically creates using the <code>let</code> DSL
-method.</p>
+              <p>Executing a unit of work creates a new instance and hands it off to the
+<code>call</code> method, which is defined by whichever assertion context is being
+used. By creating a new instance everytime, no state is preserved
+between executions.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">add_memoized_method</span><span class="params">(name, &amp;block)</span></span>
-        define_method(name) <span class="keyword">do</span>
-          memoized[block] ||= instance_eval(&amp;block)
-        <span class="keyword">end</span>
-      <span class="keyword">end</span>
-
-      <span class="function"><span class="keyword">def</span> <span class="title">to_s</span></span>
-        <span class="string">"Context:'<span class="subst">#{name}</span>'"</span>
+            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">execute</span><span class="params">(unit_of_work)</span></span>
+        new.call(unit_of_work)
       <span class="keyword">end</span></pre></div></div>
             
         </li>
@@ -264,8 +236,48 @@ method.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
-              <p>A recursive iteration that returns all leaf-node units of work as
-NestedUnitOfWork objects.</p>
+              <p>The root context is nothing special, and behaves the same as all the
+others.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">root</span><span class="params">(assertion_context)</span></span>
+        make(<span class="keyword">nil</span>, assertion_context)
+      <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>Child contexts and units of work are typically added by the <code>describe</code>
+and <code>it</code> DSL methods respectively.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">add_child_context</span><span class="params">(name = <span class="keyword">nil</span>, opts = {}, &amp;block)</span></span>
+        <span class="keyword">self</span>.children &lt;&lt; make(name, assertion_context, &amp;block)
+      <span class="keyword">end</span>
+
+      <span class="function"><span class="keyword">def</span> <span class="title">add_unit_of_work</span><span class="params">(name = <span class="keyword">nil</span>, opts = {}, &amp;block)</span></span>
+        <span class="keyword">self</span>.units_of_work &lt;&lt; <span class="constant">UnitOfWork</span>.new(name, block)
+      <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>The most convenient way to access all units of work is this recursive
+iteration that returns all leaf-nodes as <code>NestedUnitOfWork</code> objects.</p>
 
             </div>
             
@@ -288,10 +300,68 @@ NestedUnitOfWork objects.</p>
         <span class="keyword">else</span>
           enum
         <span class="keyword">end</span>
+      <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p><code>include</code> is normally private, but it is useful to allow other classes
+and modules to include additional behaviour (such as assertion
+contexts).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">mixin</span><span class="params">(mod)</span></span>
+        <span class="keyword">include</span>(mod)
+      <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>Values of memoized methods are remembered only for the duration of a
+single unit of work. These are typically creates using the <code>let</code> DSL
+method.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">add_memoized_method</span><span class="params">(name, &amp;block)</span></span>
+        define_method(name) <span class="keyword">do</span>
+          memoized[block] ||= instance_eval(&amp;block)
+        <span class="keyword">end</span>
+      <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Dynamically generated classes are hard to identify in object graphs, so
+it is helpful for debugging to set an explicit name.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">to_s</span></span>
+        <span class="string">"Context:'<span class="subst">#{name}</span>'"</span>
       <span class="keyword">end</span>
     <span class="keyword">end</span>
 
-    attr_accessor <span class="symbol">:memoized</span>
+    attr_reader <span class="symbol">:memoized</span>
 
     <span class="function"><span class="keyword">def</span> <span class="title">initialize</span></span>
       <span class="variable">@memoized</span> = {}
@@ -301,11 +371,11 @@ NestedUnitOfWork objects.</p>
         </li>
         
         
-        <li id="section-10">
+        <li id="section-15">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-10">&#182;</a>
+                <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p>Units of work can be nested inside contexts. This is the main object that
 other components of the system work with.</p>
@@ -328,11 +398,11 @@ other components of the system work with.</p>
         </li>
         
         
-        <li id="section-11">
+        <li id="section-16">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-11">&#182;</a>
+                <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
               <p>A test failure will be reported as a <code>Failure</code>, which includes contextual
 information about the failure useful for reporting to the user.</p>

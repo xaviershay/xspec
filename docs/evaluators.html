@@ -73,7 +73,9 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              
+              <p>Evaluators are responsible for collecting all units of work to be run and
+scheduling them.</p>
+
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="class"><span class="keyword">module</span> <span class="title">XSpec</span></span>
@@ -88,8 +90,8 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <p>Runs all units of works serially in a loop. It&#39;s about as simple an
-evaluator as you can imagine.</p>
+              <p>The serial evaluator, unsurprisingly, runs all units of works serially in
+a loop. It&#39;s about as simple an evaluator as you can imagine.</p>
 
             </div>
             
@@ -102,7 +104,7 @@ evaluator as you can imagine.</p>
         notifier.run_start
 
         context.nested_units_of_work.each <span class="keyword">do</span> |x|
-          errors = x.immediate_parent.new.call(x)
+          errors = x.immediate_parent.execute(x)
 
           notifier.evaluate_finish(x, errors)
         <span class="keyword">end</span>

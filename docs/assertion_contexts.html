@@ -102,10 +102,25 @@ the unit of work to be executed, and return an array of <code>Failure</code> obj
 
         raise <span class="constant">AssertionFailed</span>.new(message, caller) <span class="keyword">unless</span> proposition
       <span class="keyword">end</span>
-    <span class="keyword">end</span>
+    <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>This RSpec adapter shows two useful techniques: dynamic library loading
+which removes RSpec as a direct dependency, and use for the <code>mixin</code>
+method to further extend the target context.</p>
 
-    <span class="class"><span class="keyword">module</span> <span class="title">RSpecExpectations</span></span>
-      <span class="function"><span class="keyword">def</span> <span class="title"><span class="keyword">self</span></span>.<span class="title">included</span><span class="params">(klass)</span></span>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="class"><span class="keyword">module</span> <span class="title">RSpecExpectations</span></span>
+      <span class="function"><span class="keyword">def</span> <span class="title"><span class="keyword">self</span></span>.<span class="title">included</span><span class="params">(context)</span></span>
         <span class="keyword">begin</span>
           <span class="keyword">require</span> <span class="string">'rspec/expectations'</span>
           <span class="keyword">require</span> <span class="string">'rspec/matchers'</span>
@@ -113,7 +128,7 @@ the unit of work to be executed, and return an array of <code>Failure</code> obj
           raise <span class="string">"RSpec is not available, cannot use RSpec assertion context."</span>
         <span class="keyword">end</span>
 
-        klass.mixin(<span class="constant">RSpec::Matchers</span>)
+        context.mixin(<span class="constant">RSpec::Matchers</span>)
       <span class="keyword">end</span>
 
       <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(unit_of_work)</span></span>

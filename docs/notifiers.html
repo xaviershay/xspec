@@ -73,7 +73,10 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              
+              <p>Without a notifier, there is no way for XSpec to interact with the outside
+world. A notifier handles progress updates as tests are executed, and
+summarizing the run when it finished.</p>
+
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="class"><span class="keyword">module</span> <span class="title">XSpec</span></span>
@@ -194,9 +197,23 @@ the result.</p>
 
       <span class="function"><span class="keyword">def</span> <span class="title">full_name</span><span class="params">(unit_of_work)</span></span>
         (unit_of_work.parents + [unit_of_work]).map(&amp;<span class="symbol">:name</span>).compact.join(<span class="string">' '</span>)
-      <span class="keyword">end</span>
+      <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>A standard backtrace contains many entries for XSpec itself which are
+not useful for debugging your tests, so they are stripped out.</p>
 
-      <span class="function"><span class="keyword">def</span> <span class="title">clean_backtrace</span><span class="params">(backtrace)</span></span>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">clean_backtrace</span><span class="params">(backtrace)</span></span>
         lib_dir = <span class="constant">File</span>.dirname(<span class="constant">File</span>.expand_path(<span class="string">'..'</span>, __FILE_<span class="number">_</span>))
 
         backtrace.reject {|x|
@@ -212,11 +229,11 @@ the result.</p>
         </li>
         
         
-        <li id="section-5">
+        <li id="section-6">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-5">&#182;</a>
+                <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
               <p>Includes nicely formatted names of each test in the output.</p>
 
@@ -276,11 +293,11 @@ the result.</p>
         </li>
         
         
-        <li id="section-6">
+        <li id="section-7">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-6">&#182;</a>
+                <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
               <p>A notifier that does not do anything and always returns successful.
 Useful as a parent class for other notifiers or for testing.</p>
