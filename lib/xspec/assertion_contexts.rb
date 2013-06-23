@@ -4,17 +4,24 @@
 module XSpec
   module AssertionContext
     class Simple
-      class AssertionFailed < RuntimeError; end
+      class AssertionFailed < RuntimeError
+        attr_reader :message, :backtrace
+
+        def initialize(message, backtrace)
+          @message   = message
+          @backtrace = backtrace
+        end
+      end
 
       def call(unit_of_work)
         instance_exec(&unit_of_work.block)
         []
       rescue AssertionFailed => e
-        [Failure.new(unit_of_work, e.message, caller)]
+        [Failure.new(unit_of_work, e.message, e.backtrace)]
       end
 
       def assert(proposition, message=nil)
-        raise AssertionFailed, message unless proposition
+        raise AssertionFailed.new(message, caller) unless proposition
       end
     end
 
@@ -34,7 +41,7 @@ module XSpec
         instance_exec(&unit_of_work.block)
         []
       rescue RSpec::Expectations::ExpectationNotMetError => e
-        [Failure.new(unit_of_work, e.message, caller)]
+        [Failure.new(unit_of_work, e.message, e.backtrace)]
       end
 
       def expect(*target, &target_block)
