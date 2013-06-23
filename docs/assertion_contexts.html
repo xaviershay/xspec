@@ -104,6 +104,8 @@ Thread-safety is required.</p>
       <span class="keyword">end</span>
 
       <span class="function"><span class="keyword">def</span> <span class="title">assert</span><span class="params">(proposition, message=<span class="keyword">nil</span>)</span></span>
+        message ||= <span class="string">'assertion failed'</span>
+
         raise <span class="constant">AssertionFailed</span>.new(message, caller) <span class="keyword">unless</span> proposition
       <span class="keyword">end</span>
     <span class="keyword">end</span>

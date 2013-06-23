@@ -108,16 +108,12 @@ evaluator as you can imagine.</p>
         notifier.run_start
 
         context.nested_units_of_work.each <span class="keyword">do</span> |x|
-          evaluate(x)
+          errors = assertion_context.call(x)
+
+          notifier.evaluate_finish(x, errors)
         <span class="keyword">end</span>
 
         notifier.run_finish
-      <span class="keyword">end</span>
-
-      <span class="function"><span class="keyword">def</span> <span class="title">evaluate</span><span class="params">(nested_unit_of_work)</span></span>
-        errors = assertion_context.(nested_unit_of_work)
-
-        notifier.evaluate_finish(nested_unit_of_work, errors)
       <span class="keyword">end</span>
 
       protected

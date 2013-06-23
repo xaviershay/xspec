@@ -239,11 +239,7 @@ information about the failure useful for reporting to the user.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="constant">Failure</span> = <span class="constant">Struct</span>.new(<span class="symbol">:unit_of_work</span>, <span class="symbol">:msg</span>, <span class="symbol">:caller</span>) <span class="keyword">do</span>
-    <span class="function"><span class="keyword">def</span> <span class="title">message</span></span>
-      msg || <span class="string">"assertion failed"</span>
-    <span class="keyword">end</span>
-  <span class="keyword">end</span>
+            <div class="content"><div class='highlight'><pre>  <span class="constant">Failure</span> = <span class="constant">Struct</span>.new(<span class="symbol">:unit_of_work</span>, <span class="symbol">:message</span>, <span class="symbol">:caller</span>)
 <span class="keyword">end</span></pre></div></div>
             
         </li>

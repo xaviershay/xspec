@@ -160,10 +160,7 @@ by the DSL methods above and runs it through the evaluator.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">run!</span></span>
-        notifier  = __xspec_opts.fetch(<span class="symbol">:notifier</span>)
-        evaluator = __xspec_opts.fetch(<span class="symbol">:evaluator</span>)
-
-        evaluator.run(__xspec_context)
+        __xspec_opts.fetch(<span class="symbol">:evaluator</span>).run(__xspec_context)
       <span class="keyword">end</span></pre></div></div>
             
         </li>
