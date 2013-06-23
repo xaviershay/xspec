@@ -33,19 +33,23 @@ module XSpec
     class Character
       include Composable
 
+      def initialize(out = $stdout)
+        @out = out
+      end
+
       def run_start; end
 
       def evaluate_finish(_, errors)
         if errors.any?
           @failed = true
-          print 'F'
+          @out.print 'F'
         else
-          print '.'
+          @out.print '.'
         end
       end
 
       def run_finish
-        puts
+        @out.puts
         !@failed
       end
     end
@@ -103,10 +107,11 @@ module XSpec
     class Documentation
       include Composable
 
-      def initialize(indent = 2)
-        self.indent          = indent
+      def initialize(out = $stdout)
+        self.indent          = 2
         self.last_seen_names = []
         self.failed          = false
+        self.out             = out
       end
 
       def run_start; end
@@ -122,27 +127,27 @@ module XSpec
           char        = 'F'
         end
 
-        puts "%s%s %s" % [spaces, char, unit_of_work.name]
+        out.puts "%s%s %s" % [spaces, char, unit_of_work.name]
       end
 
       def run_finish
-        puts
+        out.puts
         !failed
       end
 
       protected
 
-      attr_accessor :last_seen_names, :indent, :failed
+      attr_accessor :last_seen_names, :indent, :failed, :out
 
       def output_context_header!(parent_names)
         if parent_names != last_seen_names
           tail = parent_names - last_seen_names
 
-          puts
+          out.puts
           if tail.any?
             existing_indent = parent_names.size - tail.size
             tail.each_with_index do |name, i|
-              puts '%s%s' % [' ' * ((existing_indent + i) * indent), name]
+              out.puts '%s%s' % [' ' * ((existing_indent + i) * indent), name]
             end
           end
 
