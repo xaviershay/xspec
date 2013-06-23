@@ -2,6 +2,7 @@
 # instead. They are set up in such a way that if you can override a component
 # down in the bowels without having to provide an entire top level evaluator.
 require 'xspec/evaluator/serial'
+require 'xspec/assertion_contexts'
 require 'xspec/notifier/character'
 module XSpec
   def add_defaults(options = {})
@@ -9,10 +10,14 @@ module XSpec
     # progress or details of failing tests.
     options[:notifier]  ||= XSpec::Notifier::Character.new
 
-    # An evaluator is responsible for scheduling and executing units of work.
-    # Any logic regarding threads, remote execution or the like belongs in an
-    # evaluator.
-    options[:evaluator] ||= XSpec::Evaluator::Serial.new(options.fetch(:notifier))
+    # A context that a unit of work runs inside of. Allows for different
+    # matchers and expectation frameworks to be used.
+    options[:assertion_context] ||= XSpec::AssertionContext::Simple.new
+
+    # An evaluator is responsible for scheduling units of work and handing them
+    # off to the assertion context.  Any logic regarding threads, remote
+    # execution or the like belongs in an evaluator.
+    options[:evaluator] ||= XSpec::Evaluator::Serial.new(options)
     options
   end
   module_function :add_defaults

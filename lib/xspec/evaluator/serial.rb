@@ -3,8 +3,9 @@
 module XSpec
   module Evaluator
     class Serial
-      def initialize(notifier)
-        @notifier = notifier
+      def initialize(opts)
+        @notifier          = opts.fetch(:notifier)
+        @assertion_context = opts.fetch(:assertion_context)
       end
 
       def run(context)
@@ -18,24 +19,14 @@ module XSpec
       end
 
       def evaluate(nested_unit_of_work)
-        @current_unit_of_work = nested_unit_of_work
-        @current_caller       = caller
-        @errors               = []
+        errors = assertion_context.(nested_unit_of_work)
 
-        instance_exec(&nested_unit_of_work.block)
-
-        notifier.evaluate_finish(nested_unit_of_work, @errors)
-      end
-
-      def assert(proposition, msg=nil)
-        return if proposition
-
-        self.errors << Error.new(@it, msg, caller - @my_caller)
+        notifier.evaluate_finish(nested_unit_of_work, errors)
       end
 
       protected
 
-      attr_reader :notifier
+      attr_reader :notifier, :assertion_context
     end
   end
 end

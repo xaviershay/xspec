@@ -1,4 +1,4 @@
-require 'xspec/autorun'
+require 'spec_helper'
 
 describe 'xspec' do
   it 'evaluates this file' do
