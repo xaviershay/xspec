@@ -40,18 +40,25 @@ module XSpec
       def run_start; end
 
       def evaluate_finish(_, errors)
-        if errors.any?
-          @failed = true
-          @out.print 'F'
-        else
-          @out.print '.'
-        end
+        @out.print label_for_failure(errors[0])
+        @failed ||= errors.any?
       end
 
       def run_finish
         @out.puts
         !@failed
       end
+
+      protected
+
+      def label_for_failure(f)
+        case f
+          when CodeException then 'E'
+          when Failure then 'F'
+          else '.'
+        end
+      end
+
     end
 
     # Outputs error messages and backtraces after the entire run is complete.
@@ -120,12 +127,9 @@ module XSpec
         output_context_header! unit_of_work.parents.map(&:name).compact
 
         spaces = ' ' * (last_seen_names.size * indent)
-        char   = '-'
+        char   = label_for_failure(errors[0])
 
-        if errors.any?
-          self.failed = true
-          char        = 'F'
-        end
+        self.failed ||= errors.any?
 
         out.puts "%s%s %s" % [spaces, char, unit_of_work.name]
       end
@@ -138,6 +142,14 @@ module XSpec
       protected
 
       attr_accessor :last_seen_names, :indent, :failed, :out
+
+      def label_for_failure(f)
+        case f
+          when CodeException then 'E'
+          when Failure then 'F'
+          else '-'
+        end
+      end
 
       def output_context_header!(parent_names)
         if parent_names != last_seen_names

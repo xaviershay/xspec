@@ -17,6 +17,8 @@ module XSpec
         []
       rescue AssertionFailed => e
         [Failure.new(unit_of_work, e.message, e.backtrace)]
+      rescue => e
+        [CodeException.new(unit_of_work, e.message, e.backtrace)]
       end
 
       def assert(proposition, message=nil)
