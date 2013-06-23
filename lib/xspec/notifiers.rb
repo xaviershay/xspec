@@ -16,11 +16,16 @@ module XSpec
         @notifiers = notifiers
       end
 
-      def run_start;  notifiers.each(&:run_start); end
-      def run_finish; notifiers.each(&:run_finish); end
+      def run_start
+        notifiers.each(&:run_start)
+      end
 
       def evaluate_finish(*args)
-        notifiers.map {|x| x.evaluate_finish(*args) }.all?
+        notifiers.each {|x| x.evaluate_finish(*args) }
+      end
+
+      def run_finish
+        notifiers.map(&:run_finish).all?
       end
 
       protected
