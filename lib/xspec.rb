@@ -1,7 +1,7 @@
 # Hello and welcome to XSpec!
 #
 # XSpec is an rspec-inspired testing library that is designed to be highly
-# modular and easy to extend. Let's dive right into it.
+# modular and easy to extend. Let's dive right in.
 module XSpec
   # The DSL is the core of XSpec. It dynamically generates a module that can be
   # mixed into which ever context you choose (using `extend`), be that the
@@ -24,7 +24,7 @@ module XSpec
       end
 
       # Some meta-magic is needed to enable the options from local scope above
-      # to be avilable inside the module.
+      # to be available inside the module.
       define_method(:__xspec_opts) { options }
 
       # `run!` is where the magic happens. Typically called at the end of a

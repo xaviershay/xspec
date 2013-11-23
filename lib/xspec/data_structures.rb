@@ -135,7 +135,7 @@ module XSpec
       end
 
       # Values of memoized methods are remembered only for the duration of a
-      # single unit of work. These are typically creates using the `let` DSL
+      # single unit of work. These are typically created using the `let` DSL
       # method.
       def add_memoized_method(name, &block)
         define_method(name) do
