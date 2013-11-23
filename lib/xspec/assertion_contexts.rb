@@ -29,7 +29,7 @@ module XSpec
     end
 
     # This RSpec adapter shows two useful techniques: dynamic library loading
-    # which removes RSpec as a direct dependency, and use for the `mixin`
+    # which removes RSpec as a direct dependency, and use of the `mixin`
     # method to further extend the target context.
     module RSpecExpectations
       def self.included(context)
