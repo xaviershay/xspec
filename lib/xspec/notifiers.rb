@@ -134,11 +134,18 @@ module XSpec
         output_context_header! unit_of_work.parents.map(&:name).compact
 
         spaces = ' ' * (last_seen_names.size * indent)
-        char   = label_for_failure(errors[0])
 
         self.failed ||= errors.any?
 
-        out.puts "%s%s %s" % [spaces, char, unit_of_work.name]
+        out.puts "%s%s" % [spaces, decorate(unit_of_work.name, errors)]
+      end
+
+      def decorate(name, errors)
+        if errors[0]
+          name = append_failed(name)
+        else
+          name
+        end
       end
 
       def run_finish
@@ -171,6 +178,42 @@ module XSpec
           end
 
           self.last_seen_names = parent_names
+        end
+      end
+
+      def append_failed(name)
+        [name, "FAILED"].compact.join(' - ')
+      end
+    end
+
+    # Includes nicely formatted names of each test in the output, with color.
+    class ColoredDocumentation < Documentation
+      require 'set'
+
+      VT100_COLORS = {
+        :black   => 30,
+        :red     => 31,
+        :green   => 32,
+        :yellow  => 33,
+        :blue    => 34,
+        :magenta => 35,
+        :cyan    => 36,
+        :white   => 37
+      }
+
+      def color_code_for(color)
+        VT100_COLORS.fetch(color)
+      end
+
+      def colorize(text, color)
+        "\e[#{color_code_for(color)}m#{text}\e[0m"
+      end
+
+      def decorate(name, errors)
+        color = if errors[0]
+          colorize(append_failed(name), :red)
+        else
+          colorize(name, :green)
         end
       end
     end

@@ -78,37 +78,62 @@ describe 'documentation notifier' do
   it 'outputs each context with a header and individual tests' do
     notifier.evaluate_finish(make_nested_test(['a'], 'b'), [])
 
-    assert out.string == "\na\n  - b\n"
+    assert out.string == "\na\n  b\n"
   end
 
   it 'adds an indent for each nested context' do
     notifier.evaluate_finish(make_nested_test(['a', 'b'], 'c'), [])
 
-    assert out.string == "\na\n  b\n    - c\n"
+    assert out.string == "\na\n  b\n    c\n"
   end
 
   it 'does not repeat top level parents for multiple nested contexts' do
     notifier.evaluate_finish(make_nested_test(['a', 'b'], 'c'), [])
     notifier.evaluate_finish(make_nested_test(['a', 'd'], 'e'), [])
-    assert out.string == "\na\n  b\n    - c\n\n  d\n    - e\n"
+    assert out.string == "\na\n  b\n    c\n\n  d\n    e\n"
   end
 
   it 'ignores contexts with no name' do
     notifier.evaluate_finish(make_nested_test([nil, 'a', nil], 'b'), [])
 
-    assert out.string == "\na\n  - b\n"
+    assert out.string == "\na\n  b\n"
   end
 
-  it 'prefixes tests with F when they fail' do
+  it 'suffixes FAILED to tests when they fail' do
+    notifier.evaluate_finish(make_nested_test([], 'a'), [make_failure])
+
+    assert out.string == "a - FAILED\n"
+  end
+
+  it 'outputs FAILED for unnamed tests when they fail' do
     notifier.evaluate_finish(make_nested_test, [make_failure])
 
-    assert out.string == "F \n"
+    assert out.string == "FAILED\n"
   end
 
-  it 'prefixes tests with E when they error' do
+  it 'outputs FAILED for unnamed tests when they error' do
     notifier.evaluate_finish(make_nested_test, [make_error])
 
-    assert out.string == "E \n"
+    assert out.string == "FAILED\n"
+  end
+
+  it_behaves_like_a ComposableNotifier
+end
+
+describe 'colored documentation notifier' do
+  let(:notifier) { XSpec::Notifier::ColoredDocumentation.new(out) }
+  let(:out)      { StringIO.new }
+
+  it 'colors successful tests green' do
+    notifier.evaluate_finish(make_nested_test([], 'a'), [])
+
+    assert out.string == "\e[32ma\e[0m\n"
+  end
+
+  it 'colors failed and errored tests red' do
+    notifier.evaluate_finish(make_nested_test, [make_failure])
+
+    assert out.string == "\e[31mFAILED\e[0m\n"
   end
 
   it_behaves_like_a ComposableNotifier

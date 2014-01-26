@@ -1,7 +1,7 @@
 require 'xspec'
 
 extend XSpec.dsl(
-  notifier: XSpec::Notifier::Documentation.new +
+  notifier: XSpec::Notifier::ColoredDocumentation.new +
             XSpec::Notifier::FailuresAtEnd.new
 )
 
