@@ -31,7 +31,7 @@ describe 'failures at end notifier' do
     failure = XSpec::Failure.new(
       make_nested_test([nil, 'a', nil, 'b'], 'c'),
       "failed",
-      [File.expand_path('../../lib', __FILE__) + '/bogus.rb']
+      [File.expand_path('../../../lib', __FILE__) + '/bogus.rb']
     )
     notifier.evaluate_finish(nil, [failure])
 
