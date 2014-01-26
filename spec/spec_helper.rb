@@ -2,6 +2,7 @@ require 'xspec'
 
 extend XSpec.dsl(
   notifier: XSpec::Notifier::ColoredDocumentation.new +
+            XSpec::Notifier::TimingsAtEnd.new +
             XSpec::Notifier::FailuresAtEnd.new
 )
 

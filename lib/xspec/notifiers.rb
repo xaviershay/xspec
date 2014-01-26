@@ -74,6 +74,81 @@ module XSpec
 
     end
 
+    class TimingsAtEnd
+      DEFAULT_SPLITS = [0.001, 0.005, 0.01, 0.1, 1.0, Float::INFINITY]
+
+      def initialize(out:    $stdout,
+                     splits: DEFAULT_SPLITS,
+                     width:  20,
+                     clock:  ->{ Time.now })
+
+        @timings = {}
+        @splits  = splits
+        @width   = width
+        @clock   = clock
+        @out     = out
+      end
+
+      def run_start(*_); end
+
+      def evaluate_start(unit_of_work)
+        timings[unit_of_work] = now
+      end
+
+      def evaluate_finish(unit_of_work, _)
+        start_time = timings.fetch(unit_of_work)
+        timings[unit_of_work] = now - start_time
+      end
+
+      def run_finish
+        buckets = bucket_from_splits(timings, splits)
+        max     = buckets.values.max
+
+        out.puts "           Timings:"
+        buckets.each do |(split, count)|
+          label = split.infinite? ? "∞" : split
+
+          out.puts "    %6s %-#{width}s %i" % [
+            label,
+            '#' * (count / max.to_f * width.to_f).ceil,
+            count
+          ]
+        end
+        out.puts
+      end
+
+    private
+
+      attr_reader :timings, :splits, :width, :clock, :out
+
+      def now
+        clock.call
+      end
+
+      def bucket_from_splits(timings, splits)
+        initial_buckets = splits.each_with_object({}) do |b, a|
+          a[b] = 0
+        end
+
+        buckets = timings.each_with_object(initial_buckets) do |(_, d), a|
+          split = splits.detect {|x| d < x }
+          a[split] += 1
+        end
+
+        remove_trailing_zero_counts(buckets)
+      end
+
+      def remove_trailing_zero_counts(buckets)
+        Hash[
+          buckets
+            .to_a
+            .reverse
+            .drop_while {|_, x| x == 0 }
+            .reverse
+        ]
+      end
+    end
+
     # Outputs error messages and backtraces after the entire run is complete.
     class FailuresAtEnd
       include Composable
