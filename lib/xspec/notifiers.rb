@@ -117,78 +117,11 @@ module XSpec
       attr_accessor :out, :errors
     end
 
-    # Includes nicely formatted names of each test in the output.
-    class Documentation
-      include Composable
-
-      def initialize(out = $stdout)
-        self.indent          = 2
-        self.last_seen_names = []
-        self.failed          = false
-        self.out             = out
-      end
-
-      def run_start; end
-
-      def evaluate_finish(unit_of_work, errors)
-        output_context_header! unit_of_work.parents.map(&:name).compact
-
-        spaces = ' ' * (last_seen_names.size * indent)
-
-        self.failed ||= errors.any?
-
-        out.puts "%s%s" % [spaces, decorate(unit_of_work.name, errors)]
-      end
-
-      def decorate(name, errors)
-        if errors[0]
-          name = append_failed(name)
-        else
-          name
-        end
-      end
-
-      def run_finish
-        out.puts
-        !failed
-      end
-
-      protected
-
-      attr_accessor :last_seen_names, :indent, :failed, :out
-
-      def label_for_failure(f)
-        case f
-          when CodeException then 'E'
-          when Failure then 'F'
-          else '-'
-        end
-      end
-
-      def output_context_header!(parent_names)
-        if parent_names != last_seen_names
-          tail = parent_names - last_seen_names
-
-          out.puts
-          if tail.any?
-            existing_indent = parent_names.size - tail.size
-            tail.each_with_index do |name, i|
-              out.puts '%s%s' % [' ' * ((existing_indent + i) * indent), name]
-            end
-          end
-
-          self.last_seen_names = parent_names
-        end
-      end
-
-      def append_failed(name)
-        [name, "FAILED"].compact.join(' - ')
-      end
-    end
-
     # Includes nicely formatted names of each test in the output, with color.
-    class ColoredDocumentation < Documentation
+    class ColoredDocumentation
       require 'set'
+
+      include Composable
 
       VT100_COLORS = {
         :black   => 30,
@@ -215,6 +148,61 @@ module XSpec
         else
           colorize(name, :green)
         end
+      end
+
+      def initialize(out = $stdout)
+        self.indent          = 2
+        self.last_seen_names = []
+        self.failed          = false
+        self.out             = out
+      end
+
+      def run_start; end
+
+      def evaluate_finish(unit_of_work, errors)
+        output_context_header! unit_of_work.parents.map(&:name).compact
+
+        spaces = ' ' * (last_seen_names.size * indent)
+
+        self.failed ||= errors.any?
+
+        out.puts "%s%s" % [spaces, decorate(unit_of_work.name, errors)]
+      end
+
+      def run_finish
+        out.puts
+        !failed
+      end
+
+      protected
+
+      attr_accessor :last_seen_names, :indent, :failed, :out
+
+      def output_context_header!(parent_names)
+        if parent_names != last_seen_names
+          tail = parent_names - last_seen_names
+
+          out.puts
+          if tail.any?
+            existing_indent = parent_names.size - tail.size
+            tail.each_with_index do |name, i|
+              out.puts '%s%s' % [' ' * ((existing_indent + i) * indent), name]
+            end
+          end
+
+          self.last_seen_names = parent_names
+        end
+      end
+
+      def append_failed(name)
+        [name, "FAILED"].compact.join(' - ')
+      end
+    end
+
+    # Includes nicely formatted names of each test in the output.
+    class Documentation < ColoredDocumentation
+      def colorize(name, _)
+        name
       end
     end
 
