@@ -12,6 +12,8 @@ module XSpec
     end
 
     class Composite
+      include Composable
+
       def initialize(*notifiers)
         @notifiers = notifiers
       end

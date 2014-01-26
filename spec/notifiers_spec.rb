@@ -114,6 +114,12 @@ describe 'documentation notifier' do
   it_behaves_like_a ComposableNotifier
 end
 
+describe 'composable notifier' do
+  let(:notifier) { XSpec::Notifier::Composite.new }
+
+  it_behaves_like_a ComposableNotifier
+end
+
 describe 'null notifier' do
   let(:notifier) { XSpec::Notifier::Null.new }
 
