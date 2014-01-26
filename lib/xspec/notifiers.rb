@@ -22,6 +22,10 @@ module XSpec
         notifiers.each(&:run_start)
       end
 
+      def evaluate_start(*args)
+        notifiers.each {|x| x.evaluate_start(*args) }
+      end
+
       def evaluate_finish(*args)
         notifiers.each {|x| x.evaluate_finish(*args) }
       end
@@ -45,6 +49,8 @@ module XSpec
       end
 
       def run_start; end
+
+      def evaluate_start(*_); end
 
       def evaluate_finish(_, errors)
         @out.print label_for_failure(errors[0])
@@ -78,6 +84,8 @@ module XSpec
       end
 
       def run_start; end
+
+      def evaluate_start(*_); end
 
       def evaluate_finish(_, errors)
         self.errors += errors
@@ -159,6 +167,8 @@ module XSpec
 
       def run_start; end
 
+      def evaluate_start(*_); end
+
       def evaluate_finish(unit_of_work, errors)
         output_context_header! unit_of_work.parents.map(&:name).compact
 
@@ -212,7 +222,8 @@ module XSpec
       include Composable
 
       def run_start; end
-      def evaluate_finish(*args); end
+      def evaluate_start(*_); end
+      def evaluate_finish(*_); end
       def run_finish; true; end
     end
 

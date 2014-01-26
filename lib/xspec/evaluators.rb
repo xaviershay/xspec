@@ -13,6 +13,8 @@ module XSpec
         notifier.run_start
 
         context.nested_units_of_work.each do |x|
+          notifier.evaluate_start(x)
+
           errors = x.immediate_parent.execute(x)
 
           notifier.evaluate_finish(x, errors)
