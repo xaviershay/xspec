@@ -6,7 +6,7 @@ module XSpec
     # a loop. It's about as simple an evaluator as you can imagine.
     class Serial
       def initialize(opts)
-        @notifier          = opts.fetch(:notifier)
+        @notifier = opts.fetch(:notifier)
       end
 
       def run(context)
