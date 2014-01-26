@@ -22,9 +22,37 @@ module XSpec
       end
 
       def assert(proposition, message=nil)
-        message ||= 'assertion failed'
+        unless proposition
+          message ||= 'assertion failed'
 
-        raise AssertionFailed.new(message, caller) unless proposition
+          _raise message
+        end
+      end
+
+      def assert_equal(expected, actual)
+        unless expected == actual
+          message ||= <<-EOS
+
+
+    expected: #{expected.inspect}
+         got: #{actual.inspect}
+
+          EOS
+
+          _raise message
+        end
+      end
+
+      def fail(message = nil)
+        message ||= 'failed'
+
+        _raise message
+      end
+
+      private
+
+      def _raise(message)
+        raise AssertionFailed.new(message, caller)
       end
     end
 

@@ -127,13 +127,13 @@ describe 'colored documentation notifier' do
   it 'colors successful tests green' do
     notifier.evaluate_finish(make_nested_test([], 'a'), [])
 
-    assert out.string == "\e[32ma\e[0m\n"
+    assert_equal "\e[32ma\e[0m\n", out.string
   end
 
   it 'colors failed and errored tests red' do
     notifier.evaluate_finish(make_nested_test, [make_failure])
 
-    assert out.string == "\e[31mFAILED\e[0m\n"
+    assert_equal "\e[31mFAILED\e[0m\n", out.string
   end
 
   it_behaves_like_a ComposableNotifier
