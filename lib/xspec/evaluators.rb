@@ -1,21 +1,30 @@
+# # Evaluators
+
 # Evaluators are responsible for collecting all units of work to be run and
 # scheduling them.
 module XSpec
   module Evaluator
     # The serial evaluator, unsurprisingly, runs all units of works serially in
-    # a loop. It's about as simple an evaluator as you can imagine.
+    # a loop. It is about as simple an evaluator as you can imagine. Parents
+    # are responsible for actually executing the work.
     class Serial
       def initialize(opts)
-        @notifier          = opts.fetch(:notifier)
+        @notifier = opts.fetch(:notifier)
+        @clock    = opts.fetch(:clock, ->{ Time.now.to_f })
       end
 
       def run(context)
         notifier.run_start
 
         context.nested_units_of_work.each do |x|
-          errors = x.immediate_parent.execute(x)
+          notifier.evaluate_start(x)
 
-          notifier.evaluate_finish(x, errors)
+          start_time  = clock.()
+          errors      = x.immediate_parent.execute(x)
+          finish_time = clock.()
+
+          result = ExecutedUnitOfWork.new(x, errors, finish_time - start_time)
+          notifier.evaluate_finish(result)
         end
 
         notifier.run_finish
@@ -23,7 +32,9 @@ module XSpec
 
       protected
 
-      attr_reader :notifier
+      attr_reader :notifier, :clock
     end
+
+    DEFAULT = Serial
   end
 end

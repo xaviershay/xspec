@@ -1,3 +1,5 @@
+# # Data Structures
+
 # XSpec data structures are very dumb. They:
 #
 # * Only contain iteration and creation logic.
@@ -27,10 +29,10 @@ module XSpec
 
       # Each nested context creates a new class that inherits from the parent.
       # Methods can be added to this class as per normal, and are correctly
-      # inherited by children. When it comes time to run tests, the evaluator will
-      # create a new instance of the context (a class) for each test, making the
-      # defined methods available and also ensuring that there is no state
-      # pollution between tests.
+      # inherited by children. When it comes time to run tests, the evaluator
+      # will create a new instance of the context (a class) for each test,
+      # making the defined methods available and also ensuring that there is no
+      # state pollution between tests.
       def make(name, assertion_context, &block)
         x = Class.new(self)
         x.initialize!(name, assertion_context)
@@ -53,7 +55,7 @@ module XSpec
       # to add their own methods. It needs to be last so that users can't
       # clobber the assertion methods.
       def apply_assertion_context!
-        mixin(assertion_context)
+        include(assertion_context)
       end
 
       # Executing a unit of work creates a new instance and hands it off to the
@@ -127,13 +129,6 @@ module XSpec
         end
       end
 
-      # `include` is normally private, but it is useful to allow other classes
-      # and modules to include additional behaviour (such as assertion
-      # contexts).
-      def mixin(mod)
-        include(mod)
-      end
-
       # Values of memoized methods are remembered only for the duration of a
       # single unit of work. These are typically created using the `let` DSL
       # method.
@@ -150,10 +145,8 @@ module XSpec
       end
     end
 
-    attr_reader :memoized
-
-    def initialize
-      @memoized = {}
+    def memoized
+      @memoized ||= {}
     end
   end
 
@@ -172,10 +165,17 @@ module XSpec
     end
   end
 
+  # The result of executing a unit of work, including timing information. This
+  # is passed to notifiers for display or other processing.
+  ExecutedUnitOfWork = Struct.new(:nested_unit_of_work, :errors, :duration) do
+    def name; nested_unit_of_work.name end
+    def parents; nested_unit_of_work.parents end
+  end
+
   # A test failure will be reported as a `Failure`, which includes contextual
   # information about the failure useful for reporting to the user.
   Failure = Struct.new(:unit_of_work, :message, :caller)
 
-  # An exception is mostly handled the same was as a failure.
+  # An exception is mostly handled the same way as a failure.
   CodeException = Class.new(Failure)
 end

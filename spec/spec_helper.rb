@@ -1,7 +1,11 @@
+require 'simplecov'
+SimpleCov.start
+
 require 'xspec'
 
 extend XSpec.dsl(
-  notifier: XSpec::Notifier::Documentation.new +
+  notifier: XSpec::Notifier::ColoredDocumentation.new +
+            XSpec::Notifier::TimingsAtEnd.new +
             XSpec::Notifier::FailuresAtEnd.new
 )
 
@@ -11,7 +15,7 @@ def assert_errors_from_run(context, expected_error_messages)
   context.run!
 
   notifier = context.__xspec_opts.fetch(:notifier)
-  assert notifier.errors.flatten.map(&:message) == expected_error_messages
+  assert_equal expected_error_messages, notifier.errors.flatten.map(&:message)
 end
 
 def with_dsl(opts, &block)
@@ -23,8 +27,8 @@ def with_dsl(opts, &block)
         @errors = []
       end
 
-      def evaluate_finish(unit_of_work, errors)
-        @errors << errors
+      def evaluate_finish(result)
+        @errors << result.errors
       end
     end.new
 
