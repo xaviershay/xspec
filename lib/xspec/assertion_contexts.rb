@@ -165,6 +165,11 @@ EOS
         Recorder.new(obj)
       end
 
+      # TODO: Fix this
+      def allow(obj)
+        Recorder.new(obj)
+      end
+
       class Recorder
         def initialize(double)
           @double = double

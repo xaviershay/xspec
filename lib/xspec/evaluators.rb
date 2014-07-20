@@ -13,6 +13,7 @@ module XSpec
         @clock    = opts.fetch(:clock, ->{ Time.now.to_f })
       end
 
+      # TODO: Move notifier here, pass it in from framework.
       def run(context)
         notifier.run_start
 
