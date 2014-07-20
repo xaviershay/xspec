@@ -1,3 +1,5 @@
+# # Defaults
+
 # These are the defaults used by `XSpec.dsl`, but feel free to specify your own
 # instead. They are set up in such a way that if you can override a component
 # down in the bowels without having to provide an entire top level evaluator.
@@ -17,7 +19,7 @@ module XSpec
     # This is a module that is included as the final step in constructing a
     # context. Allows for different matchers and expectation frameworks to be
     # used.
-    options[:assertion_context] ||= AssertionContext::Simple
+    options[:assertion_context] ||= AssertionContext::Default
 
     # An evaluator is responsible for scheduling units of work and handing them
     # off to the assertion context. Any logic regarding threads, remote

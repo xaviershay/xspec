@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH.unshift "spec"
+$LOAD_PATH.unshift "lib"
+
+files = if ARGV.any? {|x| x.length > 0 }
+  ARGV
+else
+  Dir['spec/**/*_spec.rb']
+end
+
+require 'xspec'
+
+files.each do |f|
+  load f
+end
+
+if respond_to?(:run!)
+  exit 1 unless run!
+else
+  $stderr.puts "This script can only be used when XSpec.dsl is mixed in to " +
+               "global scope."
+  exit 1
+end

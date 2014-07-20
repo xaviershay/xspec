@@ -1,7 +1,33 @@
 require 'spec_helper'
 
 describe 'simple assertion context' do
-  let(:subject) { Class.new { include XSpec::AssertionContext::Simple }.new }
+  let(:subject) { Class.new { include XSpec::AssertionContext.stack {
+    include XSpec::AssertionContext::Simple
+  }}.new }
+
+  describe 'assert' do
+    it 'succeeds if parameter is true' do
+      subject.assert(true)
+    end
+
+    it 'fails with default message if parameter is false' do
+      begin
+        subject.assert(false)
+        fail "Assertion did not fail"
+      rescue XSpec::AssertionContext::Simple::AssertionFailed => e
+        assert_equal "assertion failed", e.message
+      end
+    end
+
+    it 'fails with custom message if parameter is false' do
+      begin
+        subject.assert(false, "nope")
+        fail "Assertion did not fail"
+      rescue XSpec::AssertionContext::Simple::AssertionFailed => e
+        assert_equal "nope", e.message
+      end
+    end
+  end
 
   describe 'assert_equal' do
     it 'succeeds if parameters are equal' do
@@ -13,10 +39,8 @@ describe 'simple assertion context' do
         subject.assert_equal("a", "b")
         fail "Assertion did not fail"
       rescue XSpec::AssertionContext::Simple::AssertionFailed => e
-        assert [
-          e.message =~ /expected: "a"/,
-          e.message =~ /got: "b"/
-        ].all?, "Message did not match expected: #{e.message.inspect}"
+        assert_include 'want: "a"', e.message
+        assert_include 'got: "b"', e.message
       end
     end
   end

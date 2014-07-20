@@ -1,3 +1,5 @@
+# # XSpec
+
 # Hello and welcome to XSpec!
 #
 # XSpec is an rspec-inspired testing library that is designed to be highly

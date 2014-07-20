@@ -4,7 +4,9 @@ require 'xspec/assertion_contexts'
 
 it 'integrates with rspec' do
   opts = {
-    assertion_context: XSpec::AssertionContext::RSpecExpectations
+    assertion_context: XSpec::AssertionContext.stack {
+      include XSpec::AssertionContext::RSpecExpectations
+    }
   }
 
   context = with_dsl(opts) do

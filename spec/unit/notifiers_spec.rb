@@ -21,10 +21,10 @@ describe 'failures at end notifier' do
       "failed",
       []
     )
-    notifier.evaluate_finish(nil, [failure])
+    notifier.evaluate_finish(make_executed_test errors: [failure])
 
     assert !notifier.run_finish
-    assert out.string.include?('a b c: failed')
+    assert_include "a b c:\n  failed", out.string
   end
 
   it 'cleans lib entries out of backtrace' do
@@ -33,7 +33,7 @@ describe 'failures at end notifier' do
       "failed",
       [File.expand_path('../../../lib', __FILE__) + '/bogus.rb']
     )
-    notifier.evaluate_finish(nil, [failure])
+    notifier.evaluate_finish(make_executed_test errors: [failure])
 
     assert !notifier.run_finish
     assert !out.string.include?('bogus.rb')
@@ -47,22 +47,22 @@ describe 'character notifier' do
   let(:out)      { StringIO.new }
 
   it 'outputs a . for every successful test' do
-    notifier.evaluate_finish(nil, [])
-    notifier.evaluate_finish(nil, [])
+    notifier.evaluate_finish(make_executed_test)
+    notifier.evaluate_finish(make_executed_test)
 
     assert notifier.run_finish
     assert out.string == "..\n"
   end
 
   it 'outputs a F for every failed test' do
-    notifier.evaluate_finish(nil, [make_failure])
+    notifier.evaluate_finish(make_executed_test errors: [make_failure])
 
     assert !notifier.run_finish
     assert out.string == "F\n"
   end
 
   it 'outputs an E for every errored test' do
-    notifier.evaluate_finish(nil, [make_error])
+    notifier.evaluate_finish(make_executed_test errors: [make_error])
 
     assert !notifier.run_finish
     assert out.string == "E\n"
@@ -75,46 +75,45 @@ describe 'documentation notifier' do
   let(:notifier) { XSpec::Notifier::Documentation.new(out) }
   let(:out)      { StringIO.new }
 
-  it 'outputs each context with a header and individual tests' do
-    notifier.evaluate_finish(make_nested_test(['a'], 'b'), [])
+  def evaluate_finish(args)
+    notifier.evaluate_finish(make_executed_test args)
+    out.string
+  end
 
-    assert out.string == "\na\n  b\n"
+  it 'outputs each context with a header and individual tests' do
+    assert_equal "\na\n  0.001s b\n",
+      evaluate_finish(parents: ['a'], name: 'b')
   end
 
   it 'adds an indent for each nested context' do
-    notifier.evaluate_finish(make_nested_test(['a', 'b'], 'c'), [])
-
-    assert out.string == "\na\n  b\n    c\n"
+    assert_equal "\na\n  b\n    0.001s c\n",
+      evaluate_finish(parents: ['a', 'b'], name: 'c')
   end
 
   it 'does not repeat top level parents for multiple nested contexts' do
-    notifier.evaluate_finish(make_nested_test(['a', 'b'], 'c'), [])
-    notifier.evaluate_finish(make_nested_test(['a', 'd'], 'e'), [])
-    assert out.string == "\na\n  b\n    c\n\n  d\n    e\n"
+    evaluate_finish(parents: ['a', 'b'], name: 'c')
+    evaluate_finish(parents: ['a', 'd'], name: 'e')
+
+    assert_equal "\na\n  b\n    0.001s c\n\n  d\n    0.001s e\n", out.string
   end
 
   it 'ignores contexts with no name' do
-    notifier.evaluate_finish(make_nested_test([nil, 'a', nil], 'b'), [])
-
-    assert out.string == "\na\n  b\n"
+    assert_equal "\na\n  0.001s b\n",
+      evaluate_finish(parents: [nil, 'a', nil], name: 'b')
   end
 
   it 'suffixes FAILED to tests when they fail' do
-    notifier.evaluate_finish(make_nested_test([], 'a'), [make_failure])
 
-    assert out.string == "a - FAILED\n"
+    assert_include "a - FAILED",
+      evaluate_finish(errors: [make_failure], name: 'a')
   end
 
   it 'outputs FAILED for unnamed tests when they fail' do
-    notifier.evaluate_finish(make_nested_test, [make_failure])
-
-    assert out.string == "FAILED\n"
+    assert_include "FAILED", evaluate_finish(name: nil, errors: [make_failure])
   end
 
   it 'outputs FAILED for unnamed tests when they error' do
-    notifier.evaluate_finish(make_nested_test, [make_error])
-
-    assert out.string == "FAILED\n"
+    assert_include "FAILED", evaluate_finish(errors: [make_error])
   end
 
   it_behaves_like_a ComposableNotifier
@@ -125,15 +124,15 @@ describe 'colored documentation notifier' do
   let(:out)      { StringIO.new }
 
   it 'colors successful tests green' do
-    notifier.evaluate_finish(make_nested_test([], 'a'), [])
+    notifier.evaluate_finish(make_executed_test errors: [])
 
-    assert_equal "\e[32ma\e[0m\n", out.string
+    assert_include "\e[32m\e[0m\n", out.string
   end
 
   it 'colors failed and errored tests red' do
-    notifier.evaluate_finish(make_nested_test, [make_failure])
+    notifier.evaluate_finish(make_executed_test errors: [make_failure])
 
-    assert_equal "\e[31mFAILED\e[0m\n", out.string
+    assert_include "\e[31mFAILED\e[0m", out.string
   end
 
   it_behaves_like_a ComposableNotifier
@@ -159,6 +158,17 @@ def make_nested_test(parent_names = [], work_name = nil)
   XSpec::NestedUnitOfWork.new(
     parent_names.map {|name| XSpec::Context.make(name, Module.new) },
     XSpec::UnitOfWork.new(work_name, ->{})
+  )
+end
+
+def make_executed_test(parents: [], errors: [], duration: 0.001, name: nil)
+  XSpec::ExecutedUnitOfWork.new(
+    XSpec::NestedUnitOfWork.new(
+      parents.map {|name| XSpec::Context.make(name, Module.new) },
+      XSpec::UnitOfWork.new(name, ->{})
+    ),
+    errors,
+    duration
   )
 end
 

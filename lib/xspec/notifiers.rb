@@ -1,3 +1,5 @@
+# # Notifiers
+
 # Without a notifier, there is no way for XSpec to interact with the outside
 # world. A notifier handles progress updates as tests are executed, and
 # summarizing the run when it finished.
@@ -52,9 +54,9 @@ module XSpec
 
       def evaluate_start(*_); end
 
-      def evaluate_finish(_, errors)
-        @out.print label_for_failure(errors[0])
-        @failed ||= errors.any?
+      def evaluate_finish(result)
+        @out.print label_for_failure(result.errors[0])
+        @failed ||= result.errors.any?
       end
 
       def run_finish
@@ -74,30 +76,29 @@ module XSpec
 
     end
 
+    # Renders a histogram of test durations after the entire run is complete.
     class TimingsAtEnd
+      include Composable
+
       DEFAULT_SPLITS = [0.001, 0.005, 0.01, 0.1, 1.0, Float::INFINITY]
 
       def initialize(out:    $stdout,
                      splits: DEFAULT_SPLITS,
-                     width:  20,
-                     clock:  ->{ Time.now })
+                     width:  20)
 
         @timings = {}
         @splits  = splits
         @width   = width
-        @clock   = clock
         @out     = out
       end
 
       def run_start(*_); end
 
-      def evaluate_start(unit_of_work)
-        timings[unit_of_work] = now
+      def evaluate_start(_)
       end
 
-      def evaluate_finish(unit_of_work, _)
-        start_time = timings.fetch(unit_of_work)
-        timings[unit_of_work] = now - start_time
+      def evaluate_finish(result)
+        timings[result] = result.duration
       end
 
       def run_finish
@@ -119,11 +120,7 @@ module XSpec
 
     private
 
-      attr_reader :timings, :splits, :width, :clock, :out
-
-      def now
-        clock.call
-      end
+      attr_reader :timings, :splits, :width, :out
 
       def bucket_from_splits(timings, splits)
         initial_buckets = splits.each_with_object({}) do |b, a|
@@ -162,8 +159,8 @@ module XSpec
 
       def evaluate_start(*_); end
 
-      def evaluate_finish(_, errors)
-        self.errors += errors
+      def evaluate_finish(result)
+        self.errors += result.errors
       end
 
       def run_finish
@@ -171,7 +168,7 @@ module XSpec
 
         out.puts
         errors.each do |error|
-          out.puts "%s: %s" % [full_name(error.unit_of_work), error.message]
+          out.puts "%s:\n%s\n\n" % [full_name(error.unit_of_work), error.message.lines.map {|x| "  #{x}"}.join("")]
           clean_backtrace(error.caller).each do |line|
             out.puts "  %s" % line
           end
@@ -200,7 +197,8 @@ module XSpec
       attr_accessor :out, :errors
     end
 
-    # Includes nicely formatted names of each test in the output, with color.
+    # Includes nicely formatted names and durations of each test in the output,
+    # with color.
     class ColoredDocumentation
       require 'set'
 
@@ -225,12 +223,14 @@ module XSpec
         "\e[#{color_code_for(color)}m#{text}\e[0m"
       end
 
-      def decorate(name, errors)
-        color = if errors[0]
+      def decorate(result)
+        name = result.name
+        out = if result.errors.any?
           colorize(append_failed(name), :red)
         else
-          colorize(name, :green)
+          colorize(name , :green)
         end
+        "%.3fs " % result.duration + out
       end
 
       def initialize(out = $stdout)
@@ -244,14 +244,14 @@ module XSpec
 
       def evaluate_start(*_); end
 
-      def evaluate_finish(unit_of_work, errors)
-        output_context_header! unit_of_work.parents.map(&:name).compact
+      def evaluate_finish(result)
+        output_context_header! result.parents.map(&:name).compact
 
         spaces = ' ' * (last_seen_names.size * indent)
 
-        self.failed ||= errors.any?
+        self.failed ||= result.errors.any?
 
-        out.puts "%s%s" % [spaces, decorate(unit_of_work.name, errors)]
+        out.puts "%s%s" % [spaces, decorate(result)]
       end
 
       def run_finish
@@ -284,7 +284,7 @@ module XSpec
       end
     end
 
-    # Includes nicely formatted names of each test in the output.
+    # Includes nicely formatted names and durations of each test in the output.
     class Documentation < ColoredDocumentation
       def colorize(name, _)
         name
