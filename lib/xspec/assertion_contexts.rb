@@ -94,12 +94,6 @@ EOS
       end
     end
 
-    # The default stack provided by XSpec shows the intended composition of
-    # contexts by sandwiching up the simple context between a top and a bottom.
-    Default = stack do
-      include Simple
-    end
-
     # ### Doubles
     #
     # The doubles module provides test doubles that can be used in-place of
@@ -356,6 +350,11 @@ EOS
       rescue RSpec::Expectations::ExpectationNotMetError => e
         [Failure.new(unit_of_work, e.message, e.backtrace)]
       end
+    end
+
+    DEFAULT = stack do
+      include Simple
+      include Doubles.with(:auto_verify)
     end
   end
 end

@@ -34,5 +34,7 @@ module XSpec
 
       attr_reader :notifier, :clock
     end
+
+    DEFAULT = Serial
   end
 end

@@ -302,5 +302,9 @@ module XSpec
       def run_finish; true; end
     end
 
+    DEFAULT =
+      ColoredDocumentation.new +
+      TimingsAtEnd.new +
+      FailuresAtEnd.new
   end
 end

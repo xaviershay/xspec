@@ -145,10 +145,8 @@ module XSpec
       end
     end
 
-    attr_reader :memoized
-
-    def initialize
-      @memoized = {}
+    def memoized
+      @memoized ||= {}
     end
   end
 
