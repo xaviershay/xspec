@@ -116,6 +116,8 @@ module XSpec
           ]
         end
         out.puts
+
+        true
       end
 
     private
