@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>notifiers.rb</title>
+  <title>Notifiers</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -59,12 +59,6 @@
     
     <ul class="sections">
         
-          <li id="title">
-              <div class="annotation">
-                  <h1>notifiers.rb</h1>
-              </div>
-          </li>
-        
         
         
         <li id="section-1">
@@ -73,14 +67,9 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              <p>Without a notifier, there is no way for XSpec to interact with the outside
-world. A notifier handles progress updates as tests are executed, and
-summarizing the run when it finished.</p>
+              <h1 id="notifiers">Notifiers</h1>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="class"><span class="keyword">module</span> <span class="title">XSpec</span></span>
-  <span class="class"><span class="keyword">module</span> <span class="title">Notifier</span></span></pre></div></div>
             
         </li>
         
@@ -91,38 +80,14 @@ summarizing the run when it finished.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <p>Many notifiers play nice with others, and can be composed together in a
-way that each notifier will have its callback run in turn.</p>
+              <p>Without a notifier, there is no way for XSpec to interact with the outside
+world. A notifier handles progress updates as tests are executed, and
+summarizing the run when it finished.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="class"><span class="keyword">module</span> <span class="title">Composable</span></span>
-      <span class="function"><span class="keyword">def</span> <span class="title">+</span><span class="params">(other)</span></span>
-        <span class="constant">Composite</span>.new(<span class="keyword">self</span>, other)
-      <span class="keyword">end</span>
-    <span class="keyword">end</span>
-
-    <span class="class"><span class="keyword">class</span> <span class="title">Composite</span></span>
-      <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(*notifiers)</span></span>
-        <span class="variable">@notifiers</span> = notifiers
-      <span class="keyword">end</span>
-
-      <span class="function"><span class="keyword">def</span> <span class="title">run_start</span></span>
-        notifiers.each(&amp;<span class="symbol">:run_start</span>)
-      <span class="keyword">end</span>
-
-      <span class="function"><span class="keyword">def</span> <span class="title">evaluate_finish</span><span class="params">(*args)</span></span>
-        notifiers.each {|x| x.evaluate_finish(*args) }
-      <span class="keyword">end</span>
-
-      <span class="function"><span class="keyword">def</span> <span class="title">run_finish</span></span>
-        notifiers.map(&amp;<span class="symbol">:run_finish</span>).all?
-      <span class="keyword">end</span>
-
-      protected
-
-      attr_reader <span class="symbol">:notifiers</span>
-    <span class="keyword">end</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">XSpec</span></span>
+  <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Notifier</span></span></pre></div></div>
             
         </li>
         
@@ -133,41 +98,44 @@ way that each notifier will have its callback run in turn.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>Outputs a single character for each executed unit of work representing
-the result.</p>
+              <p>Many notifiers play nice with others, and can be composed together in a
+way that each notifier will have its callback run in turn.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="class"><span class="keyword">class</span> <span class="title">Character</span></span>
-      <span class="keyword">include</span> <span class="constant">Composable</span>
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Composable</span></span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>+(other)
+        <span class="hljs-constant">Composite</span>.new(<span class="hljs-keyword">self</span>, other)
+      <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
 
-      <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(out = <span class="variable">$stdout</span>)</span></span>
-        <span class="variable">@out</span> = out
-      <span class="keyword">end</span>
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Composite</span></span>
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">Composable</span>
 
-      <span class="function"><span class="keyword">def</span> <span class="title">run_start</span>;</span> <span class="keyword">end</span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize(*notifiers)
+        <span class="hljs-variable">@notifiers</span> = notifiers
+      <span class="hljs-keyword">end</span>
 
-      <span class="function"><span class="keyword">def</span> <span class="title">evaluate_finish</span><span class="params">(<span class="number">_</span>, errors)</span></span>
-        <span class="variable">@out</span>.print label_for_failure(errors[<span class="number">0</span>])
-        <span class="variable">@failed</span> ||= errors.any?
-      <span class="keyword">end</span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_start
+        notifiers.each(&amp;<span class="hljs-symbol">:run_start</span>)
+      <span class="hljs-keyword">end</span>
 
-      <span class="function"><span class="keyword">def</span> <span class="title">run_finish</span></span>
-        <span class="variable">@out</span>.puts
-        !<span class="variable">@failed</span>
-      <span class="keyword">end</span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_start(*args)
+        notifiers.each {|x| x.evaluate_start(*args) }
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_finish(*args)
+        notifiers.each {|x| x.evaluate_finish(*args) }
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_finish
+        notifiers.map(&amp;<span class="hljs-symbol">:run_finish</span>).all?
+      <span class="hljs-keyword">end</span>
 
       protected
 
-      <span class="function"><span class="keyword">def</span> <span class="title">label_for_failure</span><span class="params">(f)</span></span>
-        <span class="keyword">case</span> f
-          <span class="keyword">when</span> <span class="constant">CodeException</span> <span class="keyword">then</span> <span class="string">'E'</span>
-          <span class="keyword">when</span> <span class="constant">Failure</span> <span class="keyword">then</span> <span class="string">'F'</span>
-          <span class="keyword">else</span> <span class="string">'.'</span>
-        <span class="keyword">end</span>
-      <span class="keyword">end</span>
-
-    <span class="keyword">end</span></pre></div></div>
+      <span class="hljs-keyword">attr_reader</span> <span class="hljs-symbol">:notifiers</span>
+    <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -178,42 +146,43 @@ the result.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
-              <p>Outputs error messages and backtraces after the entire run is complete.</p>
+              <p>Outputs a single character for each executed unit of work representing
+the result.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="class"><span class="keyword">class</span> <span class="title">FailuresAtEnd</span></span>
-      <span class="keyword">include</span> <span class="constant">Composable</span>
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Character</span></span>
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">Composable</span>
 
-      <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(out = <span class="variable">$stdout</span>)</span></span>
-        <span class="variable">@errors</span> = []
-        <span class="variable">@out</span>    = out
-      <span class="keyword">end</span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize(out = <span class="hljs-variable">$stdout</span>)
+        <span class="hljs-variable">@out</span> = out
+      <span class="hljs-keyword">end</span>
 
-      <span class="function"><span class="keyword">def</span> <span class="title">run_start</span>;</span> <span class="keyword">end</span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_start; <span class="hljs-keyword">end</span>
 
-      <span class="function"><span class="keyword">def</span> <span class="title">evaluate_finish</span><span class="params">(<span class="number">_</span>, errors)</span></span>
-        <span class="keyword">self</span>.errors += errors
-      <span class="keyword">end</span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_start(*<span class="hljs-number">_</span>); <span class="hljs-keyword">end</span>
 
-      <span class="function"><span class="keyword">def</span> <span class="title">run_finish</span></span>
-        <span class="keyword">return</span> <span class="keyword">true</span> <span class="keyword">if</span> errors.empty?
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_finish(result)
+        <span class="hljs-variable">@out</span>.print label_for_failure(result.errors[<span class="hljs-number">0</span>])
+        <span class="hljs-variable">@failed</span> ||= result.errors.any?
+      <span class="hljs-keyword">end</span>
 
-        out.puts
-        errors.each <span class="keyword">do</span> |error|
-          out.puts <span class="string">"%s: %s"</span> % [full_name(error.unit_of_work), error.message]
-          clean_backtrace(error.caller).each <span class="keyword">do</span> |line|
-            out.puts <span class="string">"  %s"</span> % line
-          <span class="keyword">end</span>
-          out.puts
-        <span class="keyword">end</span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_finish
+        <span class="hljs-variable">@out</span>.puts
+        !<span class="hljs-variable">@failed</span>
+      <span class="hljs-keyword">end</span>
 
-        <span class="keyword">false</span>
-      <span class="keyword">end</span>
+      protected
 
-      <span class="function"><span class="keyword">def</span> <span class="title">full_name</span><span class="params">(unit_of_work)</span></span>
-        (unit_of_work.parents + [unit_of_work]).map(&amp;<span class="symbol">:name</span>).compact.join(<span class="string">' '</span>)
-      <span class="keyword">end</span></pre></div></div>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>label_for_failure(f)
+        <span class="hljs-keyword">case</span> f
+          <span class="hljs-keyword">when</span> <span class="hljs-constant">CodeException</span> <span class="hljs-keyword">then</span> <span class="hljs-string">'E'</span>
+          <span class="hljs-keyword">when</span> <span class="hljs-constant">Failure</span> <span class="hljs-keyword">then</span> <span class="hljs-string">'F'</span>
+          <span class="hljs-keyword">else</span> <span class="hljs-string">'.'</span>
+        <span class="hljs-keyword">end</span>
+      <span class="hljs-keyword">end</span>
+
+    <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -224,23 +193,78 @@ the result.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>A standard backtrace contains many entries for XSpec itself which are
-not useful for debugging your tests, so they are stripped out.</p>
+              <p>Renders a histogram of test durations after the entire run is complete.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">clean_backtrace</span><span class="params">(backtrace)</span></span>
-        lib_dir = <span class="constant">File</span>.dirname(<span class="constant">File</span>.expand_path(<span class="string">'..'</span>, __FILE_<span class="number">_</span>))
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TimingsAtEnd</span></span>
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">Composable</span>
 
-        backtrace.reject {|x|
-          <span class="constant">File</span>.dirname(x).start_with?(lib_dir)
-        }
-      <span class="keyword">end</span>
+      <span class="hljs-constant">DEFAULT_SPLITS</span> = [<span class="hljs-number">0</span>.<span class="hljs-number">001</span>, <span class="hljs-number">0</span>.<span class="hljs-number">005</span>, <span class="hljs-number">0</span>.<span class="hljs-number">01</span>, <span class="hljs-number">0</span>.<span class="hljs-number">1</span>, <span class="hljs-number">1.0</span>, <span class="hljs-constant">Float::INFINITY</span>]
 
-      protected
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize(<span class="hljs-symbol">out:</span>    <span class="hljs-variable">$stdout</span>,
+                     <span class="hljs-symbol">splits:</span> <span class="hljs-constant">DEFAULT_SPLITS</span>,
+                     <span class="hljs-symbol">width:</span>  <span class="hljs-number">20</span>)
 
-      attr_accessor <span class="symbol">:out</span>, <span class="symbol">:errors</span>
-    <span class="keyword">end</span></pre></div></div>
+        <span class="hljs-variable">@timings</span> = {}
+        <span class="hljs-variable">@splits</span>  = splits
+        <span class="hljs-variable">@width</span>   = width
+        <span class="hljs-variable">@out</span>     = out
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_start(*<span class="hljs-number">_</span>); <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_start(<span class="hljs-number">_</span>)
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_finish(result)
+        timings[result] = result.duration
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_finish
+        buckets = bucket_from_splits(timings, splits)
+        max     = buckets.values.max
+
+        out.puts <span class="hljs-string">"           Timings:"</span>
+        buckets.each <span class="hljs-keyword">do</span> |(split, count)|
+          label = split.infinite? ? <span class="hljs-string">"∞"</span> <span class="hljs-symbol">:</span> split
+
+          out.puts <span class="hljs-string">"    %6s %-<span class="hljs-subst">#{width}</span>s %i"</span> % [
+            label,
+            <span class="hljs-string">'#'</span> * (count / max.to_f * width.to_f).ceil,
+            count
+          ]
+        <span class="hljs-keyword">end</span>
+        out.puts
+      <span class="hljs-keyword">end</span>
+
+    private
+
+      <span class="hljs-keyword">attr_reader</span> <span class="hljs-symbol">:timings</span>, <span class="hljs-symbol">:splits</span>, <span class="hljs-symbol">:width</span>, <span class="hljs-symbol">:out</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>bucket_from_splits(timings, splits)
+        initial_buckets = splits.each_with_object({}) <span class="hljs-keyword">do</span> |b, a|
+          a[b] = <span class="hljs-number">0</span>
+        <span class="hljs-keyword">end</span>
+
+        buckets = timings.each_with_object(initial_buckets) <span class="hljs-keyword">do</span> |(<span class="hljs-number">_</span>, d), a|
+          split = splits.detect {|x| d &lt; x }
+          a[split] += <span class="hljs-number">1</span>
+        <span class="hljs-keyword">end</span>
+
+        remove_trailing_zero_counts(buckets)
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>remove_trailing_zero_counts(buckets)
+        <span class="hljs-constant">Hash</span>[
+          buckets
+            .to_a
+            .reverse
+            .drop_while {|<span class="hljs-number">_</span>, x| x == <span class="hljs-number">0</span> }
+            .reverse
+        ]
+      <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -251,66 +275,44 @@ not useful for debugging your tests, so they are stripped out.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <p>Includes nicely formatted names of each test in the output.</p>
+              <p>Outputs error messages and backtraces after the entire run is complete.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="class"><span class="keyword">class</span> <span class="title">Documentation</span></span>
-      <span class="keyword">include</span> <span class="constant">Composable</span>
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FailuresAtEnd</span></span>
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">Composable</span>
 
-      <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(out = <span class="variable">$stdout</span>)</span></span>
-        <span class="keyword">self</span>.indent          = <span class="number">2</span>
-        <span class="keyword">self</span>.last_seen_names = []
-        <span class="keyword">self</span>.failed          = <span class="keyword">false</span>
-        <span class="keyword">self</span>.out             = out
-      <span class="keyword">end</span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize(out = <span class="hljs-variable">$stdout</span>)
+        <span class="hljs-variable">@errors</span> = []
+        <span class="hljs-variable">@out</span>    = out
+      <span class="hljs-keyword">end</span>
 
-      <span class="function"><span class="keyword">def</span> <span class="title">run_start</span>;</span> <span class="keyword">end</span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_start; <span class="hljs-keyword">end</span>
 
-      <span class="function"><span class="keyword">def</span> <span class="title">evaluate_finish</span><span class="params">(unit_of_work, errors)</span></span>
-        output_context_header! unit_of_work.parents.map(&amp;<span class="symbol">:name</span>).compact
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_start(*<span class="hljs-number">_</span>); <span class="hljs-keyword">end</span>
 
-        spaces = <span class="string">' '</span> * (last_seen_names.size * indent)
-        char   = label_for_failure(errors[<span class="number">0</span>])
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_finish(result)
+        <span class="hljs-keyword">self</span>.errors += result.errors
+      <span class="hljs-keyword">end</span>
 
-        <span class="keyword">self</span>.failed ||= errors.any?
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_finish
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span> <span class="hljs-keyword">if</span> errors.empty?
 
-        out.puts <span class="string">"%s%s %s"</span> % [spaces, char, unit_of_work.name]
-      <span class="keyword">end</span>
-
-      <span class="function"><span class="keyword">def</span> <span class="title">run_finish</span></span>
         out.puts
-        !failed
-      <span class="keyword">end</span>
-
-      protected
-
-      attr_accessor <span class="symbol">:last_seen_names</span>, <span class="symbol">:indent</span>, <span class="symbol">:failed</span>, <span class="symbol">:out</span>
-
-      <span class="function"><span class="keyword">def</span> <span class="title">label_for_failure</span><span class="params">(f)</span></span>
-        <span class="keyword">case</span> f
-          <span class="keyword">when</span> <span class="constant">CodeException</span> <span class="keyword">then</span> <span class="string">'E'</span>
-          <span class="keyword">when</span> <span class="constant">Failure</span> <span class="keyword">then</span> <span class="string">'F'</span>
-          <span class="keyword">else</span> <span class="string">'-'</span>
-        <span class="keyword">end</span>
-      <span class="keyword">end</span>
-
-      <span class="function"><span class="keyword">def</span> <span class="title">output_context_header!</span><span class="params">(parent_names)</span></span>
-        <span class="keyword">if</span> parent_names != last_seen_names
-          tail = parent_names - last_seen_names
-
+        errors.each <span class="hljs-keyword">do</span> |error|
+          out.puts <span class="hljs-string">"%s:\n%s\n\n"</span> % [full_name(error.unit_of_work), error.message.lines.map {|x| <span class="hljs-string">"  <span class="hljs-subst">#{x}</span>"</span>}.join(<span class="hljs-string">""</span>)]
+          clean_backtrace(error.caller).each <span class="hljs-keyword">do</span> |line|
+            out.puts <span class="hljs-string">"  %s"</span> % line
+          <span class="hljs-keyword">end</span>
           out.puts
-          <span class="keyword">if</span> tail.any?
-            existing_indent = parent_names.size - tail.size
-            tail.each_with_index <span class="keyword">do</span> |name, i|
-              out.puts <span class="string">'%s%s'</span> % [<span class="string">' '</span> * ((existing_indent + i) * indent), name]
-            <span class="keyword">end</span>
-          <span class="keyword">end</span>
+        <span class="hljs-keyword">end</span>
 
-          <span class="keyword">self</span>.last_seen_names = parent_names
-        <span class="keyword">end</span>
-      <span class="keyword">end</span>
-    <span class="keyword">end</span></pre></div></div>
+        <span class="hljs-keyword">false</span>
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>full_name(unit_of_work)
+        (unit_of_work.parents + [unit_of_work]).map(&amp;<span class="hljs-symbol">:name</span>).compact.join(<span class="hljs-string">' '</span>)
+      <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -321,21 +323,171 @@ not useful for debugging your tests, so they are stripped out.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
+              <p>A standard backtrace contains many entries for XSpec itself which are
+not useful for debugging your tests, so they are stripped out.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>clean_backtrace(backtrace)
+        lib_dir = <span class="hljs-constant">File</span>.dirname(<span class="hljs-constant">File</span>.expand_path(<span class="hljs-string">'..'</span>, __FILE_<span class="hljs-number">_</span>))
+
+        backtrace.reject {|x|
+          <span class="hljs-constant">File</span>.dirname(x).start_with?(lib_dir)
+        }
+      <span class="hljs-keyword">end</span>
+
+      protected
+
+      <span class="hljs-keyword">attr_accessor</span> <span class="hljs-symbol">:out</span>, <span class="hljs-symbol">:errors</span>
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Includes nicely formatted names and durations of each test in the output,
+with color.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ColoredDocumentation</span></span>
+      <span class="hljs-keyword">require</span> <span class="hljs-string">'set'</span>
+
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">Composable</span>
+
+      <span class="hljs-constant">VT100_COLORS</span> = {
+        <span class="hljs-symbol">:black</span>   =&gt; <span class="hljs-number">30</span>,
+        <span class="hljs-symbol">:red</span>     =&gt; <span class="hljs-number">31</span>,
+        <span class="hljs-symbol">:green</span>   =&gt; <span class="hljs-number">32</span>,
+        <span class="hljs-symbol">:yellow</span>  =&gt; <span class="hljs-number">33</span>,
+        <span class="hljs-symbol">:blue</span>    =&gt; <span class="hljs-number">34</span>,
+        <span class="hljs-symbol">:magenta</span> =&gt; <span class="hljs-number">35</span>,
+        <span class="hljs-symbol">:cyan</span>    =&gt; <span class="hljs-number">36</span>,
+        <span class="hljs-symbol">:white</span>   =&gt; <span class="hljs-number">37</span>
+      }
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>color_code_for(color)
+        <span class="hljs-constant">VT100_COLORS</span>.fetch(color)
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>colorize(text, color)
+        <span class="hljs-string">"\e[<span class="hljs-subst">#{color_code_for(color)}</span>m<span class="hljs-subst">#{text}</span>\e[0m"</span>
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>decorate(result)
+        name = result.name
+        out = <span class="hljs-keyword">if</span> result.errors.any?
+          colorize(append_failed(name), <span class="hljs-symbol">:red</span>)
+        <span class="hljs-keyword">else</span>
+          colorize(name , <span class="hljs-symbol">:green</span>)
+        <span class="hljs-keyword">end</span>
+        <span class="hljs-string">"%.3fs "</span> % result.duration + out
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize(out = <span class="hljs-variable">$stdout</span>)
+        <span class="hljs-keyword">self</span>.indent          = <span class="hljs-number">2</span>
+        <span class="hljs-keyword">self</span>.last_seen_names = []
+        <span class="hljs-keyword">self</span>.failed          = <span class="hljs-keyword">false</span>
+        <span class="hljs-keyword">self</span>.out             = out
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_start; <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_start(*<span class="hljs-number">_</span>); <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_finish(result)
+        output_context_header! result.parents.map(&amp;<span class="hljs-symbol">:name</span>).compact
+
+        spaces = <span class="hljs-string">' '</span> * (last_seen_names.size * indent)
+
+        <span class="hljs-keyword">self</span>.failed ||= result.errors.any?
+
+        out.puts <span class="hljs-string">"%s%s"</span> % [spaces, decorate(result)]
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_finish
+        out.puts
+        !failed
+      <span class="hljs-keyword">end</span>
+
+      protected
+
+      <span class="hljs-keyword">attr_accessor</span> <span class="hljs-symbol">:last_seen_names</span>, <span class="hljs-symbol">:indent</span>, <span class="hljs-symbol">:failed</span>, <span class="hljs-symbol">:out</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>output_context_header!(parent_names)
+        <span class="hljs-keyword">if</span> parent_names != last_seen_names
+          tail = parent_names - last_seen_names
+
+          out.puts
+          <span class="hljs-keyword">if</span> tail.any?
+            existing_indent = parent_names.size - tail.size
+            tail.each_with_index <span class="hljs-keyword">do</span> |name, i|
+              out.puts <span class="hljs-string">'%s%s'</span> % [<span class="hljs-string">' '</span> * ((existing_indent + i) * indent), name]
+            <span class="hljs-keyword">end</span>
+          <span class="hljs-keyword">end</span>
+
+          <span class="hljs-keyword">self</span>.last_seen_names = parent_names
+        <span class="hljs-keyword">end</span>
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>append_failed(name)
+        [name, <span class="hljs-string">"FAILED"</span>].compact.join(<span class="hljs-string">' - '</span>)
+      <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Includes nicely formatted names and durations of each test in the output.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Documentation</span> <span class="hljs-inheritance">&lt; <span class="hljs-parent">ColoredDocumentation</span></span></span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>colorize(name, <span class="hljs-number">_</span>)
+        name
+      <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
               <p>A notifier that does not do anything and always returns successful.
 Useful as a parent class for other notifiers or for testing.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="class"><span class="keyword">class</span> <span class="title">Null</span></span>
-      <span class="keyword">include</span> <span class="constant">Composable</span>
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Null</span></span>
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">Composable</span>
 
-      <span class="function"><span class="keyword">def</span> <span class="title">run_start</span>;</span> <span class="keyword">end</span>
-      <span class="function"><span class="keyword">def</span> <span class="title">evaluate_finish</span><span class="params">(*args)</span>;</span> <span class="keyword">end</span>
-      <span class="function"><span class="keyword">def</span> <span class="title">run_finish</span>;</span> <span class="keyword">true</span>; <span class="keyword">end</span>
-    <span class="keyword">end</span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_start; <span class="hljs-keyword">end</span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_start(*<span class="hljs-number">_</span>); <span class="hljs-keyword">end</span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_finish(*<span class="hljs-number">_</span>); <span class="hljs-keyword">end</span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_finish; <span class="hljs-keyword">true</span>; <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
 
-  <span class="keyword">end</span>
-<span class="keyword">end</span></pre></div></div>
+    <span class="hljs-constant">DEFAULT</span> =
+      <span class="hljs-constant">ColoredDocumentation</span>.new +
+      <span class="hljs-constant">TimingsAtEnd</span>.new +
+      <span class="hljs-constant">FailuresAtEnd</span>.new
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         

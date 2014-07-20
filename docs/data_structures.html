@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>data_structures.rb</title>
+  <title>Data Structures</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -59,12 +59,6 @@
     
     <ul class="sections">
         
-          <li id="title">
-              <div class="annotation">
-                  <h1>data_structures.rb</h1>
-              </div>
-          </li>
-        
         
         
         <li id="section-1">
@@ -73,15 +67,9 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              <p>XSpec data structures are very dumb. They:</p>
-<ul>
-<li>Only contain iteration and creation logic.</li>
-<li>Do not store recursive references (&quot;everything flows downhill&quot;).</li>
-</ul>
+              <h1 id="data-structures">Data Structures</h1>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="class"><span class="keyword">module</span> <span class="title">XSpec</span></span></pre></div></div>
             
         </li>
         
@@ -92,13 +80,15 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <p>A unit of work, usually created by the <code>it</code> DSL method, is a labeled,
-indivisible code block that expresses an assertion about a property of the
-system under test. They are run by an evaluator.</p>
+              <p>XSpec data structures are very dumb. They:</p>
+<ul>
+<li>Only contain iteration and creation logic.</li>
+<li>Do not store recursive references (“everything flows downhill”).</li>
+</ul>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="constant">UnitOfWork</span> = <span class="constant">Struct</span>.new(<span class="symbol">:name</span>, <span class="symbol">:block</span>)</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">XSpec</span></span></pre></div></div>
             
         </li>
         
@@ -109,19 +99,13 @@ system under test. They are run by an evaluator.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>A context is a recursively nested structure, usually created with the
-<code>describe</code> DSL method, that contains other contexts and units of work. Most
-of the logic for a context happens at the class level rather than instance,
-which is unusual but required for method inheritance to work correctly. It
-currently violates the logic rule specified above, more work is required to
-decouple it.</p>
+              <p>A unit of work, usually created by the <code>it</code> DSL method, is a labeled,
+indivisible code block that expresses an assertion about a property of the
+system under test. They are run by an evaluator.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">require</span> <span class="string">'xspec/dsl'</span>
-  <span class="class"><span class="keyword">class</span> <span class="title">Context</span></span>
-    <span class="class"><span class="keyword">class</span> <span class="inheritance">&lt;</span><span class="inheritance">&lt; <span class="parent">self</span></span></span>
-      attr_reader <span class="symbol">:name</span>, <span class="symbol">:children</span>, <span class="symbol">:units_of_work</span>, <span class="symbol">:assertion_context</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-constant">UnitOfWork</span> = <span class="hljs-constant">Struct</span>.new(<span class="hljs-symbol">:name</span>, <span class="hljs-symbol">:block</span>)</pre></div></div>
             
         </li>
         
@@ -132,13 +116,19 @@ decouple it.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
-              <p>A context includes the same DSL methods as the root level module, which
-enables the recursive creation.</p>
+              <p>A context is a recursively nested structure, usually created with the
+<code>describe</code> DSL method, that contains other contexts and units of work. Most
+of the logic for a context happens at the class level rather than instance,
+which is unusual but required for method inheritance to work correctly. It
+currently violates the logic rule specified above, more work is required to
+decouple it.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">__xspec_context</span>;</span> <span class="keyword">self</span>; <span class="keyword">end</span>
-      <span class="keyword">include</span> <span class="constant">::XSpec::DSL</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">require</span> <span class="hljs-string">'xspec/dsl'</span>
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Context</span></span>
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-inheritance">&lt;</span><span class="hljs-inheritance">&lt; <span class="hljs-parent">self</span></span></span>
+      <span class="hljs-keyword">attr_reader</span> <span class="hljs-symbol">:name</span>, <span class="hljs-symbol">:children</span>, <span class="hljs-symbol">:units_of_work</span>, <span class="hljs-symbol">:assertion_context</span></pre></div></div>
             
         </li>
         
@@ -149,22 +139,13 @@ enables the recursive creation.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>Each nested context creates a new class that inherits from the parent.
-Methods can be added to this class as per normal, and are correctly
-inherited by children. When it comes time to run tests, the evaluator will
-create a new instance of the context (a class) for each test, making the
-defined methods available and also ensuring that there is no state
-pollution between tests.</p>
+              <p>A context includes the same DSL methods as the root level module, which
+enables the recursive creation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">make</span><span class="params">(name, assertion_context, &amp;block)</span></span>
-        x = <span class="constant">Class</span>.new(<span class="keyword">self</span>)
-        x.initialize!(name, assertion_context)
-        x.class_eval(&amp;block) <span class="keyword">if</span> block
-        x.apply_assertion_context!
-        x
-      <span class="keyword">end</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>__xspec_context; <span class="hljs-keyword">self</span>; <span class="hljs-keyword">end</span>
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">::XSpec::DSL</span></pre></div></div>
             
         </li>
         
@@ -175,18 +156,22 @@ pollution between tests.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <p>A class cannot have an implicit initializer, but some variable
-inititialization is required so the <code>initialize!</code> method is called
-explicitly when ever a dynamic subclass is created.</p>
+              <p>Each nested context creates a new class that inherits from the parent.
+Methods can be added to this class as per normal, and are correctly
+inherited by children. When it comes time to run tests, the evaluator
+will create a new instance of the context (a class) for each test,
+making the defined methods available and also ensuring that there is no
+state pollution between tests.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">initialize!</span><span class="params">(name, assertion_context)</span></span>
-        <span class="variable">@children</span>          = []
-        <span class="variable">@units_of_work</span>     = []
-        <span class="variable">@name</span>              = name
-        <span class="variable">@assertion_context</span> = assertion_context
-      <span class="keyword">end</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>make(name, assertion_context, &amp;block)
+        x = <span class="hljs-constant">Class</span>.new(<span class="hljs-keyword">self</span>)
+        x.initialize!(name, assertion_context)
+        x.class_eval(&amp;block) <span class="hljs-keyword">if</span> block
+        x.apply_assertion_context!
+        x
+      <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -197,15 +182,18 @@ explicitly when ever a dynamic subclass is created.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p>The assertion context should be applied after the user has had a chance
-to add their own methods. It needs to be last so that users can&#39;t
-clobber the assertion methods.</p>
+              <p>A class cannot have an implicit initializer, but some variable
+inititialization is required so the <code>initialize!</code> method is called
+explicitly when ever a dynamic subclass is created.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">apply_assertion_context!</span></span>
-        mixin(assertion_context)
-      <span class="keyword">end</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize!(name, assertion_context)
+        <span class="hljs-variable">@children</span>          = []
+        <span class="hljs-variable">@units_of_work</span>     = []
+        <span class="hljs-variable">@name</span>              = name
+        <span class="hljs-variable">@assertion_context</span> = assertion_context
+      <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -216,16 +204,15 @@ clobber the assertion methods.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
-              <p>Executing a unit of work creates a new instance and hands it off to the
-<code>call</code> method, which is defined by whichever assertion context is being
-used. By creating a new instance everytime, no state is preserved
-between executions.</p>
+              <p>The assertion context should be applied after the user has had a chance
+to add their own methods. It needs to be last so that users can’t
+clobber the assertion methods.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">execute</span><span class="params">(unit_of_work)</span></span>
-        new.call(unit_of_work)
-      <span class="keyword">end</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>apply_assertion_context!
+        <span class="hljs-keyword">include</span>(assertion_context)
+      <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -236,14 +223,16 @@ between executions.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
-              <p>The root context is nothing special, and behaves the same as all the
-others.</p>
+              <p>Executing a unit of work creates a new instance and hands it off to the
+<code>call</code> method, which is defined by whichever assertion context is being
+used. By creating a new instance everytime, no state is preserved
+between executions.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">root</span><span class="params">(assertion_context)</span></span>
-        make(<span class="keyword">nil</span>, assertion_context)
-      <span class="keyword">end</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>execute(unit_of_work)
+        new.call(unit_of_work)
+      <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -254,18 +243,14 @@ others.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
-              <p>Child contexts and units of work are typically added by the <code>describe</code>
-and <code>it</code> DSL methods respectively.</p>
+              <p>The root context is nothing special, and behaves the same as all the
+others.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">add_child_context</span><span class="params">(name = <span class="keyword">nil</span>, opts = {}, &amp;block)</span></span>
-        <span class="keyword">self</span>.children &lt;&lt; make(name, assertion_context, &amp;block)
-      <span class="keyword">end</span>
-
-      <span class="function"><span class="keyword">def</span> <span class="title">add_unit_of_work</span><span class="params">(name = <span class="keyword">nil</span>, opts = {}, &amp;block)</span></span>
-        <span class="keyword">self</span>.units_of_work &lt;&lt; <span class="constant">UnitOfWork</span>.new(name, block)
-      <span class="keyword">end</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>root(assertion_context)
+        make(<span class="hljs-keyword">nil</span>, assertion_context)
+      <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -276,31 +261,18 @@ and <code>it</code> DSL methods respectively.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
-              <p>A shared context is a floating context that isn&#39;t part of any context
-heirachy, so its units of work will not be visible to the root node. It
-can be brought into any point in the heirachy using <code>copy_into_tree</code>
-(aliased as <code>it_behaves_like_a</code> in the DSL), and this can be done
-multiple times, which allows definitions to be reused.</p>
-<p>This is leaky abstraction, since only units of work are copied from
-shared contexts. Methods and child contexts are ignored.</p>
+              <p>Child contexts and units of work are typically added by the <code>describe</code>
+and <code>it</code> DSL methods respectively.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">create_shared_context</span><span class="params">(&amp;block)</span></span>
-        make(<span class="keyword">nil</span>, assertion_context, &amp;block)
-      <span class="keyword">end</span>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>add_child_context(name = <span class="hljs-keyword">nil</span>, opts = {}, &amp;block)
+        <span class="hljs-keyword">self</span>.children &lt;&lt; make(name, assertion_context, &amp;block)
+      <span class="hljs-keyword">end</span>
 
-      <span class="function"><span class="keyword">def</span> <span class="title">copy_into_tree</span><span class="params">(source_context)</span></span>
-        target_context = make(
-          source_context.name,
-          source_context.assertion_context
-        )
-        source_context.nested_units_of_work.each <span class="keyword">do</span> |x|
-          target_context.units_of_work &lt;&lt; x.unit_of_work
-        <span class="keyword">end</span>
-        <span class="keyword">self</span>.children &lt;&lt; target_context
-        target_context
-      <span class="keyword">end</span></pre></div></div>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>add_unit_of_work(name = <span class="hljs-keyword">nil</span>, opts = {}, &amp;block)
+        <span class="hljs-keyword">self</span>.units_of_work &lt;&lt; <span class="hljs-constant">UnitOfWork</span>.new(name, block)
+      <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -311,31 +283,31 @@ shared contexts. Methods and child contexts are ignored.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
-              <p>The most convenient way to access all units of work is this recursive
-iteration that returns all leaf-nodes as <code>NestedUnitOfWork</code> objects.</p>
+              <p>A shared context is a floating context that isn’t part of any context
+heirachy, so its units of work will not be visible to the root node. It
+can be brought into any point in the heirachy using <code>copy_into_tree</code>
+(aliased as <code>it_behaves_like_a</code> in the DSL), and this can be done
+multiple times, which allows definitions to be reused.</p>
+<p>This is leaky abstraction, since only units of work are copied from
+shared contexts. Methods and child contexts are ignored.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">require</span> <span class="string">'enumerator'</span>
-      <span class="function"><span class="keyword">def</span> <span class="title">nested_units_of_work</span><span class="params">(&amp;block)</span></span>
-        enum = <span class="constant">Enumerator</span>.new <span class="keyword">do</span> |y|
-          children.each <span class="keyword">do</span> |child|
-            child.nested_units_of_work <span class="keyword">do</span> |x|
-              y.<span class="keyword">yield</span> x.nest_under(<span class="keyword">self</span>)
-            <span class="keyword">end</span>
-          <span class="keyword">end</span>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>create_shared_context(&amp;block)
+        make(<span class="hljs-keyword">nil</span>, assertion_context, &amp;block)
+      <span class="hljs-keyword">end</span>
 
-          units_of_work.each <span class="keyword">do</span> |x|
-            y.<span class="keyword">yield</span> <span class="constant">NestedUnitOfWork</span>.new([<span class="keyword">self</span>], x)
-          <span class="keyword">end</span>
-        <span class="keyword">end</span>
-
-        <span class="keyword">if</span> block
-          enum.each(&amp;block)
-        <span class="keyword">else</span>
-          enum
-        <span class="keyword">end</span>
-      <span class="keyword">end</span></pre></div></div>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>copy_into_tree(source_context)
+        target_context = make(
+          source_context.name,
+          source_context.assertion_context
+        )
+        source_context.nested_units_of_work.each <span class="hljs-keyword">do</span> |x|
+          target_context.units_of_work &lt;&lt; x.unit_of_work
+        <span class="hljs-keyword">end</span>
+        <span class="hljs-keyword">self</span>.children &lt;&lt; target_context
+        target_context
+      <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -346,15 +318,31 @@ iteration that returns all leaf-nodes as <code>NestedUnitOfWork</code> objects.<
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
-              <p><code>include</code> is normally private, but it is useful to allow other classes
-and modules to include additional behaviour (such as assertion
-contexts).</p>
+              <p>The most convenient way to access all units of work is this recursive
+iteration that returns all leaf-nodes as <code>NestedUnitOfWork</code> objects.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">mixin</span><span class="params">(mod)</span></span>
-        <span class="keyword">include</span>(mod)
-      <span class="keyword">end</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">require</span> <span class="hljs-string">'enumerator'</span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>nested_units_of_work(&amp;block)
+        enum = <span class="hljs-constant">Enumerator</span>.new <span class="hljs-keyword">do</span> |y|
+          children.each <span class="hljs-keyword">do</span> |child|
+            child.nested_units_of_work <span class="hljs-keyword">do</span> |x|
+              y.<span class="hljs-keyword">yield</span> x.nest_under(<span class="hljs-keyword">self</span>)
+            <span class="hljs-keyword">end</span>
+          <span class="hljs-keyword">end</span>
+
+          units_of_work.each <span class="hljs-keyword">do</span> |x|
+            y.<span class="hljs-keyword">yield</span> <span class="hljs-constant">NestedUnitOfWork</span>.new([<span class="hljs-keyword">self</span>], x)
+          <span class="hljs-keyword">end</span>
+        <span class="hljs-keyword">end</span>
+
+        <span class="hljs-keyword">if</span> block
+          enum.each(&amp;block)
+        <span class="hljs-keyword">else</span>
+          enum
+        <span class="hljs-keyword">end</span>
+      <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -371,11 +359,11 @@ method.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">add_memoized_method</span><span class="params">(name, &amp;block)</span></span>
-        define_method(name) <span class="keyword">do</span>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>add_memoized_method(name, &amp;block)
+        define_method(name) <span class="hljs-keyword">do</span>
           memoized[block] ||= instance_eval(&amp;block)
-        <span class="keyword">end</span>
-      <span class="keyword">end</span></pre></div></div>
+        <span class="hljs-keyword">end</span>
+      <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -391,17 +379,15 @@ it is helpful for debugging to set an explicit name.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">to_s</span></span>
-        <span class="string">"Context:'<span class="subst">#{name}</span>'"</span>
-      <span class="keyword">end</span>
-    <span class="keyword">end</span>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>to_s
+        <span class="hljs-string">"Context:'<span class="hljs-subst">#{name}</span>'"</span>
+      <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
 
-    attr_reader <span class="symbol">:memoized</span>
-
-    <span class="function"><span class="keyword">def</span> <span class="title">initialize</span></span>
-      <span class="variable">@memoized</span> = {}
-    <span class="keyword">end</span>
-  <span class="keyword">end</span></pre></div></div>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>memoized
+      <span class="hljs-variable">@memoized</span> ||= {}
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -417,18 +403,18 @@ other components of the system work with.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="constant">NestedUnitOfWork</span> = <span class="constant">Struct</span>.new(<span class="symbol">:parents</span>, <span class="symbol">:unit_of_work</span>) <span class="keyword">do</span>
-    <span class="function"><span class="keyword">def</span> <span class="title">block</span>;</span> unit_of_work.block; <span class="keyword">end</span>
-    <span class="function"><span class="keyword">def</span> <span class="title">name</span>;</span>  unit_of_work.name; <span class="keyword">end</span>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-constant">NestedUnitOfWork</span> = <span class="hljs-constant">Struct</span>.new(<span class="hljs-symbol">:parents</span>, <span class="hljs-symbol">:unit_of_work</span>) <span class="hljs-keyword">do</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>block; unit_of_work.block; <span class="hljs-keyword">end</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>name;  unit_of_work.name; <span class="hljs-keyword">end</span>
 
-    <span class="function"><span class="keyword">def</span> <span class="title">immediate_parent</span></span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>immediate_parent
       parents.last
-    <span class="keyword">end</span>
+    <span class="hljs-keyword">end</span>
 
-    <span class="function"><span class="keyword">def</span> <span class="title">nest_under</span><span class="params">(parent)</span></span>
-      <span class="keyword">self</span>.<span class="keyword">class</span>.new([parent] + parents, unit_of_work)
-    <span class="keyword">end</span>
-  <span class="keyword">end</span></pre></div></div>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>nest_under(parent)
+      <span class="hljs-keyword">self</span>.<span class="hljs-keyword">class</span>.new([parent] + parents, unit_of_work)
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -439,12 +425,15 @@ other components of the system work with.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
-              <p>A test failure will be reported as a <code>Failure</code>, which includes contextual
-information about the failure useful for reporting to the user.</p>
+              <p>The result of executing a unit of work, including timing information. This
+is passed to notifiers for display or other processing.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="constant">Failure</span> = <span class="constant">Struct</span>.new(<span class="symbol">:unit_of_work</span>, <span class="symbol">:message</span>, <span class="symbol">:caller</span>)</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-constant">ExecutedUnitOfWork</span> = <span class="hljs-constant">Struct</span>.new(<span class="hljs-symbol">:nested_unit_of_work</span>, <span class="hljs-symbol">:errors</span>, <span class="hljs-symbol">:duration</span>) <span class="hljs-keyword">do</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>name; nested_unit_of_work.name <span class="hljs-keyword">end</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>parents; nested_unit_of_work.parents <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -455,12 +444,28 @@ information about the failure useful for reporting to the user.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
-              <p>An exception is mostly handled the same was as a failure.</p>
+              <p>A test failure will be reported as a <code>Failure</code>, which includes contextual
+information about the failure useful for reporting to the user.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="constant">CodeException</span> = <span class="constant">Class</span>.new(<span class="constant">Failure</span>)
-<span class="keyword">end</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-constant">Failure</span> = <span class="hljs-constant">Struct</span>.new(<span class="hljs-symbol">:unit_of_work</span>, <span class="hljs-symbol">:message</span>, <span class="hljs-symbol">:caller</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>An exception is mostly handled the same way as a failure.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-constant">CodeException</span> = <span class="hljs-constant">Class</span>.new(<span class="hljs-constant">Failure</span>)
+<span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         

@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>defaults.rb</title>
+  <title>Defaults</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -59,12 +59,6 @@
     
     <ul class="sections">
         
-          <li id="title">
-              <div class="annotation">
-                  <h1>defaults.rb</h1>
-              </div>
-          </li>
-        
         
         
         <li id="section-1">
@@ -73,18 +67,9 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              <p>These are the defaults used by <code>XSpec.dsl</code>, but feel free to specify your own
-instead. They are set up in such a way that if you can override a component
-down in the bowels without having to provide an entire top level evaluator.</p>
+              <h1 id="defaults">Defaults</h1>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="keyword">require</span> <span class="string">'xspec/evaluators'</span>
-<span class="keyword">require</span> <span class="string">'xspec/assertion_contexts'</span>
-<span class="keyword">require</span> <span class="string">'xspec/notifiers'</span>
-
-<span class="class"><span class="keyword">module</span> <span class="title">XSpec</span></span>
-  <span class="function"><span class="keyword">def</span> <span class="title">add_defaults</span><span class="params">(options = {})</span></span></pre></div></div>
             
         </li>
         
@@ -95,13 +80,18 @@ down in the bowels without having to provide an entire top level evaluator.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <p>A notifier makes it possible to observe the state of the system, be that
-progress or details of failing tests.</p>
+              <p>These are the defaults used by <code>XSpec.dsl</code>, but feel free to specify your own
+instead. They are set up in such a way that if you can override a component
+down in the bowels without having to provide an entire top level evaluator.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    options[<span class="symbol">:notifier</span>]          ||= <span class="constant">Notifier::Character</span>.new +
-                                    <span class="constant">Notifier::FailuresAtEnd</span>.new</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">require</span> <span class="hljs-string">'xspec/evaluators'</span>
+<span class="hljs-keyword">require</span> <span class="hljs-string">'xspec/assertion_contexts'</span>
+<span class="hljs-keyword">require</span> <span class="hljs-string">'xspec/notifiers'</span>
+
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">XSpec</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> </span>add_defaults(options = {})</pre></div></div>
             
         </li>
         
@@ -112,15 +102,12 @@ progress or details of failing tests.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>A unit of work will run as an instance method on the context it is
-defined in, but in addition an assertion context will be added as well.
-This is a module that is included as the final step in constructing a
-context. Allows for different matchers and expectation frameworks to be
-used.</p>
+              <p>A notifier makes it possible to observe the state of the system, be that
+progress or details of failing tests.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    options[<span class="symbol">:assertion_context</span>] ||= <span class="constant">AssertionContext::Simple</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>    options[<span class="hljs-symbol">:notifier</span>] ||= <span class="hljs-constant">XSpec::Notifier::DEFAULT</span></pre></div></div>
             
         </li>
         
@@ -131,17 +118,36 @@ used.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
+              <p>A unit of work will run as an instance method on the context it is
+defined in, but in addition an assertion context will be added as well.
+This is a module that is included as the final step in constructing a
+context. Allows for different matchers and expectation frameworks to be
+used.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    options[<span class="hljs-symbol">:assertion_context</span>] ||= <span class="hljs-constant">AssertionContext::DEFAULT</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
               <p>An evaluator is responsible for scheduling units of work and handing them
 off to the assertion context. Any logic regarding threads, remote
 execution or the like belongs in an evaluator.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    options[<span class="symbol">:evaluator</span>]         ||= <span class="constant">Evaluator::Serial</span>.new(options)
+            <div class="content"><div class='highlight'><pre>    options[<span class="hljs-symbol">:evaluator</span>]         ||= <span class="hljs-constant">Evaluator::DEFAULT</span>.new(options)
     options
-  <span class="keyword">end</span>
-  module_function <span class="symbol">:add_defaults</span>
-<span class="keyword">end</span></pre></div></div>
+  <span class="hljs-keyword">end</span>
+  module_function <span class="hljs-symbol">:add_defaults</span>
+<span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         

@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>evaluators.rb</title>
+  <title>Evaluators</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -59,12 +59,6 @@
     
     <ul class="sections">
         
-          <li id="title">
-              <div class="annotation">
-                  <h1>evaluators.rb</h1>
-              </div>
-          </li>
-        
         
         
         <li id="section-1">
@@ -73,13 +67,9 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              <p>Evaluators are responsible for collecting all units of work to be run and
-scheduling them.</p>
+              <h1 id="evaluators">Evaluators</h1>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="class"><span class="keyword">module</span> <span class="title">XSpec</span></span>
-  <span class="class"><span class="keyword">module</span> <span class="title">Evaluator</span></span></pre></div></div>
             
         </li>
         
@@ -90,34 +80,60 @@ scheduling them.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <p>The serial evaluator, unsurprisingly, runs all units of works serially in
-a loop. It&#39;s about as simple an evaluator as you can imagine.</p>
+              <p>Evaluators are responsible for collecting all units of work to be run and
+scheduling them.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="class"><span class="keyword">class</span> <span class="title">Serial</span></span>
-      <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(opts)</span></span>
-        <span class="variable">@notifier</span>          = opts.fetch(<span class="symbol">:notifier</span>)
-      <span class="keyword">end</span>
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">XSpec</span></span>
+  <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Evaluator</span></span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>The serial evaluator, unsurprisingly, runs all units of works serially in
+a loop. It is about as simple an evaluator as you can imagine. Parents
+are responsible for actually executing the work.</p>
 
-      <span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(context)</span></span>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Serial</span></span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize(opts)
+        <span class="hljs-variable">@notifier</span> = opts.fetch(<span class="hljs-symbol">:notifier</span>)
+        <span class="hljs-variable">@clock</span>    = opts.fetch(<span class="hljs-symbol">:clock</span>, -&gt;{ <span class="hljs-constant">Time</span>.now.to_f })
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run(context)
         notifier.run_start
 
-        context.nested_units_of_work.each <span class="keyword">do</span> |x|
-          errors = x.immediate_parent.execute(x)
+        context.nested_units_of_work.each <span class="hljs-keyword">do</span> |x|
+          notifier.evaluate_start(x)
 
-          notifier.evaluate_finish(x, errors)
-        <span class="keyword">end</span>
+          start_time  = clock.()
+          errors      = x.immediate_parent.execute(x)
+          finish_time = clock.()
+
+          result = <span class="hljs-constant">ExecutedUnitOfWork</span>.new(x, errors, finish_time - start_time)
+          notifier.evaluate_finish(result)
+        <span class="hljs-keyword">end</span>
 
         notifier.run_finish
-      <span class="keyword">end</span>
+      <span class="hljs-keyword">end</span>
 
       protected
 
-      attr_reader <span class="symbol">:notifier</span>
-    <span class="keyword">end</span>
-  <span class="keyword">end</span>
-<span class="keyword">end</span></pre></div></div>
+      <span class="hljs-keyword">attr_reader</span> <span class="hljs-symbol">:notifier</span>, <span class="hljs-symbol">:clock</span>
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-constant">DEFAULT</span> = <span class="hljs-constant">Serial</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
