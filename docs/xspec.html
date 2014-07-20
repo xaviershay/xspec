@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>xspec.rb</title>
+  <title>XSpec</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -64,12 +64,6 @@
     
     <ul class="sections">
         
-          <li id="title">
-              <div class="annotation">
-                  <h1>xspec.rb</h1>
-              </div>
-          </li>
-        
         
         
         <li id="section-1">
@@ -78,13 +72,9 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              <p>Hello and welcome to XSpec!</p>
-<p>XSpec is an rspec-inspired testing library that is designed to be highly
-modular and easy to extend. Let&#39;s dive right into it.</p>
+              <h1 id="xspec">XSpec</h1>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="class"><span class="keyword">module</span> <span class="title">XSpec</span></span></pre></div></div>
             
         </li>
         
@@ -95,20 +85,13 @@ modular and easy to extend. Let&#39;s dive right into it.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <p>The DSL is the core of XSpec. It dynamically generates a module that can be
-mixed into which ever context you choose (using <code>extend</code>), be that the
-top-level namespace or a specific class.</p>
-<p>This enables different options to be specified per DSL, which is at the
-heart of XSpec&#39;s modularity. It is easy to change every component to your
-liking.</p>
+              <p>Hello and welcome to XSpec!</p>
+<p>XSpec is an rspec-inspired testing library that is designed to be highly
+modular and easy to extend. Let’s dive right in.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">dsl</span><span class="params">(options = {})</span></span>
-    options = <span class="constant">XSpec</span>.add_defaults(options)
-
-    <span class="constant">Module</span>.new <span class="keyword">do</span>
-      <span class="keyword">include</span> <span class="constant">DSL</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">XSpec</span></span></pre></div></div>
             
         </li>
         
@@ -119,14 +102,20 @@ liking.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>Each DSL has its own independent context, which is described in detail
-in <code>data_structures.rb</code>.</p>
+              <p>The DSL is the core of XSpec. It dynamically generates a module that can be
+mixed into which ever context you choose (using <code>extend</code>), be that the
+top-level namespace or a specific class.</p>
+<p>This enables different options to be specified per DSL, which is at the
+heart of XSpec’s modularity. It is easy to change every component to your
+liking.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">__xspec_context</span></span>
-        <span class="variable">@__xspec_context</span> ||= <span class="constant">XSpec::RootContext</span>.new
-      <span class="keyword">end</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">def</span> </span>dsl(options = {})
+    options = <span class="hljs-constant">XSpec</span>.add_defaults(options)
+
+    <span class="hljs-constant">Module</span>.new <span class="hljs-keyword">do</span>
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">DSL</span></pre></div></div>
             
         </li>
         
@@ -137,12 +126,15 @@ in <code>data_structures.rb</code>.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
-              <p>Some meta-magic is needed to enable the options from local scope above
-to be avilable inside the module.</p>
+              <p>Each DSL has its own independent context, which is described in detail
+in <code>data_structures.rb</code>.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      define_method(<span class="symbol">:__xspec_opts</span>) { options }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>__xspec_context
+        assertion_context = __xspec_opts.fetch(<span class="hljs-symbol">:assertion_context</span>)
+        <span class="hljs-variable">@__xspec_context</span> ||= <span class="hljs-constant">XSpec::Context</span>.root(assertion_context)
+      <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -153,15 +145,12 @@ to be avilable inside the module.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p><code>run!</code> is where the magic happens. Typically called at the end of a file
-(or by <code>autorun!</code>), this method takes all the data that was accumulated
-by the DSL methods above and runs it through the evaluator.</p>
+              <p>Some meta-magic is needed to enable the options from local scope above
+to be available inside the module.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">run!</span></span>
-        __xspec_opts.fetch(<span class="symbol">:evaluator</span>).run(__xspec_context)
-      <span class="keyword">end</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>      define_method(<span class="hljs-symbol">:__xspec_opts</span>) { options }</pre></div></div>
             
         </li>
         
@@ -172,21 +161,15 @@ by the DSL methods above and runs it through the evaluator.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <p>It is often convenient to trigger a run after all files have been
-processed, which is what <code>autorun!</code> sets up for you. Requiring
-<code>xspec/autorun</code> does this automatically for you.</p>
+              <p><code>run!</code> is where the magic happens. Typically called at the end of a
+file (or by <code>autorun!</code>), this method takes all the data that was
+accumulated by the DSL methods above and runs it through the evaluator.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="keyword">def</span> <span class="title">autorun!</span></span>
-        at_exit <span class="keyword">do</span>
-          exit <span class="number">1</span> <span class="keyword">unless</span> run!
-        <span class="keyword">end</span>
-      <span class="keyword">end</span>
-    <span class="keyword">end</span>
-  <span class="keyword">end</span>
-  module_function <span class="symbol">:dsl</span>
-<span class="keyword">end</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run!
+        __xspec_opts.fetch(<span class="hljs-symbol">:evaluator</span>).run(__xspec_context)
+      <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -197,12 +180,21 @@ processed, which is what <code>autorun!</code> sets up for you. Requiring
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p>Understanding the data structures used by XSpec will assist you in
-understanding the behavoural components such as the evaluator and notifier.</p>
+              <p>It is often convenient to trigger a run after all files have been
+processed, which is what <code>autorun!</code> sets up for you. Requiring
+<code>xspec/autorun</code> does this automatically for you.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">require</span> <span class="string">'xspec/data_structures'</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>autorun!
+        at_exit <span class="hljs-keyword">do</span>
+          exit <span class="hljs-number">1</span> <span class="hljs-keyword">unless</span> run!
+        <span class="hljs-keyword">end</span>
+      <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+  module_function <span class="hljs-symbol">:dsl</span>
+<span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -213,15 +205,31 @@ understanding the behavoural components such as the evaluator and notifier.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
+              <p>Understanding the data structures used by XSpec will assist you in
+understanding the behavoural components such as the evaluator and notifier.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">require</span> <span class="hljs-string">'xspec/data_structures'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
               <p>To further explore the code base, dive into the defaults file, which
 describes the different sub-components of XSpec that you can use or
 customize.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">require</span> <span class="string">'xspec/defaults'</span>
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">require</span> <span class="hljs-string">'xspec/defaults'</span>
 
-<span class="keyword">require</span> <span class="string">'xspec/dsl'</span></pre></div></div>
+<span class="hljs-keyword">require</span> <span class="hljs-string">'xspec/dsl'</span></pre></div></div>
             
         </li>
         
