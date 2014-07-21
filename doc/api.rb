@@ -119,8 +119,19 @@ module Assertions
   end
 
   # #### RSpec Integration
+  #
+  # A built-in context is provided to enable RSpec expectations. (You will need
+  # to add `rspec-expecations` as a dependency of your project.)
   module RSpec
-    # TODO
+    extend XSpec.dsl(
+      assertion_context: documentation_stack {
+        include XSpec::AssertionContext::RSpecExpectations
+      }
+    )
+
+    it 'adds' do
+      expect(1 + 1).to eq(2)
+    end
   end
 end
 
@@ -448,7 +459,6 @@ end
 # `xspec` requires a global `run!` method, which will be present if you extend
 # `XSpec.dsl` into global scope, but in this file we have not done so and need
 # to provide our own.
-#
 def self.run!(*args)
   exit 1 unless [
     Basics,

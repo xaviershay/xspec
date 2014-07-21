@@ -1,5 +1,7 @@
 require 'xspec'
 
+$initial = Object.constants
+
 module ExpectToFail
   def expect_to_fail!
     @expect_to_fail = true
