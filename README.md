@@ -110,4 +110,4 @@ not do. Talk to me before embarking on anything large. Tests are written in
 XSpec, which might do your head in:
 
     bundle install
-    bundle exec bin/run-specs
+    bundle exec bin/xspec
