@@ -16,10 +16,13 @@ module XSpec
     options = XSpec.add_defaults(options)
 
     Module.new do
+      # Each DSL provides a standard set of methods provided by the [DSL
+      # module](dsl.html).
       include DSL
 
-      # Each DSL has its own independent context, which is described in detail
-      # in `data_structures.rb`.
+      # In addition, each DSL has its own independent context, which is
+      # described in detail in the
+      # [`data_structures.rb`](data_structures.html).
       def __xspec_context
         assertion_context = __xspec_opts.fetch(:assertion_context)
         @__xspec_context ||= XSpec::Context.root(assertion_context)
@@ -49,13 +52,14 @@ module XSpec
   module_function :dsl
 end
 
-# Understanding the data structures used by XSpec will assist you in
-# understanding the behavoural components such as the evaluator and notifier.
+# Understanding the [data structures](data_structures.html) used by XSpec will
+# assist you in understanding the behavoural components such as the evaluator
+# and notifier. Read it next.
 require 'xspec/data_structures'
 
-# To further explore the code base, dive into the defaults file, which
-# describes the different sub-components of XSpec that you can use or
-# customize.
+# To further explore the code base, dive into the [defaults
+# file](defaults.html), which describes the different sub-components of XSpec
+# that you can use or customize.
 require 'xspec/defaults'
 
 require 'xspec/dsl'

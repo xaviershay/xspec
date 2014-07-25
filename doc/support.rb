@@ -1,3 +1,7 @@
+# # Documentation Support
+
+# This configuration is used in the [API documentation](api.html) to enable it
+# to be written as executable tests.
 require 'xspec'
 
 $initial = Object.constants

@@ -1,6 +1,7 @@
 # # XSpec API
 
-# This page documents the public API of XSpec through a mix of comments and
+# This page documents the public API of
+# [XSpec](https://github.com/xaviershay/xspec) through a mix of comments and
 # code.
 #
 # 1. [Basics](#basics)
@@ -14,9 +15,10 @@ require_relative './support'
 
 # ## Basics
 module Basics
-  # XSpec tests are specified using the XSpec DSL. This is typically added to
-  # the global scope, but here we scope it to a module so that elsewhere in the
-  # documentation we can include it again with different options.
+  # XSpec tests are specified using the [XSpec DSL](xspec.html#section-3). This is
+  # typically added to the global scope, but here we scope it to a module so
+  # that elsewhere in the documentation we can include it again with different
+  # options.
   #
   # The DSL is customizable. A special documentation context is used in all the
   # examples, see the support file for more details. All configuration options
@@ -394,7 +396,8 @@ module Stacks
   # the given block between the `Top` and `Bottom` contexts. These two
   # contexts will be used by virtually every stack.
   #
-  # See the assertion context code documentation for more details. TODO: link
+  # See the [assertion context code documentation](assertion_contexts.html) for
+  # more details.
   extend XSpec.dsl(
     assertion_context: XSpec::AssertionContext.stack {
       include XSpec::AssertionContext::Simple
