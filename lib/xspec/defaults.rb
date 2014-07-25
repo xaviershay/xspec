@@ -23,7 +23,7 @@ module XSpec
     # An scheduler is responsible for scheduling units of work and handing them
     # off to the assertion context. Any logic regarding threads, remote
     # execution or the like belongs in a scheduler.
-    options[:scheduler]         ||= Scheduler::DEFAULT.new(options)
+    options[:scheduler]         ||= Scheduler::DEFAULT
     options
   end
   module_function :add_defaults

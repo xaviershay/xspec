@@ -36,7 +36,10 @@ module XSpec
       # file (or by `autorun!`), this method takes all the data that was
       # accumulated by the DSL methods above and runs it through the scheduler.
       def run!
-        __xspec_opts.fetch(:scheduler).run(__xspec_context)
+        notifier  = __xspec_opts.fetch(:notifier)
+        scheduler = __xspec_opts.fetch(:scheduler)
+
+        scheduler.run(__xspec_context, notifier)
       end
 
       # It is often convenient to trigger a run after all files have been

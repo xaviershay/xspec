@@ -8,13 +8,11 @@ module XSpec
     # a loop. It is about as simple a scheduler as you can imagine. Parents
     # are responsible for actually executing the work.
     class Serial
-      def initialize(opts)
-        @notifier = opts.fetch(:notifier)
-        @clock    = opts.fetch(:clock, ->{ Time.now.to_f })
+      def initialize(opts = {})
+        @clock = opts.fetch(:clock, ->{ Time.now.to_f })
       end
 
-      # TODO: Move notifier here, pass it in from framework.
-      def run(context)
+      def run(context, notifier)
         notifier.run_start
 
         context.nested_units_of_work.each do |x|
@@ -33,9 +31,9 @@ module XSpec
 
       protected
 
-      attr_reader :notifier, :clock
+      attr_reader :clock
     end
 
-    DEFAULT = Serial
+    DEFAULT = Serial.new
   end
 end

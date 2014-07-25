@@ -417,9 +417,7 @@ end
 # tests one at a time in the order they were loaded.
 module BuiltInScheduler
   extend XSpec.dsl(
-    scheduler: XSpec::Scheduler::Serial.new(
-      notifier:  XSpec::Notifier::DEFAULT
-    )
+    scheduler: XSpec::Scheduler::Serial.new
   )
 end
 
