@@ -24,8 +24,8 @@ module XSpec
       # described in detail in the
       # [`data_structures.rb`](data_structures.html).
       def __xspec_context
-        assertion_context = __xspec_opts.fetch(:assertion_context)
-        @__xspec_context ||= XSpec::Context.root(assertion_context)
+        evaluator = __xspec_opts.fetch(:evaluator)
+        @__xspec_context ||= XSpec::Context.root(evaluator)
       end
 
       # Some meta-magic is needed to enable the options from local scope above

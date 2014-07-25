@@ -1,11 +1,11 @@
 require 'spec_helper'
 
-require 'xspec/assertion_contexts'
+require 'xspec/evaluators'
 
 it 'integrates with rspec' do
   opts = {
-    assertion_context: XSpec::AssertionContext.stack {
-      include XSpec::AssertionContext::RSpecExpectations
+    evaluator: XSpec::Evaluator.stack {
+      include XSpec::Evaluator::RSpecExpectations
     }
   }
 

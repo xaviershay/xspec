@@ -8,7 +8,7 @@
 # 2. [Assertions](#assertions)
 # 3. [Doubles](#doubles)
 # 4. [Notifiers](#notifiers)
-# 5. [Assertion Contexts](#assertion-contexts)
+# 5. [Evaluators](#evaluators)
 # 6. [Schedulers](#schedulers)
 # 7. [Running](#running)
 require_relative './support'
@@ -24,7 +24,7 @@ module Basics
   # examples, see the support file for more details. All configuration options
   # are documented in the "Configuration" section.
   extend XSpec.dsl(
-    assertion_context: documentation_stack
+    evaluator: documentation_stack
   )
 
   # Tests are grouped into contexts, which are created using `describe`. The
@@ -91,12 +91,12 @@ module Assertions
   # messages. Like most things in XSpec, they are optional, but it would be
   # rare that you did not use some form of them.
   #
-  # The `Simple` context provides basic assertions. While included explicitly
+  # The `Simple` evaluator provides basic assertions. While included explicitly
   # here, it is available in the default configuration so can usually be
   # omitted.
   extend XSpec.dsl(
-    assertion_context: documentation_stack {
-      include XSpec::AssertionContext::Simple
+    evaluator: documentation_stack {
+      include XSpec::Evaluator::Simple
     }
   )
 
@@ -126,8 +126,8 @@ module Assertions
   # to add `rspec-expecations` as a dependency of your project.)
   module RSpec
     extend XSpec.dsl(
-      assertion_context: documentation_stack {
-        include XSpec::AssertionContext::RSpecExpectations
+      evaluator: documentation_stack {
+        include XSpec::Evaluator::RSpecExpectations
       }
     )
 
@@ -148,8 +148,8 @@ module Doubles
   #
   # Test doubles are available in the default XSpec configuration.
   extend XSpec.dsl(
-    assertion_context: documentation_stack {
-      include XSpec::AssertionContext::Doubles
+    evaluator: documentation_stack {
+      include XSpec::Evaluator::Doubles
     }
   )
 
@@ -234,8 +234,8 @@ module Doubles
       # test runs. That way individual tests can be executed quickly without
       # loading all dependencies.
       extend XSpec.dsl(
-        assertion_context: documentation_stack {
-          include XSpec::AssertionContext::Doubles.with(:strict)
+        evaluator: documentation_stack {
+          include XSpec::Evaluator::Doubles.with(:strict)
         }
       )
 
@@ -255,8 +255,8 @@ module Doubles
       # enabled here to demonstrate that `with` takes a variable number of
       # arguments, it is not actually necessary for auto-verification.
       extend XSpec.dsl(
-        assertion_context: documentation_stack {
-          include XSpec::AssertionContext::Doubles.with(:strict, :auto_verify)
+        evaluator: documentation_stack {
+          include XSpec::Evaluator::Doubles.with(:strict, :auto_verify)
         }
       )
 
@@ -350,14 +350,14 @@ module Notifiers
 end
 
 
-# ## Assertion Contexts
+# ## Evaluators
 #
-# `assertion_context` is the module responsible for executing an individual
+# `Evalutor` is the module responsible for executing an individual
 # test. It will be mixed into a new context object that already has methods
 # from the surrounding context defined (including `let` definitions), and
 # then have its `call` implementation invoked.
-module AssertionContext
-  module NoTimeContext
+module Evaluators
+  module NoTimeEvaluator
     def call(uow)
       instance_exec(&uow.block)
       []
@@ -371,7 +371,7 @@ module AssertionContext
   end
 
   extend XSpec.dsl(
-    assertion_context: NoTimeContext
+    evaluator: NoTimeEvaluator
   )
 
   it 'will not execute' do
@@ -379,29 +379,30 @@ module AssertionContext
   end
 end
 
-# Assertion contexts are usually composed by creating a _stack_, a module
-# that includes other modules.
+# Evaluators are usually composed by creating a _stack_, a module that includes
+# other modules.
 #
-# This works best when individual contexts call `super` in their `call`
-# method and leave `Bottom` to actually execute the test.
+# This works best when individual evaluators call `super` in their `call`
+# method and leave `Bottom` to actually execute the test. If you are familiar
+# with Rack middleware, this is a very similar concept.
 module Stacks
   module Stack
-    include XSpec::AssertionContext::Bottom
-    include XSpec::AssertionContext::Simple
-    include XSpec::AssertionContext::Doubles
-    include XSpec::AssertionContext::Top
+    include XSpec::Evaluator::Bottom
+    include XSpec::Evaluator::Simple
+    include XSpec::Evaluator::Doubles
+    include XSpec::Evaluator::Top
   end
 
   # The `stack` method is a shorthand way of creating a stack that sandwiches
-  # the given block between the `Top` and `Bottom` contexts. These two
-  # contexts will be used by virtually every stack.
+  # the given block between the `Top` and `Bottom` evaluators. These two
+  # evaluators will be used by virtually every stack.
   #
-  # See the [assertion context code documentation](assertion_contexts.html) for
+  # See the [evaluator code documentation](evaluators.html) for
   # more details.
   extend XSpec.dsl(
-    assertion_context: XSpec::AssertionContext.stack {
-      include XSpec::AssertionContext::Simple
-      include XSpec::AssertionContext::Doubles
+    evaluator: XSpec::Evaluator.stack {
+      include XSpec::Evaluator::Simple
+      include XSpec::Evaluator::Doubles
     }
   )
 end

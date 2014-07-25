@@ -25,9 +25,9 @@ end
 
 def documentation_stack(&block)
   Module.new do
-    include XSpec::AssertionContext::Bottom
+    include XSpec::Evaluator::Bottom
     instance_exec &block if block
-    include XSpec::AssertionContext::Top
+    include XSpec::Evaluator::Top
     include ExpectToFail
   end
 end

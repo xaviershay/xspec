@@ -6,13 +6,13 @@ class LoadedClass
 end
 
 describe 'doubles assertion context' do
-  let(:subject) { Class.new { include XSpec::AssertionContext.stack {
-    include XSpec::AssertionContext::Doubles
+  let(:subject) { Class.new { include XSpec::Evaluator.stack {
+    include XSpec::Evaluator::Doubles
   }}.new }
 
   it 'converts double exceptions to failures' do
     result = subject.call(XSpec::UnitOfWork.new(nil, ->{
-      raise XSpec::AssertionContext::Doubles::DoubleFailure, "nope"
+      raise XSpec::Evaluator::Doubles::DoubleFailure, "nope"
     }))
     assert_equal "nope", result[0].message
   end
@@ -43,7 +43,7 @@ describe 'doubles assertion context' do
           double.bar("a")
         }
         fail "no error raised"
-      rescue XSpec::AssertionContext::Doubles::DoubleFailure => e
+      rescue XSpec::Evaluator::Doubles::DoubleFailure => e
         assert_include "Unexpectedly received", e.message
         assert_include 'bar("a")', e.message
       end
@@ -57,7 +57,7 @@ describe 'doubles assertion context' do
           double.foo("b")
         }
         fail "no error raised"
-      rescue XSpec::AssertionContext::Doubles::DoubleFailure => e
+      rescue XSpec::Evaluator::Doubles::DoubleFailure => e
         assert_include "Unexpectedly received", e.message
         assert_include 'foo("b")', e.message
       end
@@ -83,7 +83,7 @@ describe 'doubles assertion context' do
           assert_exhausted double
         }
         fail "no error raised"
-      rescue XSpec::AssertionContext::Doubles::DoubleFailure => e
+      rescue XSpec::Evaluator::Doubles::DoubleFailure => e
         assert_include "did not receive", e.message
         assert_include 'foo(1, "abc")', e.message
       end
@@ -106,7 +106,7 @@ describe 'doubles assertion context' do
             expect(double).bogus_method { 123 }
           }
           fail "no error raised"
-        rescue XSpec::AssertionContext::Doubles::DoubleFailure => e
+        rescue XSpec::Evaluator::Doubles::DoubleFailure => e
           assert_include "LoadedClass#bogus_method", e.message
         end
       end
@@ -129,7 +129,7 @@ describe 'doubles assertion context' do
             expect(double).bogus_method { 123 }
           }
           fail "no error raised"
-        rescue XSpec::AssertionContext::Doubles::DoubleFailure => e
+        rescue XSpec::Evaluator::Doubles::DoubleFailure => e
           assert_include "LoadedClass.bogus_method", e.message
         end
       end
@@ -138,8 +138,8 @@ describe 'doubles assertion context' do
 end
 
 describe 'strict doubles assertion context' do
-  let(:subject) { Class.new { include XSpec::AssertionContext.stack {
-    include XSpec::AssertionContext::Doubles.with(:strict)
+  let(:subject) { Class.new { include XSpec::Evaluator.stack {
+    include XSpec::Evaluator::Doubles.with(:strict)
   }}.new }
 
   it 'allows doubling of loaded classes' do
@@ -150,15 +150,15 @@ describe 'strict doubles assertion context' do
     begin
       subject.instance_double("Bogus")
       fail "no error raised"
-    rescue XSpec::AssertionContext::Doubles::DoubleFailure => e
+    rescue XSpec::Evaluator::Doubles::DoubleFailure => e
       assert_include "Bogus", e.message
     end
   end
 end
 
 describe 'auto-verifying doubles assertion context' do
-  let(:subject) { Class.new { include XSpec::AssertionContext.stack {
-    include XSpec::AssertionContext::Doubles.with(:auto_verify)
+  let(:subject) { Class.new { include XSpec::Evaluator.stack {
+    include XSpec::Evaluator::Doubles.with(:auto_verify)
   }}.new }
 
   it 'verifies all used instance doubles on successful result' do

@@ -1,13 +1,13 @@
-# # Assertion Contexts
+# # Evaluators
 
-# Assertion contexts are composed together into a context stack. The final
-# stack has a single API method `call`, which is sent the unit of work to be
-# executed and must return an array of `Failure` objects. It should not allow
-# code-level exceptions to be raised, though should not block system exceptions
+# Evaluators are usually composed together into a stack. The final stack has a
+# single API method `call`, which is sent the unit of work to be executed and
+# must return an array of `Failure` objects. It should not allow code-level
+# exceptions to be raised, though should not block system exceptions
 # (`SignalException`, `NoMemoryError`, etc).
 module XSpec
-  module AssertionContext
-    # A stack is typically book-ended by the top and bottom contexts, so this
+  module Evaluator
+    # A stack is typically book-ended by the top and bottom evaluators, so this
     # helper is the most commond way to build up a custom stack.
     def self.stack(&block)
       Module.new do
@@ -17,9 +17,9 @@ module XSpec
       end
     end
 
-    # The bottom context executes the unit of work, with no error handling or
-    # extra behaviour. By separating this, all other contexts layered on top of
-    # this one can just call `super`, making them easy to compose.
+    # The bottom evaluator executes the unit of work, with no error handling or
+    # extra behaviour. By separating this, all other evaluators layered on top
+    # of this one can just call `super`, making them easy to compose.
     module Bottom
       def call(unit_of_work)
         instance_exec(&unit_of_work.block)
@@ -27,9 +27,9 @@ module XSpec
       end
     end
 
-    # The top should be included as the final module in a context stack. It is
-    # a catch all to make sure all standard exceptions have been handled and
-    # do not leak outside the stack.
+    # The top should usually be included as the final module in a stack. It is
+    # a catch all to make sure all standard exceptions have been handled and do
+    # not leak outside the stack.
     module Top
       def call(unit_of_work)
         super
@@ -40,7 +40,7 @@ module XSpec
 
     # ### Simple Assertions
     #
-    # This simple context provides very straight-forward assertion methods.
+    # This simple evaluator provides very straight-forward assertion methods.
     module Simple
       class AssertionFailed < RuntimeError
         attr_reader :message, :backtrace
@@ -337,9 +337,9 @@ EOS
     #
     # This RSpec adapter shows two useful techniques: dynamic library loading
     # which removes RSpec as a direct dependency, and use of the `mixin`
-    # method to further extend the target context.
+    # method to further extend the target evalutor.
     module RSpecExpectations
-      def self.included(context)
+      def self.included(mod)
         begin
           require 'rspec/expectations'
           require 'rspec/matchers'
@@ -347,7 +347,7 @@ EOS
           raise "RSpec is not available, cannot use RSpec assertion context."
         end
 
-        context.include(RSpec::Matchers)
+        mod.include(RSpec::Matchers)
       end
 
       def call(unit_of_work)
