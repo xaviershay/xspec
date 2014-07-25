@@ -7,7 +7,7 @@
 module XSpec
   # A unit of work, usually created by the `it` DSL method, is a labeled,
   # indivisible code block that expresses an assertion about a property of the
-  # system under test. They are run by an evaluator.
+  # system under test. They are run by a scheduler.
   UnitOfWork = Struct.new(:name, :block)
 
 
@@ -29,7 +29,7 @@ module XSpec
 
       # Each nested context creates a new class that inherits from the parent.
       # Methods can be added to this class as per normal, and are correctly
-      # inherited by children. When it comes time to run tests, the evaluator
+      # inherited by children. When it comes time to run tests, the scheduler
       # will create a new instance of the context (a class) for each test,
       # making the defined methods available and also ensuring that there is no
       # state pollution between tests.

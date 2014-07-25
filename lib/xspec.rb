@@ -34,9 +34,9 @@ module XSpec
 
       # `run!` is where the magic happens. Typically called at the end of a
       # file (or by `autorun!`), this method takes all the data that was
-      # accumulated by the DSL methods above and runs it through the evaluator.
+      # accumulated by the DSL methods above and runs it through the scheduler.
       def run!
-        __xspec_opts.fetch(:evaluator).run(__xspec_context)
+        __xspec_opts.fetch(:scheduler).run(__xspec_context)
       end
 
       # It is often convenient to trigger a run after all files have been
@@ -53,7 +53,7 @@ module XSpec
 end
 
 # Understanding the [data structures](data_structures.html) used by XSpec will
-# assist you in understanding the behavoural components such as the evaluator
+# assist you in understanding the behavoural components such as the scheduler
 # and notifier. Read it next.
 require 'xspec/data_structures'
 

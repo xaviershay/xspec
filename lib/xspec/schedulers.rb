@@ -1,11 +1,11 @@
-# # Evaluators
+# # Schedulers
 
-# Evaluators are responsible for collecting all units of work to be run and
+# Schedulers are responsible for collecting all units of work to be run and
 # scheduling them.
 module XSpec
-  module Evaluator
-    # The serial evaluator, unsurprisingly, runs all units of works serially in
-    # a loop. It is about as simple an evaluator as you can imagine. Parents
+  module Scheduler
+    # The serial scheduler, unsurprisingly, runs all units of works serially in
+    # a loop. It is about as simple a scheduler as you can imagine. Parents
     # are responsible for actually executing the work.
     class Serial
       def initialize(opts)
