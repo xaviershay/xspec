@@ -39,7 +39,7 @@ describe 'failures at end notifier' do
     assert !out.string.include?('bogus.rb')
   end
 
-  it_behaves_like_a ComposableNotifier
+  include_context ComposableNotifier
 end
 
 describe 'character notifier' do
@@ -68,7 +68,7 @@ describe 'character notifier' do
     assert out.string == "E\n"
   end
 
-  it_behaves_like_a ComposableNotifier
+  include_context ComposableNotifier
 end
 
 describe 'documentation notifier' do
@@ -116,7 +116,7 @@ describe 'documentation notifier' do
     assert_include "FAILED", evaluate_finish(errors: [make_error])
   end
 
-  it_behaves_like_a ComposableNotifier
+  include_context ComposableNotifier
 end
 
 describe 'colored documentation notifier' do
@@ -135,13 +135,13 @@ describe 'colored documentation notifier' do
     assert_include "\e[31mFAILED\e[0m", out.string
   end
 
-  it_behaves_like_a ComposableNotifier
+  include_context ComposableNotifier
 end
 
 describe 'composable notifier' do
   let(:notifier) { XSpec::Notifier::Composite.new }
 
-  it_behaves_like_a ComposableNotifier
+  include_context ComposableNotifier
 end
 
 describe 'null notifier' do
@@ -161,7 +161,7 @@ describe 'timings at end' do
     assert notifier.run_finish
   end
 
-  it_behaves_like_a ComposableNotifier
+  include_context ComposableNotifier
 end
 
 def make_nested_test(parent_names = [], work_name = nil)

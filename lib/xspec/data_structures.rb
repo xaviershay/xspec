@@ -85,7 +85,7 @@ module XSpec
       # A shared context is a floating context that isn't part of any context
       # heirachy, so its units of work will not be visible to the root node. It
       # can be brought into any point in the heirachy using `copy_into_tree`
-      # (aliased as `it_behaves_like_a` in the DSL), and this can be done
+      # (aliased as `include_context` in the DSL), and this can be done
       # multiple times, which allows definitions to be reused.
       #
       # This is leaky abstraction, since only units of work are copied from
