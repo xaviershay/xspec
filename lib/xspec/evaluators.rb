@@ -153,20 +153,25 @@ EOS
         Double.new(ref)
       end
 
-      # To set up a stub on a double, call the expected method and arguments on
-      # the proxy object returned by `stub`. If a return value is desired, it
-      # can be supplied as a block, for example: `expect(double).some_method(1,
-      # 2) { "return value" }`
-      def stub(obj)
-        Proxy.new(obj, :_stub)
-      end
-
-      # TODO: document
+      # Use `verify` to assert that a method was called on a double with
+      # particular arguments. Doubles record all received messages, so `verify`
+      # should be called at the end of your test.
       def verify(obj)
         Proxy.new(obj, :_verify)
       end
 
-      class Proxy
+
+      # All messages sent to a double will return `nil`. Use `stub` to specify
+      # a return value instead: `stub(double).some_method(1, 2) { "return
+      # value" }`. This must be called before the message is sent to the
+      # double.
+      def stub(obj)
+        Proxy.new(obj, :_stub)
+      end
+
+      # The proxy object captures messages sent to it and passes them through
+      # to either the `_verify` of `_stub` method on the double.
+      class Proxy < BasicObject
         def initialize(double, method)
           @double = double
           @method = method
@@ -179,8 +184,8 @@ EOS
 
       # Since the double object inherits from `BasicObject`, virtually every
       # method call will be routed through `method_missing`. From there, the
-      # call can be checked against the expectations that were setup at the
-      # beginning of a spec.
+      # message can be recorded and an appropriate return value selected from
+      # the stubs.
       class Double < BasicObject
         def initialize(klass)
           @klass    = klass
@@ -282,7 +287,7 @@ EOS
       end
 
       # The `:strict` option mixes in this `Strict` module, which raises rather
-      # than create `StringReference`s for unknown classes.
+      # than create a `StringReference` for unknown classes.
       module Strict
         def _double(klass, type)
           ref = if self.class.const_defined?(klass)

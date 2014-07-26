@@ -140,11 +140,14 @@ end
 # ## Doubles
 module Doubles
   # Test doubles are "fake" objects that can stand in for collaborators in your
-  # system in order to make certain modules easier to unit test.
+  # system in order to make certain modules easier to unit test. XSpec's
+  # implementation shares a philosophy with the
+  # [mockito](https://code.google.com/p/mockito/) library, though provides far
+  # fewer features.
   #
   # Doubles are the sports car of testing techniques. Extremely powerful, but
-  # uncomfortably straightforward to drive into a tree. Only double code that
-  # you own, do so sparingly, and you'll stay a contented motorist.
+  # uncomfortably straightforward to drive into a tree. Only double behaviour
+  # that you own, do so sparingly, and you'll stay a contented motorist.
   #
   # Test doubles are available in the default XSpec configuration.
   extend XSpec.dsl(
