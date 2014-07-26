@@ -361,11 +361,13 @@ end
 # method and leave `Bottom` to actually execute the test. If you are familiar
 # with Rack middleware, this is a very similar concept.
 module Stacks
+  XE = XSpec::Evaluator
+
   module Stack
-    include XSpec::Evaluator::Bottom
-    include XSpec::Evaluator::Simple
-    include XSpec::Evaluator::Doubles
-    include XSpec::Evaluator::Top
+    include XE::Bottom
+    include XE::Simple
+    include XE::Doubles
+    include XE::Top
   end
 
   # The `stack` method is a shorthand way of creating a stack that sandwiches
@@ -375,9 +377,9 @@ module Stacks
   # See the [evaluator code documentation](evaluators.html) for
   # more details.
   extend XSpec.dsl(
-    evaluator: XSpec::Evaluator.stack {
-      include XSpec::Evaluator::Simple
-      include XSpec::Evaluator::Doubles
+    evaluator: XE.stack {
+      include XE::Simple
+      include XE::Doubles
     }
   )
 end
