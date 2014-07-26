@@ -34,6 +34,25 @@ module XSpec
       attr_reader :clock
     end
 
+    class Filter
+      def initialize(scheduler:, filter:)
+        @scheduler = scheduler
+        @filter    = filter
+      end
+
+      def run(context, notifier)
+        scheduler.run(FilteredContext.new(context, filter), notifier)
+      end
+
+      FilteredContext = Struct.new(:context, :filter) do
+        def nested_units_of_work
+          context.nested_units_of_work.select(&filter)
+        end
+      end
+
+      attr_reader :scheduler, :filter
+    end
+
     DEFAULT = Serial.new
   end
 end

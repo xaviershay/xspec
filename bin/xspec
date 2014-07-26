@@ -1,11 +1,30 @@
 #!/usr/bin/env ruby
 
+require 'optparse'
+
 $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
 
 require 'xspec'
 
 $LOAD_PATH.unshift "spec"
 $LOAD_PATH.unshift "lib"
+
+filter = //
+
+parser = OptionParser.new
+parser.banner = "Usage: xspec [options] [files]"
+parser.separator ""
+parser.on('-e FILTER', "Only run specs with full name including FILTER") do |f|
+  filter = Regexp.new(f)
+end
+parser.on("-h", "--help", "Show this message") do
+  $stderr.puts parser
+  exit
+end
+parser.separator ""
+
+parser.parse!
+
 
 files = if ARGV.any? {|x| x.length > 0 }
   ARGV
@@ -18,7 +37,13 @@ files.each do |f|
 end
 
 if respond_to?(:run!)
-  exit 1 unless run!
+  exit 1 unless run!(scheduler: XSpec::Scheduler::Filter.new(
+    scheduler: __xspec_opts.fetch(:scheduler),
+    filter:    -> uow {
+      full_name = (uow.parents + [uow]).map(&:name).compact.join(' ')
+      full_name =~ filter
+    }
+  ))
 else
   $stderr.puts "This script can only be used when XSpec.dsl is mixed in to " +
                "global scope."

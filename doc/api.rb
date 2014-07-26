@@ -432,9 +432,8 @@ end
 #
 # XSpec provides the `xspec` script, that can be used to run XSpec files. It is
 # not required, but provides a number of niceties:
-# * Adds `spec` and `lib` directories to the load path.
-# * Loads all files passed as arguments.
 # * Exits non-zero if the run fails.
+# * Running specific files and specs, use `--help` option for details.
 #
 # (`autorun!` provides roughly equivalent behaviour.)
 #

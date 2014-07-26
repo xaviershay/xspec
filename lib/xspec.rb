@@ -35,9 +35,13 @@ module XSpec
       # `run!` is where the magic happens. Typically called at the end of a
       # file (or by `autorun!`), this method takes all the data that was
       # accumulated by the DSL methods above and runs it through the scheduler.
-      def run!
-        notifier  = __xspec_opts.fetch(:notifier)
-        scheduler = __xspec_opts.fetch(:scheduler)
+      #
+      # It takes an optional parameter that can be used to override any options
+      # set in the initial `XSpec.dsl` call.
+      def run!(overrides = {})
+        opts = __xspec_opts.merge(overrides)
+        notifier  = opts.fetch(:notifier)
+        scheduler = opts.fetch(:scheduler)
 
         scheduler.run(__xspec_context, notifier)
       end
