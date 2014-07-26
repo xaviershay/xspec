@@ -170,7 +170,7 @@ module Doubles
     # Test doubles can be created as copies of existing classes. Use
     # `instance_double` when you are doubling an instance (i.e.
     # `Repository.new`), and `class_double` when doubling class methods.
-    let(:repo) { instance_double('Repository') }
+    let(:repo) { instance_double('Doubles::Repository') }
 
     # Doubles allow you to selectively verify interactions with them by
     # wrapping them in a call to `verify` then calling the invocation you
@@ -194,7 +194,7 @@ module Doubles
     # invocation as well.
     it 'stores a hash document in the repository' do
       stub(repo).store(msg: 'hello') { true }
-      assert save('hello', repository: repo)
+      save('hello', repository: repo)
       verify(repo).store(msg: 'hello')
     end
 
@@ -202,20 +202,20 @@ module Doubles
     # that the test is being run in isolation so the collaborator, or it has
     # not been implemented yet.
     #
-    # If the class does exist, both `verify` and `expect` check invocations
+    # If the class does exist, both `verify` and `stub` check invocations
     # against methods that are actually implemented on the doubled class. This
     # test fails because `put` is not a method.
     it 'stores a hash document in the repository' do
       expect_to_fail!
-      verify(repo).put(msg: 'hello')
+      stub(repo).put(msg: 'hello')
     end
 
-    # If the class does exist, any expecation is allowed. It is assumed that
+    # If the class does exist, any stub is allowed. It is assumed that
     # this test will be run again in the future either once the class is
     # implemented, or as part of a larger run that loads all collaborators.
     it 'stores a hash document in an alternate repository' do
       alt_repo = class_double('RemoteRepository')
-      verify(alt_repo).put(msg: 'hello')
+      stub(alt_repo).put(msg: 'hello')
     end
 
     # #### Strict mode
@@ -421,6 +421,9 @@ module CustomScheduler
   extend XSpec.dsl(
     scheduler: ShuffleScheduler.new
   )
+
+  it 'executes' do
+  end
 end
 
 # ## Running
@@ -440,9 +443,15 @@ def self.run!(*args)
   exit 1 unless [
     Basics,
     Assertions,
+    Assertions::RSpec,
     Doubles,
     Doubles::Strict,
-    Doubles::AutoVerify
+    Notifiers,
+    Notifiers::BuiltIn,
+    Evaluators,
+    Stacks,
+    BuiltInScheduler,
+    CustomScheduler,
   ].map {|x|
     x.run!(*args)
   }.all?

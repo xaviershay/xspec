@@ -8,7 +8,7 @@ $initial = Object.constants
 
 module ExpectToFail
   def expect_to_fail!
-    @expect_to_fail = true
+    @expect_to_fail = caller
   end
 
   def call(uow)
@@ -16,7 +16,7 @@ module ExpectToFail
     return result unless @expect_to_fail
 
     if result.empty?
-      [XSpec::Failure.new(uow, "expected failure", [])]
+      [XSpec::Failure.new(uow, "expected failure", @expect_to_fail)]
     else
       []
     end
