@@ -169,60 +169,48 @@ module Doubles
     # `Repository.new`), and `class_double` when doubling class methods.
     let(:repo) { instance_double('Repository') }
 
-    # Set expecations on the test double by wrapping it in a call to
-    # `expect`, and then calling the invocation you are expecting.
-    #
-    # `assert_exhausted` will fail unless all expectations were invoked.
+    # Doubles allow you to selectively verify interactions with them by
+    # wrapping them in a call to `verify` then calling the invocation you
+    # expected.
     it 'stores a hash document in the repository' do
-      expect(repo).store(msg: 'hello')
       save('hello', repository: repo)
-      assert_exhausted repo
+      verify(repo).store(msg: 'hello')
     end
 
-    # Calling methods that were not expected cause the test to fail.  This test
-    # will fail because the double is not expecting a message with "goodbye" in
-    # it.
+    # If a matching method has not been called, the test will fail  This test
+    # will fail because the double did not receive a message with "hello".
     it 'stores a hash document in the repository - broken' do
       expect_to_fail!
 
-      expect(repo).store(msg: 'hello')
       save('goodbye', repository: repo)
+      verify(repo).store(msg: 'hello')
     end
 
-    # In this case the test fails because the `store` expectation was never
-    # invoked.
-    it 'stores a hash document in the repository - broken' do
-      expect_to_fail!
-
-      expect(repo).store(msg: 'hello')
-      assert_exhausted repo
-    end
-
-    # Invocations can be allowed but not required using `allow`. This test does
-    # not fail, even though `store` was never called.
+    # Methods can be pre-emptively expected using `expect`. This has the
+    # benefit of allowing a return value to be specified.
     it 'stores a hash document in the repository' do
-      allow(repo).store(msg: 'hello')
-      assert_exhausted repo
+      expect(repo).store(msg: 'hello') { true }
+      assert save('hello', repository: repo)
     end
 
     # By default, doubling classes that do no exist is allowed. It is assumed
     # that the test is being run in isolation so the collaborator, or it has
     # not been implemented yet.
     #
-    # If the class does exist, both `expect` and `allow` check invocations
+    # If the class does exist, both `verify` and `expect` check invocations
     # against methods that are actually implemented on the doubled class. This
     # test fails because `put` is not a method.
     it 'stores a hash document in the repository' do
       expect_to_fail!
-      expect(repo).put(msg: 'hello')
+      verify(repo).put(msg: 'hello')
     end
 
-    # If not, any expecation is allowed. It is assumed that this test will be
-    # run again in the future either once the class is implemented, or as part
-    # of a larger run that loads all collaborators.
+    # If the class does exist, any expecation is allowed. It is assumed that
+    # this test will be run again in the future either once the class is
+    # implemented, or as part of a larger run that loads all collaborators.
     it 'stores a hash document in an alternate repository' do
       alt_repo = class_double('RemoteRepository')
-      allow(alt_repo).put(msg: 'hello')
+      verify(alt_repo).put(msg: 'hello')
     end
 
     # #### Strict mode
@@ -233,6 +221,8 @@ module Doubles
       # A cute trick is to disable this by default, and only enable it in full
       # test runs. That way individual tests can be executed quickly without
       # loading all dependencies.
+      #
+      # Strict mode is not enabled in the default XSpec configuration.
       extend XSpec.dsl(
         evaluator: documentation_stack {
           include XSpec::Evaluator::Doubles.with(:strict)
@@ -244,27 +234,7 @@ module Doubles
       it 'stores a hash document in an alternate repository' do
         expect_to_fail!
 
-        alt_repo = class_double('RemoteRepository')
-      end
-    end
-
-    # #### Auto-verification
-    module AutoVerify
-      # `assert_exhausted` can be called automatically on all created doubles
-      # after a test has run. This is default behaviour. `strict` is only
-      # enabled here to demonstrate that `with` takes a variable number of
-      # arguments, it is not actually necessary for auto-verification.
-      extend XSpec.dsl(
-        evaluator: documentation_stack {
-          include XSpec::Evaluator::Doubles.with(:strict, :auto_verify)
-        }
-      )
-
-      # This test fails because `store` is never called on the double.
-      it 'stores a hash document in an alternate repository' do
-        expect_to_fail!
-
-        expect(repo).store(msg: 'hello')
+        class_double('RemoteRepository')
       end
     end
   end

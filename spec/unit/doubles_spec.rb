@@ -36,56 +36,61 @@ describe 'doubles assertion context' do
     end
 
     it 'requires matching method name' do
-      begin
-        subject.instance_eval {
-          double = instance_double('Bogus')
-          expect(double).foo("a")
-          double.bar("a")
-        }
-        fail "no error raised"
-      rescue XSpec::Evaluator::Doubles::DoubleFailure => e
-        assert_include "Unexpectedly received", e.message
-        assert_include 'bar("a")', e.message
-      end
+      assert_equal nil, subject.instance_eval {
+        double = instance_double('Bogus')
+        expect(double).foo("a") { 1 }
+        double.bar("a")
+      }
     end
 
     it 'requires exact arguments' do
-      begin
-        subject.instance_eval {
-          double = instance_double('Bogus')
-          expect(double).foo("a")
-          double.foo("b")
-        }
-        fail "no error raised"
-      rescue XSpec::Evaluator::Doubles::DoubleFailure => e
-        assert_include "Unexpectedly received", e.message
-        assert_include 'foo("b")', e.message
-      end
+      assert_equal nil, subject.instance_eval {
+        double = instance_double('Bogus')
+        expect(double).foo("a") { 1 }
+        double.foo("b")
+      }
     end
   end
 
-  describe 'assert_exhausted' do
-    it 'passes if all expectations have been called' do
+  describe 'verify' do
+    it 'can verify a method was called with no setup' do
       assert subject.instance_eval {
         double = instance_double('Bogus')
-        expect(double).foo
         double.foo
-        assert_exhausted double
+        verify(double).foo
         true
       }
     end
 
-    it 'raises when not all expectations have been called' do
+    it 'raises if method was not called' do
       begin
         subject.instance_eval {
           double = instance_double('Bogus')
-          expect(double).foo(1, "abc")
-          assert_exhausted double
+          double.bar
+          verify(double).foo("b")
         }
         fail "no error raised"
       rescue XSpec::Evaluator::Doubles::DoubleFailure => e
-        assert_include "did not receive", e.message
-        assert_include 'foo(1, "abc")', e.message
+        assert_include "Did not receive", e.message
+        assert_include 'foo("b")', e.message
+      end
+    end
+
+    it 'raises if method was not called with right arguments' do
+      begin
+        subject.instance_eval {
+          double = instance_double('Bogus')
+          double.foo("a")
+          double.foo("b")
+          verify(double).foo("c")
+        }
+        fail "no error raised"
+      rescue XSpec::Evaluator::Doubles::DoubleFailure => e
+        assert_include "Did not receive", e.message
+        assert_include 'foo("b")', e.message
+        assert_include "Did receive", e.message
+        assert_include 'foo("a")', e.message
+        assert_include 'foo("b")', e.message
       end
     end
   end
@@ -153,47 +158,5 @@ describe 'strict doubles assertion context' do
     rescue XSpec::Evaluator::Doubles::DoubleFailure => e
       assert_include "Bogus", e.message
     end
-  end
-end
-
-describe 'auto-verifying doubles assertion context' do
-  let(:subject) { Class.new { include XSpec::Evaluator.stack {
-    include XSpec::Evaluator::Doubles.with(:auto_verify)
-  }}.new }
-
-  it 'verifies all used instance doubles on successful result' do
-    result = subject.call(XSpec::UnitOfWork.new(nil, ->{
-      double = instance_double('Bogus')
-      expect(double).foo
-    }))
-
-    assert_equal 1, result.length
-    assert_include "did not receive", result[0].message
-    assert_include "foo()", result[0].message
-  end
-
-  it 'verifies all used class doubles on successful result' do
-    result = subject.call(XSpec::UnitOfWork.new(nil, ->{
-      double = class_double('Bogus')
-      expect(double).foo
-    }))
-
-    assert_equal 1, result.length
-    assert_include "did not receive", result[0].message
-    assert_include "foo()", result[0].message
-  end
-
-  it 'does not verify doubles if errors occurred' do
-    result = subject.call(XSpec::UnitOfWork.new(nil, ->{
-      double = instance_double('Bogus')
-      expect(double).foo
-      fail "nope"
-    }))
-    assert_equal 1, result.length
-    assert_include "nope", result[0].message
-  end
-
-  it 'returns successful result if all doubles are valid' do
-    assert_equal [], subject.call(XSpec::UnitOfWork.new(nil, ->{}))
   end
 end

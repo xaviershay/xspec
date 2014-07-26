@@ -107,11 +107,8 @@ EOS
         [Failure.new(unit_of_work, e.message, e.backtrace)]
       end
 
-      # It can be configured with a few options:
+      # It can be configured with the following options:
       #
-      # * `auto_verify` calls `assert_exhausted` on all created doubles after a
-      # unit of work executes successfully to ensure that all expectations that
-      # were set were actually called.
       # * `strict` forbids doubling of classes that have not been loaded. This
       # should generally be enabled when doing a full spec run, and disabled
       # when running specs in isolation.
@@ -119,8 +116,7 @@ EOS
       # The `with` method returns a module that can be included in a stack.
       def self.with(*opts)
         modules = [self] + opts.map {|x| {
-          auto_verify: AutoVerify,
-          strict:      Strict
+          strict: Strict
         }.fetch(x) }
 
 
@@ -162,21 +158,21 @@ EOS
       # is desired, it can be supplied as a block, for example:
       # `expect(double).some_method(1, 2) { "return value" }`
       def expect(obj)
-        Recorder.new(obj)
+        Proxy.new(obj, :_expect)
       end
 
-      # TODO: Fix this
-      def allow(obj)
-        Recorder.new(obj)
+      def verify(obj)
+        Proxy.new(obj, :_verify)
       end
 
-      class Recorder
-        def initialize(double)
+      class Proxy
+        def initialize(double, method)
           @double = double
+          @method = method
         end
 
         def method_missing(*args, &ret)
-          @double._expect(args, &(ret || ->{}))
+          @double.__send__(@method, args, &(ret || ->{}))
         end
       end
 
@@ -188,6 +184,7 @@ EOS
         def initialize(klass)
           @klass    = klass
           @expected = []
+          @received = []
         end
 
         def method_missing(*actual_args)
@@ -198,11 +195,8 @@ EOS
           if i
             @expected.delete_at(i)[1].call
           else
-            name, rest = *actual_args
-            ::Kernel.raise DoubleFailure, "Unexpectedly received: %s(%s)" % [
-              name,
-              [*rest].map(&:inspect).join(", ")
-            ]
+            @received << actual_args
+            nil
           end
         end
 
@@ -217,15 +211,22 @@ EOS
           @expected << [args, ret]
         end
 
-        def _verify
-          return if @expected.empty?
+        def _verify(args)
+          i = @received.index(args)
 
-          ::Kernel.raise DoubleFailure, "%s double did not receive:\n%s" % [
-            @klass.to_s,
-            @expected.map {|(name, *args), _|
-              "  %s(%s)" % [name, args.map(&:inspect).join(", ")]
-            }.join("\n")
-          ]
+          if i
+            @received.delete_at(i)
+          else
+            name, rest = *args
+            ::Kernel.raise DoubleFailure,
+              "Did not receive: %s(%s)\nDid receive:%s\n" % [
+                name,
+                [*rest].map(&:inspect).join(", "),
+                @received.map {|name, *args|
+                  "  %s(%s)" % [name, args.map(&:inspect).join(", ")]
+                }.join("\n")
+              ]
+          end
         end
       end
 
@@ -289,49 +290,8 @@ EOS
           super
         end
       end
-
-      # An assertion is provided to validate that all expected methods were
-      # called on a double.
-      def assert_exhausted(obj)
-        obj._verify
-      end
-
-      # Most of the time, `assert_exhausted` will not be called directly, since
-      # the `:auto_verify` option can be used to call it by default on all
-      # doubles. That option mixes in this `AutoVerify` module to augment
-      # methods necessary for this behaviour.
-      module AutoVerify
-        def initialize
-          @doubles = []
-        end
-
-        def call(unit_of_work)
-          result = super
-
-          if result.empty?
-            @doubles.each do |double|
-              assert_exhausted double
-            end
-          end
-
-          result
-        rescue DoubleFailure => e
-          [Failure.new(unit_of_work, e.message, e.backtrace)]
-        end
-
-        def class_double(klass)
-          x = super
-          @doubles << x
-          x
-        end
-
-        def instance_double(klass)
-          x = super
-          @doubles << x
-          x
-        end
-      end
     end
+
 
     # ### RSpec Integration
     #
@@ -359,7 +319,7 @@ EOS
 
     DEFAULT = stack do
       include Simple
-      include Doubles.with(:auto_verify)
+      include Doubles
     end
   end
 end
