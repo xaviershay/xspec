@@ -155,7 +155,7 @@ describe 'null notifier' do
 end
 
 describe 'timings at end' do
-  let(:notifier) { XSpec::Notifier::TimingsAtEnd.new }
+  let(:notifier) { XSpec::Notifier::TimingsAtEnd.new(out: out) }
 
   it 'always returns true' do
     assert notifier.run_finish
