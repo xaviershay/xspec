@@ -186,11 +186,13 @@ module Doubles
       verify(repo).store(msg: 'hello')
     end
 
-    # Methods can be pre-emptively expected using `expect`. This has the
-    # benefit of allowing a return value to be specified.
+    # Methods can be stubbed using `stub`. This has the benefit of allowing a
+    # return value to be specified. You still may choose to `verify` the
+    # invocation as well.
     it 'stores a hash document in the repository' do
-      expect(repo).store(msg: 'hello') { true }
+      stub(repo).store(msg: 'hello') { true }
       assert save('hello', repository: repo)
+      verify(repo).store(msg: 'hello')
     end
 
     # By default, doubling classes that do no exist is allowed. It is assumed

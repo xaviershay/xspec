@@ -153,14 +153,15 @@ EOS
         Double.new(ref)
       end
 
-      # To set up an expectation on a double, call the expected method an
-      # arguments on the proxy object returned by `expect`. If a return value
-      # is desired, it can be supplied as a block, for example:
-      # `expect(double).some_method(1, 2) { "return value" }`
-      def expect(obj)
-        Proxy.new(obj, :_expect)
+      # To set up a stub on a double, call the expected method and arguments on
+      # the proxy object returned by `stub`. If a return value is desired, it
+      # can be supplied as a block, for example: `expect(double).some_method(1,
+      # 2) { "return value" }`
+      def stub(obj)
+        Proxy.new(obj, :_stub)
       end
 
+      # TODO: document
       def verify(obj)
         Proxy.new(obj, :_verify)
       end
@@ -188,16 +189,17 @@ EOS
         end
 
         def method_missing(*actual_args)
-          i = @expected.find_index {|expected_args, ret|
+          stub = @expected.find {|expected_args, ret|
             expected_args == actual_args
           }
 
-          if i
-            @expected.delete_at(i)[1].call
-          else
-            @received << actual_args
-            nil
+          ret = if stub
+            stub[1].call
           end
+
+          @received << actual_args
+
+          ret
         end
 
         # The two methods needed on this object to set it up and verify it are
@@ -205,13 +207,15 @@ EOS
         # expectations. While not fail-safe, users should only be using
         # expectations for a public API, and `_` is traditionally only used
         # for private methods (if at all).
-        def _expect(args, &ret)
+        def _stub(args, &ret)
           @klass.validate_call! args
 
           @expected << [args, ret]
         end
 
         def _verify(args)
+          @klass.validate_call! args
+
           i = @received.index(args)
 
           if i

@@ -18,19 +18,20 @@ describe 'doubles assertion context' do
   end
 
   describe 'doubles of unloaded classes' do
-    it 'allows any method to be expected' do
-      assert_equal nil, subject.instance_eval {
+    it 'allows a stub to be used multiple times' do
+      assert_equal 1, subject.instance_eval {
         double = instance_double('Bogus')
-        expect(double).foo
-        double.foo
+        stub(double).foo("a") { 1 }
+        double.foo("a")
+        double.foo("a")
       }
     end
 
-    it 'allows any return value to be specified' do
+    it 'allows any return value to be stubbed' do
       assert_equal 1, subject.instance_eval {
         double = instance_double('Bogus')
-        expect(double).foo("a") { 2 }
-        expect(double).foo("b") { 3 }
+        stub(double).foo("a") { 2 }
+        stub(double).foo("b") { 3 }
         double.foo("b") - double.foo("a")
       }
     end
@@ -38,7 +39,7 @@ describe 'doubles assertion context' do
     it 'requires matching method name' do
       assert_equal nil, subject.instance_eval {
         double = instance_double('Bogus')
-        expect(double).foo("a") { 1 }
+        stub(double).foo("a") { 1 }
         double.bar("a")
       }
     end
@@ -46,7 +47,7 @@ describe 'doubles assertion context' do
     it 'requires exact arguments' do
       assert_equal nil, subject.instance_eval {
         double = instance_double('Bogus')
-        expect(double).foo("a") { 1 }
+        stub(double).foo("a") { 1 }
         double.foo("b")
       }
     end
@@ -56,6 +57,16 @@ describe 'doubles assertion context' do
     it 'can verify a method was called with no setup' do
       assert subject.instance_eval {
         double = instance_double('Bogus')
+        double.foo
+        verify(double).foo
+        true
+      }
+    end
+
+    it 'can verify a method that was stubbed' do
+      assert subject.instance_eval {
+        double = instance_double('Bogus')
+        stub(double).foo { 1 }
         double.foo
         verify(double).foo
         true
@@ -97,18 +108,30 @@ describe 'doubles assertion context' do
 
   describe 'instance_double' do
     describe 'when doubled class is loaded' do
-      it 'allows instance methods to be expected' do
+      it 'allows instance methods to be stubbed' do
         assert subject.instance_eval {
           double = instance_double('LoadedClass')
-          expect(double).instance_method { 123 }
+          stub(double).instance_method { 123 }
         }
       end
 
-      it 'does not allow non-existing methods to be expected' do
+      it 'does not allow non-existing methods to be stubbed' do
         begin
           assert subject.instance_eval {
             double = instance_double('LoadedClass')
-            expect(double).bogus_method { 123 }
+            stub(double).bogus_method { 123 }
+          }
+          fail "no error raised"
+        rescue XSpec::Evaluator::Doubles::DoubleFailure => e
+          assert_include "LoadedClass#bogus_method", e.message
+        end
+      end
+
+      it 'does not allow non-existing methods to be verified' do
+        begin
+          assert subject.instance_eval {
+            double = instance_double('LoadedClass')
+            verify(double).bogus_method { 123 }
           }
           fail "no error raised"
         rescue XSpec::Evaluator::Doubles::DoubleFailure => e
@@ -120,18 +143,30 @@ describe 'doubles assertion context' do
 
   describe 'class_double' do
     describe 'when doubled class is loaded' do
-      it 'allows instance methods to be expected' do
+      it 'allows instance methods to be stubbed' do
         assert subject.instance_eval {
           double = class_double('LoadedClass')
-          expect(double).class_method { 123 }
+          stub(double).class_method { 123 }
         }
       end
 
-      it 'does not allow non-existing methods to be expected' do
+      it 'does not allow non-existing methods to be stubbed' do
         begin
           assert subject.instance_eval {
             double = class_double('LoadedClass')
-            expect(double).bogus_method { 123 }
+            stub(double).bogus_method { 123 }
+          }
+          fail "no error raised"
+        rescue XSpec::Evaluator::Doubles::DoubleFailure => e
+          assert_include "LoadedClass.bogus_method", e.message
+        end
+      end
+
+      it 'does not allow non-existing methods to be verified' do
+        begin
+          assert subject.instance_eval {
+            double = class_double('LoadedClass')
+            verify(double).bogus_method
           }
           fail "no error raised"
         rescue XSpec::Evaluator::Doubles::DoubleFailure => e
