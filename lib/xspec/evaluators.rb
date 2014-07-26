@@ -33,28 +33,24 @@ module XSpec
     module Top
       def call(unit_of_work)
         super
+      rescue EvaluateFailed => e
+        [Failure.new(unit_of_work, e.message, e.backtrace)]
       rescue => e
         [CodeException.new(unit_of_work, e.message, e.backtrace)]
       end
     end
 
+    # As long as the `Top` evaluator is used, evaluators can raise
+    # `EvaluateFailed` to indicate a failure separate from a normal code
+    # exception.
+    EvaluateFailed = Class.new(RuntimeError)
+
     # ### Simple Assertions
     #
     # This simple evaluator provides very straight-forward assertion methods.
     module Simple
-      class AssertionFailed < RuntimeError
-        attr_reader :message, :backtrace
-
-        def initialize(message, backtrace)
-          @message   = message
-          @backtrace = backtrace
-        end
-      end
-
       def call(unit_of_work)
         super
-      rescue AssertionFailed => e
-        [Failure.new(unit_of_work, e.message, e.backtrace)]
       end
 
       def assert(proposition, message=nil)
@@ -90,7 +86,7 @@ EOS
       private
 
       def _raise(message)
-        raise AssertionFailed.new(message, caller)
+        raise EvaluateFailed, message
       end
     end
 
@@ -99,12 +95,8 @@ EOS
     # The doubles module provides test doubles that can be used in-place of
     # real objects.
     module Doubles
-      DoubleFailure = Class.new(RuntimeError)
-
       def call(unit_of_work)
         super
-      rescue DoubleFailure => e
-        [Failure.new(unit_of_work, e.message, e.backtrace)]
       end
 
       # It can be configured with the following options:
@@ -227,7 +219,7 @@ EOS
             @received.delete_at(i)
           else
             name, rest = *args
-            ::Kernel.raise DoubleFailure,
+            ::Kernel.raise EvaluateFailed,
               "Did not receive: %s(%s)\nDid receive:%s\n" % [
                 name,
                 [*rest].map(&:inspect).join(", "),
@@ -269,7 +261,7 @@ EOS
           name, rest = *args
 
           unless @klass.respond_to?(name)
-            raise DoubleFailure,
+            raise EvaluateFailed,
               "#{@klass}.#{name} is unimplemented or not public"
           end
         end
@@ -280,7 +272,7 @@ EOS
           name, rest = *args
 
           unless @klass.public_instance_methods.include?(name)
-            raise DoubleFailure,
+            raise EvaluateFailed,
               "#{@klass}##{name} is unimplemented or not public"
           end
         end
@@ -293,7 +285,7 @@ EOS
           ref = if self.class.const_defined?(klass)
             type.new(self.class.const_get(klass))
           else
-            raise DoubleFailure, "#{klass} is not a valid class name"
+            raise EvaluateFailed, "#{klass} is not a valid class name"
           end
 
           super
