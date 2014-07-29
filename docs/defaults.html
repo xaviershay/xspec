@@ -19,16 +19,6 @@
           <div id="jump_page">
             
               
-              <a class="source" href="xspec.html">
-                xspec.rb
-              </a>
-            
-              
-              <a class="source" href="assertion_contexts.html">
-                assertion_contexts.rb
-              </a>
-            
-              
               <a class="source" href="autorun.html">
                 autorun.rb
               </a>
@@ -56,6 +46,11 @@
               
               <a class="source" href="notifiers.html">
                 notifiers.rb
+              </a>
+            
+              
+              <a class="source" href="schedulers.html">
+                schedulers.rb
               </a>
             
           </div>
@@ -87,12 +82,12 @@
               </div>
               <p>These are the defaults used by <code>XSpec.dsl</code>, but feel free to specify your own
 instead. They are set up in such a way that if you can override a component
-down in the bowels without having to provide an entire top level evaluator.</p>
+down in the bowels without having to provide an entire top level scheduler.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">require</span> <span class="hljs-string">'xspec/evaluators'</span>
-<span class="hljs-keyword">require</span> <span class="hljs-string">'xspec/assertion_contexts'</span>
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">require</span> <span class="hljs-string">'xspec/schedulers'</span>
+<span class="hljs-keyword">require</span> <span class="hljs-string">'xspec/evaluators'</span>
 <span class="hljs-keyword">require</span> <span class="hljs-string">'xspec/notifiers'</span>
 
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">XSpec</span></span>
@@ -131,7 +126,7 @@ used.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    options[<span class="hljs-symbol">:assertion_context</span>] ||= <span class="hljs-constant">AssertionContext::DEFAULT</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>    options[<span class="hljs-symbol">:evaluator</span>] ||= <span class="hljs-constant">Evaluator::DEFAULT</span></pre></div></div>
             
         </li>
         
@@ -142,13 +137,13 @@ used.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>An evaluator is responsible for scheduling units of work and handing them
+              <p>An scheduler is responsible for scheduling units of work and handing them
 off to the assertion context. Any logic regarding threads, remote
-execution or the like belongs in an evaluator.</p>
+execution or the like belongs in a scheduler.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    options[<span class="hljs-symbol">:evaluator</span>]         ||= <span class="hljs-constant">Evaluator::DEFAULT</span>.new(options)
+            <div class="content"><div class='highlight'><pre>    options[<span class="hljs-symbol">:scheduler</span>]         ||= <span class="hljs-constant">Scheduler::DEFAULT</span>
     options
   <span class="hljs-keyword">end</span>
   module_function <span class="hljs-symbol">:add_defaults</span>

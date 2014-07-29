@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>XSpec API</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="api.html">
+                api.rb
+              </a>
+            
+              
+              <a class="source" href="support.html">
+                support.rb
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <h1 id="xspec-api">XSpec API</h1>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>This page documents the public API of
+<a href="https://github.com/xaviershay/xspec">XSpec</a> through a mix of comments and
+code.</p>
+<ol>
+<li><a href="#basics">Basics</a></li>
+<li><a href="#assertions">Assertions</a></li>
+<li><a href="#doubles">Doubles</a></li>
+<li><a href="#notifiers">Notifiers</a></li>
+<li><a href="#evaluators">Evaluators</a></li>
+<li><a href="#schedulers">Schedulers</a></li>
+<li><a href="#running">Running</a></li>
+</ol>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>require_relative <span class="hljs-string">'./support'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <h2 id="basics">Basics</h2>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Basics</span></span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>XSpec tests are specified using the <a href="xspec.html#section-3">XSpec DSL</a>. This is
+typically added to the global scope, but here we scope it to a module so
+that elsewhere in the documentation we can include it again with different
+options.</p>
+<p>The DSL is customizable. A special documentation context is used in all the
+examples, see the support file for more details. All configuration options
+are documented in the “Configuration” section.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  extend <span class="hljs-constant">XSpec</span>.dsl(
+    <span class="hljs-symbol">evaluator:</span> documentation_stack
+  )</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Tests are grouped into contexts, which are created using <code>describe</code>. The
+optional string parameter is used in notifiers to distinguish tests from
+one another.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  describe <span class="hljs-string">'calculation'</span> <span class="hljs-keyword">do</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Individual tests are defined using <code>it</code>. Like <code>describe</code>, it takes an
+optional string parameter that is used for labeling.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    it <span class="hljs-string">'can add'</span> <span class="hljs-keyword">do</span>
+      raise <span class="hljs-string">"failed"</span> <span class="hljs-keyword">unless</span> <span class="hljs-number">1</span> + <span class="hljs-number">1</span> == <span class="hljs-number">2</span>
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p><code>expect_to_fail!</code> is a custom method used only in this documentation to
+enable demonstrations of failure. It is provided by the documentation
+stack. (See the support documentation for details.)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    it <span class="hljs-string">'can add'</span> <span class="hljs-keyword">do</span>
+      expect_to_fail!
+
+      raise <span class="hljs-string">"failed"</span> <span class="hljs-keyword">unless</span> <span class="hljs-number">1</span> + <span class="hljs-number">1</span> == <span class="hljs-number">3</span>
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Methods defined in the context are available in tests. This is often a
+good technique for decoupling tests from your code, allowing you to
+define repeated set up and invocation details that are not relevant to
+the properties being tested.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>subtract(a, b); a - b <span class="hljs-keyword">end</span>
+
+    it <span class="hljs-string">'can subtract'</span> <span class="hljs-keyword">do</span>
+      raise <span class="hljs-string">"failed"</span> <span class="hljs-keyword">unless</span> subtract(<span class="hljs-number">2</span>, <span class="hljs-number">1</span>) == <span class="hljs-number">1</span>
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Another common pattern in tests is to set up a memoized variable and
+refer to it many times both in a single test, and across multiple tests.</p>
+<p>Each test is run in its own object, so the instance variable here will
+not persist across tests.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>input; <span class="hljs-variable">@input</span> ||= <span class="hljs-number">3</span> <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>Since this pattern is so common, a helper method <code>let</code> is provided. This
+invocation is exactly equivalent to the previous definiton of <code>input</code>.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    let(<span class="hljs-symbol">:input</span>) { <span class="hljs-number">3</span> }
+
+    it <span class="hljs-string">'can multiply'</span> <span class="hljs-keyword">do</span>
+      raise <span class="hljs-string">"failed"</span> <span class="hljs-keyword">unless</span> input * input == <span class="hljs-number">9</span>
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Contexts can be arbitrarily nested. This is useful for both for
+organisation and scoping of helper methods, and also grouping in test
+output.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    describe <span class="hljs-string">'division'</span> <span class="hljs-keyword">do</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>Method definitions from all parents are available in nested contexts.
+Here the <code>input</code> definition defined above is used.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      it <span class="hljs-string">'works'</span> <span class="hljs-keyword">do</span>
+        raise <span class="hljs-string">"failed"</span> <span class="hljs-keyword">unless</span> input / <span class="hljs-number">3</span> == <span class="hljs-number">1</span>
+      <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <h2 id="assertions">Assertions</h2>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Assertions</span></span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Assertions provide a nicer way of handling failures that raising error
+messages. Like most things in XSpec, they are optional, but it would be
+rare that you did not use some form of them.</p>
+<p>The <code>Simple</code> evaluator provides basic assertions. While included explicitly
+here, it is available in the default configuration so can usually be
+omitted.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  extend <span class="hljs-constant">XSpec</span>.dsl(
+    <span class="hljs-symbol">evaluator:</span> documentation_stack {
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">XSpec::Evaluator::Simple</span>
+    }
+  )
+
+  describe <span class="hljs-string">'greetings'</span> <span class="hljs-keyword">do</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>greet(x); <span class="hljs-string">"hello <span class="hljs-subst">#{x}</span>"</span> <span class="hljs-keyword">end</span>
+
+    it <span class="hljs-string">'addresses the caller'</span> <span class="hljs-keyword">do</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p><code>assert</code> is the basic building block of all assertions. It can be used
+with a single parameter, in which case it fails the test unless the
+parameter is truthy (not nil or false).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      assert <span class="hljs-string">"hello don"</span> == greet(<span class="hljs-string">"don"</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>It can also be given a second parameter, which is used instead of the
+default “assertion failed” failure message.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      assert <span class="hljs-string">"hello don"</span> == greet(<span class="hljs-string">"don"</span>), <span class="hljs-string">"greeting did not match expected"</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>A few helpers are provided for common assertions. These are simple
+wrappers around <code>assert</code> that provide a useful failure message.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      assert_equal <span class="hljs-string">"hello don"</span>, greet(<span class="hljs-string">"don"</span>)
+      assert_include <span class="hljs-string">"don"</span>, greet(<span class="hljs-string">"don"</span>)
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <h4 id="rspec-integration">RSpec Integration</h4>
+<p>A built-in context is provided to enable RSpec expectations. (You will need
+to add <code>rspec-expecations</code> as a dependency of your project.)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">RSpec</span></span>
+    extend <span class="hljs-constant">XSpec</span>.dsl(
+      <span class="hljs-symbol">evaluator:</span> documentation_stack {
+        <span class="hljs-keyword">include</span> <span class="hljs-constant">XSpec::Evaluator::RSpecExpectations</span>
+      }
+    )
+
+    it <span class="hljs-string">'adds'</span> <span class="hljs-keyword">do</span>
+      expect(<span class="hljs-number">1</span> + <span class="hljs-number">1</span>).to eq(<span class="hljs-number">2</span>)
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <h2 id="doubles">Doubles</h2>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Doubles</span></span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>Test doubles are “fake” objects that can stand in for collaborators in your
+system in order to make certain modules easier to unit test. XSpec’s
+implementation shares a philosophy with the
+<a href="https://code.google.com/p/mockito/">mockito</a> library, though provides far
+fewer features.</p>
+<p>Doubles are the sports car of testing techniques. Extremely powerful, but
+uncomfortably straightforward to drive into a tree. Only double behaviour
+that you own, do so sparingly, and you’ll stay a contented motorist.</p>
+<p>Test doubles are available in the default XSpec configuration.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  extend <span class="hljs-constant">XSpec</span>.dsl(
+    <span class="hljs-symbol">evaluator:</span> documentation_stack {
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">XSpec::Evaluator::Doubles</span>
+    }
+  )
+
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Repository</span></span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>store(document)
+      <span class="hljs-number">_</span> <span class="hljs-comment"># implementation not important</span>
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+
+  describe <span class="hljs-string">'save'</span> <span class="hljs-keyword">do</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>save(message, <span class="hljs-symbol">repository:</span> <span class="hljs-constant">Repository</span>.new)
+      repository.store(<span class="hljs-symbol">msg:</span> message)
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>Test doubles can be created as copies of existing classes. Use
+<code>instance_double</code> when you are doubling an instance (i.e.
+<code>Repository.new</code>), and <code>class_double</code> when doubling class methods.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    let(<span class="hljs-symbol">:repo</span>) { instance_double(<span class="hljs-string">'Doubles::Repository'</span>) }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>Doubles allow you to selectively verify interactions with them by
+wrapping them in a call to <code>verify</code> then calling the invocation you
+expected.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    it <span class="hljs-string">'stores a hash document in the repository'</span> <span class="hljs-keyword">do</span>
+      save(<span class="hljs-string">'hello'</span>, <span class="hljs-symbol">repository:</span> repo)
+      verify(repo).store(<span class="hljs-symbol">msg:</span> <span class="hljs-string">'hello'</span>)
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>If a matching method has not been called, the test will fail  This test
+will fail because the double did not receive a message with “hello”.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    it <span class="hljs-string">'stores a hash document in the repository - broken'</span> <span class="hljs-keyword">do</span>
+      expect_to_fail!
+
+      save(<span class="hljs-string">'goodbye'</span>, <span class="hljs-symbol">repository:</span> repo)
+      verify(repo).store(<span class="hljs-symbol">msg:</span> <span class="hljs-string">'hello'</span>)
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>Methods can be stubbed using <code>stub</code>. This has the benefit of allowing a
+return value to be specified. You still may choose to <code>verify</code> the
+invocation as well.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    it <span class="hljs-string">'stores a hash document in the repository'</span> <span class="hljs-keyword">do</span>
+      stub(repo).store(<span class="hljs-symbol">msg:</span> <span class="hljs-string">'hello'</span>) { <span class="hljs-keyword">true</span> }
+      save(<span class="hljs-string">'hello'</span>, <span class="hljs-symbol">repository:</span> repo)
+      verify(repo).store(<span class="hljs-symbol">msg:</span> <span class="hljs-string">'hello'</span>)
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>By default, doubling classes that do no exist is allowed. It is assumed
+that the test is being run in isolation so the collaborator, or it has
+not been implemented yet.</p>
+<p>If the class does exist, both <code>verify</code> and <code>stub</code> check invocations
+against methods that are actually implemented on the doubled class. This
+test fails because <code>put</code> is not a method.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    it <span class="hljs-string">'stores a hash document in the repository'</span> <span class="hljs-keyword">do</span>
+      expect_to_fail!
+      stub(repo).put(<span class="hljs-symbol">msg:</span> <span class="hljs-string">'hello'</span>)
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p>If the class does exist, any stub is allowed. It is assumed that
+this test will be run again in the future either once the class is
+implemented, or as part of a larger run that loads all collaborators.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    it <span class="hljs-string">'stores a hash document in an alternate repository'</span> <span class="hljs-keyword">do</span>
+      alt_repo = class_double(<span class="hljs-string">'RemoteRepository'</span>)
+      stub(alt_repo).put(<span class="hljs-symbol">msg:</span> <span class="hljs-string">'hello'</span>)
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <h4 id="strict-mode">Strict mode</h4>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Strict</span></span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>When you know that all collaborators are available, double support can
+be configured in strict mode.</p>
+<p>A cute trick is to disable this by default, and only enable it in full
+test runs. That way individual tests can be executed quickly without
+loading all dependencies.</p>
+<p>Strict mode is not enabled in the default XSpec configuration.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      extend <span class="hljs-constant">XSpec</span>.dsl(
+        <span class="hljs-symbol">evaluator:</span> documentation_stack {
+          <span class="hljs-keyword">include</span> <span class="hljs-constant">XSpec::Evaluator::Doubles</span>.with(<span class="hljs-symbol">:strict</span>)
+        }
+      )</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p>In strict mode, any attempt to double a class that does not exist will
+error.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      it <span class="hljs-string">'stores a hash document in an alternate repository'</span> <span class="hljs-keyword">do</span>
+        expect_to_fail!
+
+        class_double(<span class="hljs-string">'RemoteRepository'</span>)
+      <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <h2 id="notifiers">Notifiers</h2>
+<p>An XSpec notifier is an object that receives callbacks at different stages
+of a test run. Typically this is used to output progress.</p>
+<p>While only one notifier can be provided to <code>XSpec.dsl</code>, all built-in
+notifiers are composable, meaning they can be combined using <code>+</code> to create
+a single notifier that delegates to multiple children. Custom formatters
+can be made composable by include the <code>Composable</code> module.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Notifiers</span></span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <p>A notifier must implement four methods:</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DiagnosticNotifier</span></span>
+    <span class="hljs-keyword">include</span> <span class="hljs-constant">XSpec::Notifier::Composable</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <ul>
+<li><code>run_start</code> is called before any tests have been scheduled to run.</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_start
+      puts <span class="hljs-string">"The test run is starting"</span>
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-33">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-33">&#182;</a>
+              </div>
+              <ul>
+<li><code>evaluate_start</code> is called with a <code>NestedUnitOfWork</code> just as it is about
+to be evaluated.</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_start(uow)
+      puts <span class="hljs-string">"%s is running"</span> % uow.name
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-34">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-34">&#182;</a>
+              </div>
+              <ul>
+<li><code>evaluate_finish</code> is called with an <code>ExecutedUnitOfWork</code>, including all
+the data from the <code>NestedUnitOfWork</code> passed to <code>evaluate_start</code>, as
+well as any errors and the duration of the evaluation.</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_finish(result)
+      <span class="hljs-variable">@failed</span> ||= result.errors.any?
+
+      puts <span class="hljs-string">"finished with %i errors in %.3f"</span> % [
+        result.errors.length,
+        result.duration
+      ]
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-35">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-35">&#182;</a>
+              </div>
+              <ul>
+<li><code>run_finish</code> is called after all tests have been executed. The return
+value of this method is used to either pass or fail the run.</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_finish
+      puts <span class="hljs-string">"The test run has finished"</span>
+      !<span class="hljs-variable">@failed</span>
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-36">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-36">&#182;</a>
+              </div>
+              <p>Notifiers are configured in the <code>XSpec.dsl</code> method.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  extend <span class="hljs-constant">XSpec</span>.dsl(
+    <span class="hljs-symbol">notifier:</span> <span class="hljs-constant">DiagnosticNotifier</span>.new
+  )</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-37">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-37">&#182;</a>
+              </div>
+              <h4 id="built-in-notifiers">Built-in Notifiers</h4>
+<ul>
+<li><code>Character</code> outputs a single character for each test. A <code>.</code> for pass, <code>F</code>
+for fail, and <code>E</code> for an exception. It fails unless all tests are
+successful</li>
+<li><code>ColoredDocumentation</code> outputs timings and nested descriptions of each
+test. It uses ansi coloring to make successful tests green and failed ones
+red. It fails unless all tests are successful.</li>
+<li><code>Documentation</code> is identical to <code>ColoredDocumentation</code> except without the
+coloring. Useful if redirecting output to a file.</li>
+<li><code>FailuresAtEnd</code> collects all failures and displays details of them (full
+test name, failure message, cleaned backtrace) after all tests have been
+run. It fails unless all tests are successful.</li>
+<li><code>TimingsAtEnd</code> displays a histogram of test durations. It always
+succeeds.</li>
+<li><code>Composite</code> takes any number of other notifiers and delegates callbacks
+to each of them in turn. It fails unless all of those notifiers are
+successful. This notifier is created by the <code>+</code> operator of <code>Composable</code>
+notifiers, so is rarely instantiated directly.</li>
+<li><code>Null</code> does nothing and is always successful. It is useful as a parent
+class for other notifiers, or for testing purposes.</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">BuiltIn</span></span>
+    extend <span class="hljs-constant">XSpec</span>.dsl(
+      <span class="hljs-symbol">notifiers:</span>
+        <span class="hljs-constant">XSpec::Notifier::Character</span>.new +
+        <span class="hljs-constant">XSpec::Notifier::FailuresAtEnd</span>.new
+    )
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-38">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-38">&#182;</a>
+              </div>
+              <h2 id="evaluators">Evaluators</h2>
+<p><code>Evalutor</code> is the module responsible for executing an individual
+test. It will be mixed into a new context object that already has methods
+from the surrounding context defined (including <code>let</code> definitions), and
+then have its <code>call</code> implementation invoked.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Evaluators</span></span>
+  <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">NoTimeEvaluator</span></span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>call(uow)
+      instance_exec(&amp;uow.block)
+      []
+    <span class="hljs-keyword">rescue</span>
+      [<span class="hljs-constant">XSpec::Failure</span>.new(uow, <span class="hljs-string">"Failed"</span>, caller)]
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>sleep(<span class="hljs-number">_</span>)
+      <span class="hljs-number">_</span> <span class="hljs-comment"># noop</span>
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+
+  extend <span class="hljs-constant">XSpec</span>.dsl(
+    <span class="hljs-symbol">evaluator:</span> <span class="hljs-constant">NoTimeEvaluator</span>
+  )
+
+  it <span class="hljs-string">'will not execute'</span> <span class="hljs-keyword">do</span>
+    sleep <span class="hljs-number">1000</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-39">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-39">&#182;</a>
+              </div>
+              <p>Evaluators are usually composed by creating a <em>stack</em>, a module that includes
+other modules.</p>
+<p>This works best when individual evaluators call <code>super</code> in their <code>call</code>
+method and leave <code>Bottom</code> to actually execute the test. If you are familiar
+with Rack middleware, this is a very similar concept.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Stacks</span></span>
+  <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Stack</span></span>
+    <span class="hljs-keyword">include</span> <span class="hljs-constant">XSpec::Evaluator::Bottom</span>
+    <span class="hljs-keyword">include</span> <span class="hljs-constant">XSpec::Evaluator::Simple</span>
+    <span class="hljs-keyword">include</span> <span class="hljs-constant">XSpec::Evaluator::Doubles</span>
+    <span class="hljs-keyword">include</span> <span class="hljs-constant">XSpec::Evaluator::Top</span>
+  <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-40">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-40">&#182;</a>
+              </div>
+              <p>The <code>stack</code> method is a shorthand way of creating a stack that sandwiches
+the given block between the <code>Top</code> and <code>Bottom</code> evaluators. These two
+evaluators will be used by virtually every stack.</p>
+<p>See the <a href="evaluators.html">evaluator code documentation</a> for
+more details.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  extend <span class="hljs-constant">XSpec</span>.dsl(
+    <span class="hljs-symbol">evaluator:</span> <span class="hljs-constant">XSpec::Evaluator</span>.stack {
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">XSpec::Evaluator::Simple</span>
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">XSpec::Evaluator::Doubles</span>
+    }
+  )
+<span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-41">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-41">&#182;</a>
+              </div>
+              <h2 id="schedulers">Schedulers</h2>
+<p>A scheduler takes all tests and arranges them to be run. It delegates the
+actual work of running the test to the assertion context, but it is
+responsible for combining the result with timing information and triggering
+the notifier callbacks.</p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-42">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-42">&#182;</a>
+              </div>
+              <p><code>Serial</code> is the only built-in scheduler, and is the default. It runs all
+tests one at a time in the order they were loaded.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">BuiltInScheduler</span></span>
+  extend <span class="hljs-constant">XSpec</span>.dsl(
+    <span class="hljs-symbol">scheduler:</span> <span class="hljs-constant">XSpec::Scheduler::Serial</span>.new
+  )
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">CustomScheduler</span></span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-43">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-43">&#182;</a>
+              </div>
+              <p>This example scheduler runs tests in a random order and does not record
+durations.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ShuffleScheduler</span></span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run(context, notifier)
+      notifier.run_start
+
+      context.nested_units_of_work.sort_by { rand }.each <span class="hljs-keyword">do</span> |uow|
+        notifier.evaluate_start(uow)
+
+        errors   = uow.immediate_parent.execute(uow)
+        duration = <span class="hljs-number">0</span>
+        result   = <span class="hljs-constant">XSpec::ExecutedUnitOfWork</span>.new(uow, errors, duration)
+
+        notifier.evaluate_finish(result)
+      <span class="hljs-keyword">end</span>
+
+      notifier.run_finish
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+
+  extend <span class="hljs-constant">XSpec</span>.dsl(
+    <span class="hljs-symbol">scheduler:</span> <span class="hljs-constant">ShuffleScheduler</span>.new
+  )
+
+  it <span class="hljs-string">'executes'</span> <span class="hljs-keyword">do</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-44">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-44">&#182;</a>
+              </div>
+              <h2 id="running">Running</h2>
+<p>XSpec provides the <code>xspec</code> script, that can be used to run XSpec files. It is
+not required, but provides a number of niceties:</p>
+<ul>
+<li>Adds <code>spec</code> and <code>lib</code> directories to the load path.</li>
+<li>Loads all files passed as arguments.</li>
+<li>Exits non-zero if the run fails.</li>
+</ul>
+<p>(<code>autorun!</code> provides roughly equivalent behaviour.)</p>
+<p><code>xspec</code> requires a global <code>run!</code> method, which will be present if you extend
+<code>XSpec.dsl</code> into global scope, but in this file we have not done so and need
+to provide our own.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">def</span> </span><span class="hljs-keyword">self</span>.run!(*args)
+  exit <span class="hljs-number">1</span> <span class="hljs-keyword">unless</span> [
+    <span class="hljs-constant">Basics</span>,
+    <span class="hljs-constant">Assertions</span>,
+    <span class="hljs-constant">Assertions::RSpec</span>,
+    <span class="hljs-constant">Doubles</span>,
+    <span class="hljs-constant">Doubles::Strict</span>,
+    <span class="hljs-constant">Notifiers</span>,
+    <span class="hljs-constant">Notifiers::BuiltIn</span>,
+    <span class="hljs-constant">Evaluators</span>,
+    <span class="hljs-constant">Stacks</span>,
+    <span class="hljs-constant">BuiltInScheduler</span>,
+    <span class="hljs-constant">CustomScheduler</span>,
+  ].map {|x|
+    x.run!(*args)
+  }.all?
+<span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

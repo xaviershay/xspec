@@ -19,16 +19,6 @@
           <div id="jump_page">
             
               
-              <a class="source" href="xspec.html">
-                xspec.rb
-              </a>
-            
-              
-              <a class="source" href="assertion_contexts.html">
-                assertion_contexts.rb
-              </a>
-            
-              
               <a class="source" href="autorun.html">
                 autorun.rb
               </a>
@@ -56,6 +46,11 @@
               
               <a class="source" href="notifiers.html">
                 notifiers.rb
+              </a>
+            
+              
+              <a class="source" href="schedulers.html">
+                schedulers.rb
               </a>
             
           </div>
@@ -106,7 +101,7 @@
               </div>
               <p>A unit of work, usually created by the <code>it</code> DSL method, is a labeled,
 indivisible code block that expresses an assertion about a property of the
-system under test. They are run by an evaluator.</p>
+system under test. They are run by a scheduler.</p>
 
             </div>
             
@@ -133,7 +128,7 @@ decouple it.</p>
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">require</span> <span class="hljs-string">'xspec/dsl'</span>
   <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Context</span></span>
     <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-inheritance">&lt;</span><span class="hljs-inheritance">&lt; <span class="hljs-parent">self</span></span></span>
-      <span class="hljs-keyword">attr_reader</span> <span class="hljs-symbol">:name</span>, <span class="hljs-symbol">:children</span>, <span class="hljs-symbol">:units_of_work</span>, <span class="hljs-symbol">:assertion_context</span></pre></div></div>
+      <span class="hljs-keyword">attr_reader</span> <span class="hljs-symbol">:name</span>, <span class="hljs-symbol">:children</span>, <span class="hljs-symbol">:units_of_work</span>, <span class="hljs-symbol">:evaluator</span></pre></div></div>
             
         </li>
         
@@ -163,18 +158,18 @@ enables the recursive creation.</p>
               </div>
               <p>Each nested context creates a new class that inherits from the parent.
 Methods can be added to this class as per normal, and are correctly
-inherited by children. When it comes time to run tests, the evaluator
+inherited by children. When it comes time to run tests, the scheduler
 will create a new instance of the context (a class) for each test,
 making the defined methods available and also ensuring that there is no
 state pollution between tests.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>make(name, assertion_context, &amp;block)
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>make(name, evaluator, &amp;block)
         x = <span class="hljs-constant">Class</span>.new(<span class="hljs-keyword">self</span>)
-        x.initialize!(name, assertion_context)
+        x.initialize!(name, evaluator)
         x.class_eval(&amp;block) <span class="hljs-keyword">if</span> block
-        x.apply_assertion_context!
+        x.apply_evaluator!
         x
       <span class="hljs-keyword">end</span></pre></div></div>
             
@@ -193,11 +188,11 @@ explicitly when ever a dynamic subclass is created.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize!(name, assertion_context)
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize!(name, evaluator)
         <span class="hljs-variable">@children</span>          = []
         <span class="hljs-variable">@units_of_work</span>     = []
         <span class="hljs-variable">@name</span>              = name
-        <span class="hljs-variable">@assertion_context</span> = assertion_context
+        <span class="hljs-variable">@evaluator</span> = evaluator
       <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
@@ -215,8 +210,8 @@ clobber the assertion methods.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>apply_assertion_context!
-        <span class="hljs-keyword">include</span>(assertion_context)
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>apply_evaluator!
+        <span class="hljs-keyword">include</span>(evaluator)
       <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
@@ -253,8 +248,8 @@ others.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>root(assertion_context)
-        make(<span class="hljs-keyword">nil</span>, assertion_context)
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>root(evaluator)
+        make(<span class="hljs-keyword">nil</span>, evaluator)
       <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
@@ -272,7 +267,7 @@ and <code>it</code> DSL methods respectively.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>add_child_context(name = <span class="hljs-keyword">nil</span>, opts = {}, &amp;block)
-        <span class="hljs-keyword">self</span>.children &lt;&lt; make(name, assertion_context, &amp;block)
+        <span class="hljs-keyword">self</span>.children &lt;&lt; make(name, evaluator, &amp;block)
       <span class="hljs-keyword">end</span>
 
       <span class="hljs-function"><span class="hljs-keyword">def</span> </span>add_unit_of_work(name = <span class="hljs-keyword">nil</span>, opts = {}, &amp;block)
@@ -299,13 +294,13 @@ shared contexts. Methods and child contexts are ignored.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>create_shared_context(&amp;block)
-        make(<span class="hljs-keyword">nil</span>, assertion_context, &amp;block)
+        make(<span class="hljs-keyword">nil</span>, evaluator, &amp;block)
       <span class="hljs-keyword">end</span>
 
       <span class="hljs-function"><span class="hljs-keyword">def</span> </span>copy_into_tree(source_context)
         target_context = make(
           source_context.name,
-          source_context.assertion_context
+          source_context.evaluator
         )
         source_context.nested_units_of_work.each <span class="hljs-keyword">do</span> |x|
           target_context.units_of_work &lt;&lt; x.unit_of_work

@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>DSL</title>
+  <title>Schedulers</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -67,7 +67,7 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              <h1 id="dsl">DSL</h1>
+              <h1 id="schedulers">Schedulers</h1>
 
             </div>
             
@@ -80,35 +80,57 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <p>Common DSL functions are provided as a module so that they can be used in
-both top-level and nested contexts. The method names are modeled after
-rspec, and should behave roughly the same.</p>
-<p>They delegate to method in the <a href="xspec.html#section-5">current context</a> named
-in a way that more accurately represents XSpec implementation details.</p>
+              <p>Schedulers are responsible for collecting all units of work to be run and
+scheduling them.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">XSpec</span></span>
-  <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">DSL</span></span>
-    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>it(*args, &amp;block)
-      __xspec_context.add_unit_of_work(*args, &amp;block)
+  <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Scheduler</span></span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>The serial scheduler, unsurprisingly, runs all units of works serially in
+a loop. It is about as simple a scheduler as you can imagine. Parents
+are responsible for actually executing the work.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Serial</span></span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize(opts = {})
+        <span class="hljs-variable">@clock</span> = opts.fetch(<span class="hljs-symbol">:clock</span>, -&gt;{ <span class="hljs-constant">Time</span>.now.to_f })
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run(context, notifier)
+        notifier.run_start
+
+        context.nested_units_of_work.each <span class="hljs-keyword">do</span> |x|
+          notifier.evaluate_start(x)
+
+          start_time  = clock.()
+          errors      = x.immediate_parent.execute(x)
+          finish_time = clock.()
+
+          result = <span class="hljs-constant">ExecutedUnitOfWork</span>.new(x, errors, finish_time - start_time)
+          notifier.evaluate_finish(result)
+        <span class="hljs-keyword">end</span>
+
+        notifier.run_finish
+      <span class="hljs-keyword">end</span>
+
+      protected
+
+      <span class="hljs-keyword">attr_reader</span> <span class="hljs-symbol">:clock</span>
     <span class="hljs-keyword">end</span>
 
-    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>describe(*args, &amp;block)
-      __xspec_context.add_child_context(*args, &amp;block)
-    <span class="hljs-keyword">end</span>
-
-    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>let(*args, &amp;block)
-      __xspec_context.add_memoized_method(*args, &amp;block)
-    <span class="hljs-keyword">end</span>
-
-    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>shared_context(*args, &amp;block)
-      __xspec_context.create_shared_context(*args, &amp;block)
-    <span class="hljs-keyword">end</span>
-
-    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>it_behaves_like_a(context)
-      __xspec_context.copy_into_tree(context)
-    <span class="hljs-keyword">end</span>
+    <span class="hljs-constant">DEFAULT</span> = <span class="hljs-constant">Serial</span>.new
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span></pre></div></div>
             
