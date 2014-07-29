@@ -24,11 +24,6 @@
               </a>
             
               
-              <a class="source" href="assertion_contexts.html">
-                assertion_contexts.rb
-              </a>
-            
-              
               <a class="source" href="autorun.html">
                 autorun.rb
               </a>
@@ -56,6 +51,11 @@
               
               <a class="source" href="notifiers.html">
                 notifiers.rb
+              </a>
+            
+              
+              <a class="source" href="schedulers.html">
+                schedulers.rb
               </a>
             
           </div>
@@ -114,8 +114,7 @@ liking.</p>
             <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">def</span> </span>dsl(options = {})
     options = <span class="hljs-constant">XSpec</span>.add_defaults(options)
 
-    <span class="hljs-constant">Module</span>.new <span class="hljs-keyword">do</span>
-      <span class="hljs-keyword">include</span> <span class="hljs-constant">DSL</span></pre></div></div>
+    <span class="hljs-constant">Module</span>.new <span class="hljs-keyword">do</span></pre></div></div>
             
         </li>
         
@@ -126,15 +125,12 @@ liking.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
-              <p>Each DSL has its own independent context, which is described in detail
-in <code>data_structures.rb</code>.</p>
+              <p>Each DSL provides a standard set of methods provided by the <a href="dsl.html">DSL
+module</a>.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>__xspec_context
-        assertion_context = __xspec_opts.fetch(<span class="hljs-symbol">:assertion_context</span>)
-        <span class="hljs-variable">@__xspec_context</span> ||= <span class="hljs-constant">XSpec::Context</span>.root(assertion_context)
-      <span class="hljs-keyword">end</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">include</span> <span class="hljs-constant">DSL</span></pre></div></div>
             
         </li>
         
@@ -144,6 +140,26 @@ in <code>data_structures.rb</code>.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>In addition, each DSL has its own independent context, which is
+described in detail in the
+<a href="data_structures.html"><code>data_structures.rb</code></a>.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>__xspec_context
+        evaluator = __xspec_opts.fetch(<span class="hljs-symbol">:evaluator</span>)
+        <span class="hljs-variable">@__xspec_context</span> ||= <span class="hljs-constant">XSpec::Context</span>.root(evaluator)
+      <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
               <p>Some meta-magic is needed to enable the options from local scope above
 to be available inside the module.</p>
@@ -155,30 +171,33 @@ to be available inside the module.</p>
         </li>
         
         
-        <li id="section-6">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-6">&#182;</a>
-              </div>
-              <p><code>run!</code> is where the magic happens. Typically called at the end of a
-file (or by <code>autorun!</code>), this method takes all the data that was
-accumulated by the DSL methods above and runs it through the evaluator.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run!
-        __xspec_opts.fetch(<span class="hljs-symbol">:evaluator</span>).run(__xspec_context)
-      <span class="hljs-keyword">end</span></pre></div></div>
-            
-        </li>
-        
-        
         <li id="section-7">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p><code>run!</code> is where the magic happens. Typically called at the end of a
+file (or by <code>autorun!</code>), this method takes all the data that was
+accumulated by the DSL methods above and runs it through the scheduler.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run!
+        notifier  = __xspec_opts.fetch(<span class="hljs-symbol">:notifier</span>)
+        scheduler = __xspec_opts.fetch(<span class="hljs-symbol">:scheduler</span>)
+
+        scheduler.run(__xspec_context, notifier)
+      <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
               <p>It is often convenient to trigger a run after all files have been
 processed, which is what <code>autorun!</code> sets up for you. Requiring
@@ -199,14 +218,15 @@ processed, which is what <code>autorun!</code> sets up for you. Requiring
         </li>
         
         
-        <li id="section-8">
+        <li id="section-9">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-8">&#182;</a>
+                <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
-              <p>Understanding the data structures used by XSpec will assist you in
-understanding the behavoural components such as the evaluator and notifier.</p>
+              <p>Understanding the <a href="data_structures.html">data structures</a> used by XSpec will
+assist you in understanding the behavoural components such as the scheduler
+and notifier. Read it next.</p>
 
             </div>
             
@@ -215,15 +235,15 @@ understanding the behavoural components such as the evaluator and notifier.</p>
         </li>
         
         
-        <li id="section-9">
+        <li id="section-10">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-9">&#182;</a>
+                <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
-              <p>To further explore the code base, dive into the defaults file, which
-describes the different sub-components of XSpec that you can use or
-customize.</p>
+              <p>To further explore the code base, dive into the <a href="defaults.html">defaults
+file</a>, which describes the different sub-components of XSpec
+that you can use or customize.</p>
 
             </div>
             
