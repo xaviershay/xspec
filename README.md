@@ -93,8 +93,8 @@ Documentation
 
 There are two major sources of documentation:
 
-* [Main API documentation.](https://xaviershay.github.io/xspec/api.html)
-* [Literate source code.](https://xaviershay.github.io/xspec/)
+* [Main API documentation.](https://xaviershay.github.io/xspec/docs/api.html)
+* [Literate source code.](https://xaviershay.github.io/xspec/docs/xspec.html)
 
 It is expected that regular users of XSpec will read both at least once. There
 isn't much to them, and they will give you a useful mental model of how XSpec
