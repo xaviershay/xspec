@@ -154,6 +154,16 @@ describe 'null notifier' do
   it_behaves_like_a ComposableNotifier
 end
 
+describe 'timings at end' do
+  let(:notifier) { XSpec::Notifier::TimingsAtEnd.new }
+
+  it 'always returns true' do
+    assert notifier.run_finish
+  end
+
+  it_behaves_like_a ComposableNotifier
+end
+
 def make_nested_test(parent_names = [], work_name = nil)
   XSpec::NestedUnitOfWork.new(
     parent_names.map {|name| XSpec::Context.make(name, Module.new) },

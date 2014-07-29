@@ -1,0 +1,4 @@
+language: ruby
+script: bundle exec bin/xspec
+rvm:
+  - 2.1.2

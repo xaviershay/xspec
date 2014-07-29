@@ -1,14 +1,14 @@
 XSpec
 =====
 
-XSpec is an rspec-inspired testing library that is written in a literate style
-and designed to be obvious to use, highly modular, and easy to extend.
-
-Open up `lib/xspec.rb` and start reading, or use this [nicely formatted
-version](http://xaviershay.github.io/xspec/).
+XSpec is an rspec-inspired testing library for Ruby that is written in a
+literate style and designed to be obvious to use, highly modular, and easy to
+extend.
 
 Usage
 -----
+
+    gem install xspec
 
 The default configuration XSpec provides a number of interesting features:
 assertions, doubles, and rich output.
@@ -40,7 +40,7 @@ Running this with the built-in runner generates some pretty output. You can't
 see the colors in this README, but trust me they are quite lovely.
 
 ```
-> bin/xspec example.rb
+> xspec example.rb
 
 my application
   0.000s does math
@@ -61,8 +61,7 @@ my application fails:
   bin/xspec:19:in `<main>'
 ```
 
-Customization
--------------
+### Customization
 
 Every aspect of XSpec is customizable, from how tests are scheduled and run all
 the way through to formatting of output.
@@ -86,56 +85,29 @@ describe '...' do
 end
 ```
 
-Of course, you can easily make your own extension classes as well. A runner
-that randomly drops tests and reports random durations? Whatever floats your
-boat:
+Of course, you can make your own extension classes as well. For details, see
+the "Configuration" section of the documentation.
 
-``` ruby
-require 'xspec'
+Documentation
+-------------
 
-class UnhelpfulRunner
-  attr_reader :notifier
+There are two major sources of documentation:
 
-  def initialize(opts)
-    @notifier = opts.fetch(:notifier)
-  end
+* [Main API documentation.](https://xaviershay.github.io/xspec/api.html)
+* [Literate source code.](https://xaviershay.github.io/xspec/)
 
-  def run(context)
-    notifier.run_start
-
-    context.nested_units_of_work.each do |x|
-      next if rand > 0.9
-
-      notifier.evaluate_start(x)
-
-      errors   = x.immediate_parent.execute(x)
-      duration = rand
-      result   = XSpec::ExecutedUnitOfWork.new(x, errors, duration)
-
-      notifier.evaluate_finish(result)
-    end
-
-    notifier.run_finish
-  end
-end
-
-extend XSpec.dsl(
-  evaluator: UnhelpfulRunner.new(notifier: XSpec::Notifier::DEFAULT)
-)
-
-describe '...' do
-  # etc etc
-end
-```
+It is expected that regular users of XSpec will read both at least once. There
+isn't much to them, and they will give you a useful mental model of how XSpec
+works.
 
 Developing
 ----------
 
 Follow the idioms you find in the source, they are somewhat different than
-a traditional Ruby project. Bug fixes welcome, features likely to be rejected
-since I have a strong opinion of what this library should and should not do.
-Talk to me before embarking on anything large. Tests are written in XSpec,
-which might do your head in:
+a traditional Ruby project. Bug fixes welcome, though features are likely to be
+rejected since I have a strong opinion of what this library should and should
+not do. Talk to me before embarking on anything large. Tests are written in
+XSpec, which might do your head in:
 
     bundle install
-    bundle exec bin/run-specs
+    bundle exec bin/xspec

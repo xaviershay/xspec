@@ -1,8 +1,8 @@
 require 'spec_helper'
 
 describe 'simple assertion context' do
-  let(:subject) { Class.new { include XSpec::AssertionContext.stack {
-    include XSpec::AssertionContext::Simple
+  let(:subject) { Class.new { include XSpec::Evaluator.stack {
+    include XSpec::Evaluator::Simple
   }}.new }
 
   describe 'assert' do
@@ -14,7 +14,7 @@ describe 'simple assertion context' do
       begin
         subject.assert(false)
         fail "Assertion did not fail"
-      rescue XSpec::AssertionContext::Simple::AssertionFailed => e
+      rescue XSpec::Evaluator::Simple::AssertionFailed => e
         assert_equal "assertion failed", e.message
       end
     end
@@ -23,7 +23,7 @@ describe 'simple assertion context' do
       begin
         subject.assert(false, "nope")
         fail "Assertion did not fail"
-      rescue XSpec::AssertionContext::Simple::AssertionFailed => e
+      rescue XSpec::Evaluator::Simple::AssertionFailed => e
         assert_equal "nope", e.message
       end
     end
@@ -38,7 +38,7 @@ describe 'simple assertion context' do
       begin
         subject.assert_equal("a", "b")
         fail "Assertion did not fail"
-      rescue XSpec::AssertionContext::Simple::AssertionFailed => e
+      rescue XSpec::Evaluator::Simple::AssertionFailed => e
         assert_include 'want: "a"', e.message
         assert_include 'got: "b"', e.message
       end
@@ -50,7 +50,7 @@ describe 'simple assertion context' do
       begin
         subject.fail
         assert false, "fail did not fail"
-      rescue XSpec::AssertionContext::Simple::AssertionFailed => e
+      rescue XSpec::Evaluator::Simple::AssertionFailed => e
         assert_equal "failed", e.message
       end
     end
@@ -59,7 +59,7 @@ describe 'simple assertion context' do
       begin
         subject.fail ":("
         assert false, "fail did not fail"
-      rescue XSpec::AssertionContext::Simple::AssertionFailed => e
+      rescue XSpec::Evaluator::Simple::AssertionFailed => e
         assert_equal ":(", e.message
       end
     end

@@ -11,7 +11,7 @@ Gem::Specification.new do |gem|
   gem.homepage      = "http://github.com/xaviershay/xspec"
 
   gem.executables   = []
-  gem.required_ruby_version = '>= 1.9.0'
+  gem.required_ruby_version = '>= 2.1.0'
   gem.files         = Dir.glob("{spec,lib}/**/*.rb") + %w(
                         README.md
                         xspec.gemspec
@@ -22,6 +22,6 @@ Gem::Specification.new do |gem|
   gem.bindir        = "bin"
   gem.executables  << "xspec"
   gem.license       = "Apache 2.0"
-  gem.version       = "0.0.1"
+  gem.version       = "0.1.0"
   gem.has_rdoc      = false
 end

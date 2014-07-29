@@ -1,6 +1,11 @@
+# # DSL
+
 # Common DSL functions are provided as a module so that they can be used in
 # both top-level and nested contexts. The method names are modeled after
 # rspec, and should behave roughly the same.
+#
+# They delegate to method in the [current context](xspec.html#section-5) named
+# in a way that more accurately represents XSpec implementation details.
 module XSpec
   module DSL
     def it(*args, &block)

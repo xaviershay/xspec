@@ -7,7 +7,7 @@
 module XSpec
   # A unit of work, usually created by the `it` DSL method, is a labeled,
   # indivisible code block that expresses an assertion about a property of the
-  # system under test. They are run by an evaluator.
+  # system under test. They are run by a scheduler.
   UnitOfWork = Struct.new(:name, :block)
 
 
@@ -20,7 +20,7 @@ module XSpec
   require 'xspec/dsl'
   class Context
     class << self
-      attr_reader :name, :children, :units_of_work, :assertion_context
+      attr_reader :name, :children, :units_of_work, :evaluator
 
       # A context includes the same DSL methods as the root level module, which
       # enables the recursive creation.
@@ -29,33 +29,33 @@ module XSpec
 
       # Each nested context creates a new class that inherits from the parent.
       # Methods can be added to this class as per normal, and are correctly
-      # inherited by children. When it comes time to run tests, the evaluator
+      # inherited by children. When it comes time to run tests, the scheduler
       # will create a new instance of the context (a class) for each test,
       # making the defined methods available and also ensuring that there is no
       # state pollution between tests.
-      def make(name, assertion_context, &block)
+      def make(name, evaluator, &block)
         x = Class.new(self)
-        x.initialize!(name, assertion_context)
+        x.initialize!(name, evaluator)
         x.class_eval(&block) if block
-        x.apply_assertion_context!
+        x.apply_evaluator!
         x
       end
 
       # A class cannot have an implicit initializer, but some variable
       # inititialization is required so the `initialize!` method is called
       # explicitly when ever a dynamic subclass is created.
-      def initialize!(name, assertion_context)
+      def initialize!(name, evaluator)
         @children          = []
         @units_of_work     = []
         @name              = name
-        @assertion_context = assertion_context
+        @evaluator = evaluator
       end
 
       # The assertion context should be applied after the user has had a chance
       # to add their own methods. It needs to be last so that users can't
       # clobber the assertion methods.
-      def apply_assertion_context!
-        include(assertion_context)
+      def apply_evaluator!
+        include(evaluator)
       end
 
       # Executing a unit of work creates a new instance and hands it off to the
@@ -68,14 +68,14 @@ module XSpec
 
       # The root context is nothing special, and behaves the same as all the
       # others.
-      def root(assertion_context)
-        make(nil, assertion_context)
+      def root(evaluator)
+        make(nil, evaluator)
       end
 
       # Child contexts and units of work are typically added by the `describe`
       # and `it` DSL methods respectively.
       def add_child_context(name = nil, opts = {}, &block)
-        self.children << make(name, assertion_context, &block)
+        self.children << make(name, evaluator, &block)
       end
 
       def add_unit_of_work(name = nil, opts = {}, &block)
@@ -91,13 +91,13 @@ module XSpec
       # This is leaky abstraction, since only units of work are copied from
       # shared contexts. Methods and child contexts are ignored.
       def create_shared_context(&block)
-        make(nil, assertion_context, &block)
+        make(nil, evaluator, &block)
       end
 
       def copy_into_tree(source_context)
         target_context = make(
           source_context.name,
-          source_context.assertion_context
+          source_context.evaluator
         )
         source_context.nested_units_of_work.each do |x|
           target_context.units_of_work << x.unit_of_work

@@ -1,5 +1,9 @@
 #!/usr/bin/env ruby
 
+$LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
+
+require 'xspec'
+
 $LOAD_PATH.unshift "spec"
 $LOAD_PATH.unshift "lib"
 
@@ -8,8 +12,6 @@ files = if ARGV.any? {|x| x.length > 0 }
 else
   Dir['spec/**/*_spec.rb']
 end
-
-require 'xspec'
 
 files.each do |f|
   load f

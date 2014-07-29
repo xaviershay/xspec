@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-ruby -Ilib -Ispec spec/all_specs.rb "$*"

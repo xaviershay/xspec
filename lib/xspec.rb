@@ -16,13 +16,16 @@ module XSpec
     options = XSpec.add_defaults(options)
 
     Module.new do
+      # Each DSL provides a standard set of methods provided by the [DSL
+      # module](dsl.html).
       include DSL
 
-      # Each DSL has its own independent context, which is described in detail
-      # in `data_structures.rb`.
+      # In addition, each DSL has its own independent context, which is
+      # described in detail in the
+      # [`data_structures.rb`](data_structures.html).
       def __xspec_context
-        assertion_context = __xspec_opts.fetch(:assertion_context)
-        @__xspec_context ||= XSpec::Context.root(assertion_context)
+        evaluator = __xspec_opts.fetch(:evaluator)
+        @__xspec_context ||= XSpec::Context.root(evaluator)
       end
 
       # Some meta-magic is needed to enable the options from local scope above
@@ -31,9 +34,12 @@ module XSpec
 
       # `run!` is where the magic happens. Typically called at the end of a
       # file (or by `autorun!`), this method takes all the data that was
-      # accumulated by the DSL methods above and runs it through the evaluator.
+      # accumulated by the DSL methods above and runs it through the scheduler.
       def run!
-        __xspec_opts.fetch(:evaluator).run(__xspec_context)
+        notifier  = __xspec_opts.fetch(:notifier)
+        scheduler = __xspec_opts.fetch(:scheduler)
+
+        scheduler.run(__xspec_context, notifier)
       end
 
       # It is often convenient to trigger a run after all files have been
@@ -49,13 +55,14 @@ module XSpec
   module_function :dsl
 end
 
-# Understanding the data structures used by XSpec will assist you in
-# understanding the behavoural components such as the evaluator and notifier.
+# Understanding the [data structures](data_structures.html) used by XSpec will
+# assist you in understanding the behavoural components such as the scheduler
+# and notifier. Read it next.
 require 'xspec/data_structures'
 
-# To further explore the code base, dive into the defaults file, which
-# describes the different sub-components of XSpec that you can use or
-# customize.
+# To further explore the code base, dive into the [defaults
+# file](defaults.html), which describes the different sub-components of XSpec
+# that you can use or customize.
 require 'xspec/defaults'
 
 require 'xspec/dsl'

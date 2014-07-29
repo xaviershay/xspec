@@ -7,6 +7,7 @@ set -ex
 git checkout gh-pages
 git merge master
 docco lib/**/*.rb
+docco doc/*.rb
 git add .
 git commit -m "Updating docs."
 git push origin HEAD

@@ -116,6 +116,8 @@ module XSpec
           ]
         end
         out.puts
+
+        true
       end
 
     private
@@ -177,6 +179,8 @@ module XSpec
 
         false
       end
+
+      private
 
       def full_name(unit_of_work)
         (unit_of_work.parents + [unit_of_work]).map(&:name).compact.join(' ')
