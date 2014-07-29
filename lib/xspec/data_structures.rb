@@ -2,7 +2,7 @@
 
 # XSpec data structures are very dumb. They:
 #
-# * Only contain iteration and creation logic.
+# * Only contain iteration, property, and creation logic.
 # * Do not store recursive references ("everything flows downhill").
 module XSpec
   # A unit of work, usually created by the `it` DSL method, is a labeled,
@@ -156,6 +156,21 @@ module XSpec
     def block; unit_of_work.block; end
     def name;  unit_of_work.name; end
 
+    def full_name
+      (parents + [self]).map(&:name).compact.join(' ')
+    end
+
+    def short_id
+      length  = 3
+      base    = 32
+      digest  = Digest::SHA1.hexdigest(full_name).hex
+      bottom  = base ** (length-1)
+      top     = base ** length
+      shifted = digest % (top - bottom) + bottom
+
+      shifted.to_s(base)
+    end
+
     def immediate_parent
       parents.last
     end
@@ -170,6 +185,8 @@ module XSpec
   ExecutedUnitOfWork = Struct.new(:nested_unit_of_work, :errors, :duration) do
     def name; nested_unit_of_work.name end
     def parents; nested_unit_of_work.parents end
+    def full_name; nested_unit_of_work.full_name end
+    def short_id; nested_unit_of_work.short_id end
   end
 
   # A test failure will be reported as a `Failure`, which includes contextual

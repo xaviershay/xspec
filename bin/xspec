@@ -9,13 +9,17 @@ require 'xspec'
 $LOAD_PATH.unshift "spec"
 $LOAD_PATH.unshift "lib"
 
-filter = //
+filter    = //
+short_ids = []
 
 parser = OptionParser.new
 parser.banner = "Usage: xspec [options] [files]"
 parser.separator ""
 parser.on('-e FILTER', "Only run specs with full name including FILTER") do |f|
   filter = Regexp.new(f)
+end
+parser.on('-f ID', "Run spec with short id ID. Overrides -e option.") do |f|
+  short_ids << f
 end
 parser.on("-h", "--help", "Show this message") do
   $stderr.puts parser
@@ -40,8 +44,11 @@ if respond_to?(:run!)
   exit 1 unless run!(scheduler: XSpec::Scheduler::Filter.new(
     scheduler: __xspec_opts.fetch(:scheduler),
     filter:    -> uow {
-      full_name = (uow.parents + [uow]).map(&:name).compact.join(' ')
-      full_name =~ filter
+      if short_ids.any?
+        short_ids.include?(XSpec.short_id(uow.full_name))
+      else
+        uow.full_name =~ filter
+      end
     }
   ))
 else

@@ -170,7 +170,11 @@ module XSpec
 
         out.puts
         errors.each do |error|
-          out.puts "%s:\n%s\n\n" % [full_name(error.unit_of_work), error.message.lines.map {|x| "  #{x}"}.join("")]
+          out.puts "%s - %s\n%s\n\n" % [
+            error.unit_of_work.short_id,
+            error.unit_of_work.full_name,
+            error.message.lines.map {|x| "  #{x}"}.join("")
+          ]
           clean_backtrace(error.caller).each do |line|
             out.puts "  %s" % line
           end
@@ -181,10 +185,6 @@ module XSpec
       end
 
       private
-
-      def full_name(unit_of_work)
-        (unit_of_work.parents + [unit_of_work]).map(&:name).compact.join(' ')
-      end
 
       # A standard backtrace contains many entries for XSpec itself which are
       # not useful for debugging your tests, so they are stripped out.
@@ -234,7 +234,11 @@ module XSpec
         else
           colorize(name , :green)
         end
-        "%.3fs " % result.duration + out
+        "%.3fs %s %s" % [
+          result.duration,
+          result.short_id,
+          out,
+        ]
       end
 
       def initialize(out = $stdout)
