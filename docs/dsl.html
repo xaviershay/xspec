@@ -19,11 +19,6 @@
           <div id="jump_page">
             
               
-              <a class="source" href="xspec.html">
-                xspec.rb
-              </a>
-            
-              
               <a class="source" href="autorun.html">
                 autorun.rb
               </a>
@@ -111,7 +106,7 @@ in a way that more accurately represents XSpec implementation details.</p>
       __xspec_context.create_shared_context(*args, &amp;block)
     <span class="hljs-keyword">end</span>
 
-    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>it_behaves_like_a(context)
+    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>include_context(context)
       __xspec_context.copy_into_tree(context)
     <span class="hljs-keyword">end</span>
   <span class="hljs-keyword">end</span>

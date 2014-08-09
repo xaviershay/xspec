@@ -19,11 +19,6 @@
           <div id="jump_page">
             
               
-              <a class="source" href="xspec.html">
-                xspec.rb
-              </a>
-            
-              
               <a class="source" href="autorun.html">
                 autorun.rb
               </a>
@@ -113,8 +108,9 @@ are responsible for actually executing the work.</p>
         <span class="hljs-variable">@clock</span> = opts.fetch(<span class="hljs-symbol">:clock</span>, -&gt;{ <span class="hljs-constant">Time</span>.now.to_f })
       <span class="hljs-keyword">end</span>
 
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run(context, notifier)
-        notifier.run_start
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run(context, config)
+        notifier = config.fetch(<span class="hljs-symbol">:notifier</span>)
+        notifier.run_start(config)
 
         context.nested_units_of_work.each <span class="hljs-keyword">do</span> |x|
           notifier.evaluate_start(x)
@@ -133,6 +129,25 @@ are responsible for actually executing the work.</p>
       protected
 
       <span class="hljs-keyword">attr_reader</span> <span class="hljs-symbol">:clock</span>
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Filter</span></span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize(<span class="hljs-symbol">scheduler:</span>, <span class="hljs-symbol">filter:</span>)
+        <span class="hljs-variable">@scheduler</span> = scheduler
+        <span class="hljs-variable">@filter</span>    = filter
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run(context, config)
+        scheduler.run(<span class="hljs-constant">FilteredContext</span>.new(context, filter), config)
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-constant">FilteredContext</span> = <span class="hljs-constant">Struct</span>.new(<span class="hljs-symbol">:context</span>, <span class="hljs-symbol">:filter</span>) <span class="hljs-keyword">do</span>
+        <span class="hljs-function"><span class="hljs-keyword">def</span> </span>nested_units_of_work
+          context.nested_units_of_work.select(&amp;filter)
+        <span class="hljs-keyword">end</span>
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-keyword">attr_reader</span> <span class="hljs-symbol">:scheduler</span>, <span class="hljs-symbol">:filter</span>
     <span class="hljs-keyword">end</span>
 
     <span class="hljs-constant">DEFAULT</span> = <span class="hljs-constant">Serial</span>.new

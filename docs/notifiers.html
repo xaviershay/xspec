@@ -19,11 +19,6 @@
           <div id="jump_page">
             
               
-              <a class="source" href="xspec.html">
-                xspec.rb
-              </a>
-            
-              
               <a class="source" href="autorun.html">
                 autorun.rb
               </a>
@@ -103,6 +98,29 @@ summarizing the run when it finished.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
+              <p>A formatter must implement at least four methods. <code>run_start</code> and
+<code>run_finish</code> are called at the beginning and end of the full spec run
+respectively, while <code>evaluate_start</code> and <code>evaluate_finish</code> are called for
+each test. See <a href="api.html#notifiers">API docs</a> for more information.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">EmptyFormatter</span></span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_start(*<span class="hljs-number">_</span>); <span class="hljs-keyword">end</span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_start(*<span class="hljs-number">_</span>); <span class="hljs-keyword">end</span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_finish(*<span class="hljs-number">_</span>); <span class="hljs-keyword">end</span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_finish(*<span class="hljs-number">_</span>); <span class="hljs-keyword">true</span>; <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
               <p>Many notifiers play nice with others, and can be composed together in a
 way that each notifier will have its callback run in turn.</p>
 
@@ -121,8 +139,8 @@ way that each notifier will have its callback run in turn.</p>
         <span class="hljs-variable">@notifiers</span> = notifiers
       <span class="hljs-keyword">end</span>
 
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_start
-        notifiers.each(&amp;<span class="hljs-symbol">:run_start</span>)
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_start(*args)
+        notifiers.each {|x| x.run_start(*args) }
       <span class="hljs-keyword">end</span>
 
       <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_start(*args)
@@ -145,11 +163,11 @@ way that each notifier will have its callback run in turn.</p>
         </li>
         
         
-        <li id="section-4">
+        <li id="section-5">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-4">&#182;</a>
+                <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
               <p>Outputs a single character for each executed unit of work representing
 the result.</p>
@@ -157,15 +175,12 @@ the result.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Character</span></span>
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">EmptyFormatter</span>
       <span class="hljs-keyword">include</span> <span class="hljs-constant">Composable</span>
 
       <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize(out = <span class="hljs-variable">$stdout</span>)
         <span class="hljs-variable">@out</span> = out
       <span class="hljs-keyword">end</span>
-
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_start; <span class="hljs-keyword">end</span>
-
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_start(*<span class="hljs-number">_</span>); <span class="hljs-keyword">end</span>
 
       <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_finish(result)
         <span class="hljs-variable">@out</span>.print label_for_failure(result.errors[<span class="hljs-number">0</span>])
@@ -186,23 +201,23 @@ the result.</p>
           <span class="hljs-keyword">else</span> <span class="hljs-string">'.'</span>
         <span class="hljs-keyword">end</span>
       <span class="hljs-keyword">end</span>
-
     <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-5">
+        <li id="section-6">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-5">&#182;</a>
+                <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
               <p>Renders a histogram of test durations after the entire run is complete.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TimingsAtEnd</span></span>
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">EmptyFormatter</span>
       <span class="hljs-keyword">include</span> <span class="hljs-constant">Composable</span>
 
       <span class="hljs-constant">DEFAULT_SPLITS</span> = [<span class="hljs-number">0</span>.<span class="hljs-number">001</span>, <span class="hljs-number">0</span>.<span class="hljs-number">005</span>, <span class="hljs-number">0</span>.<span class="hljs-number">01</span>, <span class="hljs-number">0</span>.<span class="hljs-number">1</span>, <span class="hljs-number">1.0</span>, <span class="hljs-constant">Float::INFINITY</span>]
@@ -215,11 +230,6 @@ the result.</p>
         <span class="hljs-variable">@splits</span>  = splits
         <span class="hljs-variable">@width</span>   = width
         <span class="hljs-variable">@out</span>     = out
-      <span class="hljs-keyword">end</span>
-
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_start(*<span class="hljs-number">_</span>); <span class="hljs-keyword">end</span>
-
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_start(<span class="hljs-number">_</span>)
       <span class="hljs-keyword">end</span>
 
       <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_finish(result)
@@ -276,27 +286,49 @@ the result.</p>
         </li>
         
         
-        <li id="section-6">
+        <li id="section-7">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-6">&#182;</a>
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Provides convenience methods for working with short ids.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">ShortIdSupport</span></span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_start(config)
+        <span class="hljs-keyword">super</span>
+        <span class="hljs-variable">@short_id</span> = config.fetch(<span class="hljs-symbol">:short_id</span>)
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>short_id_for(x)
+        <span class="hljs-variable">@short_id</span>.(x)
+      <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
               <p>Outputs error messages and backtraces after the entire run is complete.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FailuresAtEnd</span></span>
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">EmptyFormatter</span>
       <span class="hljs-keyword">include</span> <span class="hljs-constant">Composable</span>
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">ShortIdSupport</span>
 
       <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize(out = <span class="hljs-variable">$stdout</span>)
         <span class="hljs-variable">@errors</span> = []
         <span class="hljs-variable">@out</span>    = out
       <span class="hljs-keyword">end</span>
-
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_start; <span class="hljs-keyword">end</span>
-
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_start(*<span class="hljs-number">_</span>); <span class="hljs-keyword">end</span>
 
       <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_finish(result)
         <span class="hljs-keyword">self</span>.errors += result.errors
@@ -307,7 +339,11 @@ the result.</p>
 
         out.puts
         errors.each <span class="hljs-keyword">do</span> |error|
-          out.puts <span class="hljs-string">"%s:\n%s\n\n"</span> % [full_name(error.unit_of_work), error.message.lines.map {|x| <span class="hljs-string">"  <span class="hljs-subst">#{x}</span>"</span>}.join(<span class="hljs-string">""</span>)]
+          out.puts <span class="hljs-string">"%s - %s\n%s\n\n"</span> % [
+            short_id_for(error.unit_of_work),
+            error.unit_of_work.full_name,
+            error.message.lines.map {|x| <span class="hljs-string">"  <span class="hljs-subst">#{x}</span>"</span>}.join(<span class="hljs-string">""</span>)
+          ]
           clean_backtrace(error.caller).each <span class="hljs-keyword">do</span> |line|
             out.puts <span class="hljs-string">"  %s"</span> % line
           <span class="hljs-keyword">end</span>
@@ -317,20 +353,16 @@ the result.</p>
         <span class="hljs-keyword">false</span>
       <span class="hljs-keyword">end</span>
 
-      private
-
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>full_name(unit_of_work)
-        (unit_of_work.parents + [unit_of_work]).map(&amp;<span class="hljs-symbol">:name</span>).compact.join(<span class="hljs-string">' '</span>)
-      <span class="hljs-keyword">end</span></pre></div></div>
+      private</pre></div></div>
             
         </li>
         
         
-        <li id="section-7">
+        <li id="section-9">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-7">&#182;</a>
+                <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
               <p>A standard backtrace contains many entries for XSpec itself which are
 not useful for debugging your tests, so they are stripped out.</p>
@@ -353,11 +385,11 @@ not useful for debugging your tests, so they are stripped out.</p>
         </li>
         
         
-        <li id="section-8">
+        <li id="section-10">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-8">&#182;</a>
+                <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
               <p>Includes nicely formatted names and durations of each test in the output,
 with color.</p>
@@ -365,9 +397,9 @@ with color.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ColoredDocumentation</span></span>
-      <span class="hljs-keyword">require</span> <span class="hljs-string">'set'</span>
-
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">EmptyFormatter</span>
       <span class="hljs-keyword">include</span> <span class="hljs-constant">Composable</span>
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">ShortIdSupport</span>
 
       <span class="hljs-constant">VT100_COLORS</span> = {
         <span class="hljs-symbol">:black</span>   =&gt; <span class="hljs-number">30</span>,
@@ -380,34 +412,12 @@ with color.</p>
         <span class="hljs-symbol">:white</span>   =&gt; <span class="hljs-number">37</span>
       }
 
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>color_code_for(color)
-        <span class="hljs-constant">VT100_COLORS</span>.fetch(color)
-      <span class="hljs-keyword">end</span>
-
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>colorize(text, color)
-        <span class="hljs-string">"\e[<span class="hljs-subst">#{color_code_for(color)}</span>m<span class="hljs-subst">#{text}</span>\e[0m"</span>
-      <span class="hljs-keyword">end</span>
-
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>decorate(result)
-        name = result.name
-        out = <span class="hljs-keyword">if</span> result.errors.any?
-          colorize(append_failed(name), <span class="hljs-symbol">:red</span>)
-        <span class="hljs-keyword">else</span>
-          colorize(name , <span class="hljs-symbol">:green</span>)
-        <span class="hljs-keyword">end</span>
-        <span class="hljs-string">"%.3fs "</span> % result.duration + out
-      <span class="hljs-keyword">end</span>
-
       <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize(out = <span class="hljs-variable">$stdout</span>)
         <span class="hljs-keyword">self</span>.indent          = <span class="hljs-number">2</span>
         <span class="hljs-keyword">self</span>.last_seen_names = []
         <span class="hljs-keyword">self</span>.failed          = <span class="hljs-keyword">false</span>
         <span class="hljs-keyword">self</span>.out             = out
       <span class="hljs-keyword">end</span>
-
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_start; <span class="hljs-keyword">end</span>
-
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_start(*<span class="hljs-number">_</span>); <span class="hljs-keyword">end</span>
 
       <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_finish(result)
         output_context_header! result.parents.map(&amp;<span class="hljs-symbol">:name</span>).compact
@@ -427,6 +437,28 @@ with color.</p>
       protected
 
       <span class="hljs-keyword">attr_accessor</span> <span class="hljs-symbol">:last_seen_names</span>, <span class="hljs-symbol">:indent</span>, <span class="hljs-symbol">:failed</span>, <span class="hljs-symbol">:out</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>color_code_for(color)
+        <span class="hljs-constant">VT100_COLORS</span>.fetch(color)
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>colorize(text, color)
+        <span class="hljs-string">"\e[<span class="hljs-subst">#{color_code_for(color)}</span>m<span class="hljs-subst">#{text}</span>\e[0m"</span>
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>decorate(result)
+        name = result.name
+        out = <span class="hljs-keyword">if</span> result.errors.any?
+          colorize(append_failed(name), <span class="hljs-symbol">:red</span>)
+        <span class="hljs-keyword">else</span>
+          colorize(name , <span class="hljs-symbol">:green</span>)
+        <span class="hljs-keyword">end</span>
+        <span class="hljs-string">"%.3fs %s %s"</span> % [
+          result.duration,
+          short_id_for(result),
+          out,
+        ]
+      <span class="hljs-keyword">end</span>
 
       <span class="hljs-function"><span class="hljs-keyword">def</span> </span>output_context_header!(parent_names)
         <span class="hljs-keyword">if</span> parent_names != last_seen_names
@@ -452,11 +484,11 @@ with color.</p>
         </li>
         
         
-        <li id="section-9">
+        <li id="section-11">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-9">&#182;</a>
+                <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
               <p>Includes nicely formatted names and durations of each test in the output.</p>
 
@@ -471,11 +503,11 @@ with color.</p>
         </li>
         
         
-        <li id="section-10">
+        <li id="section-12">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-10">&#182;</a>
+                <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
               <p>A notifier that does not do anything and always returns successful.
 Useful as a parent class for other notifiers or for testing.</p>
@@ -484,11 +516,7 @@ Useful as a parent class for other notifiers or for testing.</p>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Null</span></span>
       <span class="hljs-keyword">include</span> <span class="hljs-constant">Composable</span>
-
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_start; <span class="hljs-keyword">end</span>
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_start(*<span class="hljs-number">_</span>); <span class="hljs-keyword">end</span>
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_finish(*<span class="hljs-number">_</span>); <span class="hljs-keyword">end</span>
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_finish; <span class="hljs-keyword">true</span>; <span class="hljs-keyword">end</span>
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">EmptyFormatter</span>
     <span class="hljs-keyword">end</span>
 
     <span class="hljs-constant">DEFAULT</span> =

@@ -19,11 +19,6 @@
           <div id="jump_page">
             
               
-              <a class="source" href="xspec.html">
-                xspec.rb
-              </a>
-            
-              
               <a class="source" href="autorun.html">
                 autorun.rb
               </a>
@@ -87,7 +82,7 @@
               </div>
               <p>XSpec data structures are very dumb. They:</p>
 <ul>
-<li>Only contain iteration and creation logic.</li>
+<li>Only contain iteration, property, and creation logic.</li>
 <li>Do not store recursive references (“everything flows downhill”).</li>
 </ul>
 
@@ -291,7 +286,7 @@ and <code>it</code> DSL methods respectively.</p>
               <p>A shared context is a floating context that isn’t part of any context
 heirachy, so its units of work will not be visible to the root node. It
 can be brought into any point in the heirachy using <code>copy_into_tree</code>
-(aliased as <code>it_behaves_like_a</code> in the DSL), and this can be done
+(aliased as <code>include_context</code> in the DSL), and this can be done
 multiple times, which allows definitions to be reused.</p>
 <p>This is leaky abstraction, since only units of work are copied from
 shared contexts. Methods and child contexts are ignored.</p>
@@ -412,6 +407,10 @@ other components of the system work with.</p>
     <span class="hljs-function"><span class="hljs-keyword">def</span> </span>block; unit_of_work.block; <span class="hljs-keyword">end</span>
     <span class="hljs-function"><span class="hljs-keyword">def</span> </span>name;  unit_of_work.name; <span class="hljs-keyword">end</span>
 
+    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>full_name
+      (parents + [<span class="hljs-keyword">self</span>]).map(&amp;<span class="hljs-symbol">:name</span>).compact.join(<span class="hljs-string">' '</span>)
+    <span class="hljs-keyword">end</span>
+
     <span class="hljs-function"><span class="hljs-keyword">def</span> </span>immediate_parent
       parents.last
     <span class="hljs-keyword">end</span>
@@ -438,6 +437,7 @@ is passed to notifiers for display or other processing.</p>
             <div class="content"><div class='highlight'><pre>  <span class="hljs-constant">ExecutedUnitOfWork</span> = <span class="hljs-constant">Struct</span>.new(<span class="hljs-symbol">:nested_unit_of_work</span>, <span class="hljs-symbol">:errors</span>, <span class="hljs-symbol">:duration</span>) <span class="hljs-keyword">do</span>
     <span class="hljs-function"><span class="hljs-keyword">def</span> </span>name; nested_unit_of_work.name <span class="hljs-keyword">end</span>
     <span class="hljs-function"><span class="hljs-keyword">def</span> </span>parents; nested_unit_of_work.parents <span class="hljs-keyword">end</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>full_name; nested_unit_of_work.full_name <span class="hljs-keyword">end</span>
   <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>

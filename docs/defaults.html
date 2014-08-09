@@ -19,11 +19,6 @@
           <div id="jump_page">
             
               
-              <a class="source" href="xspec.html">
-                xspec.rb
-              </a>
-            
-              
               <a class="source" href="autorun.html">
                 autorun.rb
               </a>
@@ -95,7 +90,21 @@ down in the bowels without having to provide an entire top level scheduler.</p>
 <span class="hljs-keyword">require</span> <span class="hljs-string">'xspec/evaluators'</span>
 <span class="hljs-keyword">require</span> <span class="hljs-string">'xspec/notifiers'</span>
 
+<span class="hljs-keyword">require</span> <span class="hljs-string">'digest/sha1'</span>
+
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">XSpec</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> </span>default_short_id(uow)
+    length  = <span class="hljs-number">3</span>
+    base    = <span class="hljs-number">32</span>
+    digest  = <span class="hljs-constant">Digest::SHA1</span>.hexdigest(uow.full_name).hex
+    bottom  = base ** (length-<span class="hljs-number">1</span>)
+    top     = base ** length
+    shifted = digest % (top - bottom) + bottom
+
+    shifted.to_s(base)
+  <span class="hljs-keyword">end</span>
+  module_function <span class="hljs-symbol">:default_short_id</span>
+
   <span class="hljs-function"><span class="hljs-keyword">def</span> </span>add_defaults(options = {})</pre></div></div>
             
         </li>
@@ -131,7 +140,9 @@ used.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    options[<span class="hljs-symbol">:evaluator</span>] ||= <span class="hljs-constant">Evaluator::DEFAULT</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>    options[<span class="hljs-symbol">:evaluator</span>] ||= <span class="hljs-constant">Evaluator::DEFAULT</span>
+
+    options[<span class="hljs-symbol">:short_id</span>] ||= <span class="hljs-constant">XSpec</span>.method(<span class="hljs-symbol">:default_short_id</span>)</pre></div></div>
             
         </li>
         

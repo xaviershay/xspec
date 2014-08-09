@@ -19,11 +19,6 @@
           <div id="jump_page">
             
               
-              <a class="source" href="xspec.html">
-                xspec.rb
-              </a>
-            
-              
               <a class="source" href="autorun.html">
                 autorun.rb
               </a>
@@ -158,6 +153,8 @@ not leak outside the stack.</p>
             <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Top</span></span>
       <span class="hljs-function"><span class="hljs-keyword">def</span> </span>call(unit_of_work)
         <span class="hljs-keyword">super</span>
+      <span class="hljs-keyword">rescue</span> <span class="hljs-constant">EvaluateFailed</span> =&gt; e
+        [<span class="hljs-constant">Failure</span>.new(unit_of_work, e.message, e.backtrace)]
       <span class="hljs-keyword">rescue</span> =&gt; e
         [<span class="hljs-constant">CodeException</span>.new(unit_of_work, e.message, e.backtrace)]
       <span class="hljs-keyword">end</span>
@@ -172,25 +169,31 @@ not leak outside the stack.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
+              <p>As long as the <code>Top</code> evaluator is used, evaluators can raise
+<code>EvaluateFailed</code> to indicate a failure separate from a normal code
+exception.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-constant">EvaluateFailed</span> = <span class="hljs-constant">Class</span>.new(<span class="hljs-constant">RuntimeError</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
               <h3 id="simple-assertions">Simple Assertions</h3>
 <p>This simple evaluator provides very straight-forward assertion methods.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Simple</span></span>
-      <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AssertionFailed</span> <span class="hljs-inheritance">&lt; <span class="hljs-parent">RuntimeError</span></span></span>
-        <span class="hljs-keyword">attr_reader</span> <span class="hljs-symbol">:message</span>, <span class="hljs-symbol">:backtrace</span>
-
-        <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize(message, backtrace)
-          <span class="hljs-variable">@message</span>   = message
-          <span class="hljs-variable">@backtrace</span> = backtrace
-        <span class="hljs-keyword">end</span>
-      <span class="hljs-keyword">end</span>
-
       <span class="hljs-function"><span class="hljs-keyword">def</span> </span>call(unit_of_work)
         <span class="hljs-keyword">super</span>
-      <span class="hljs-keyword">rescue</span> <span class="hljs-constant">AssertionFailed</span> =&gt; e
-        [<span class="hljs-constant">Failure</span>.new(unit_of_work, e.message, e.backtrace)]
       <span class="hljs-keyword">end</span>
 
       <span class="hljs-function"><span class="hljs-keyword">def</span> </span>assert(proposition, message=<span class="hljs-keyword">nil</span>)
@@ -226,33 +229,9 @@ not leak outside the stack.</p>
       private
 
       <span class="hljs-function"><span class="hljs-keyword">def</span> </span>_raise(message)
-        raise <span class="hljs-constant">AssertionFailed</span>.new(message, caller)
+        raise <span class="hljs-constant">EvaluateFailed</span>, message
       <span class="hljs-keyword">end</span>
     <span class="hljs-keyword">end</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-7">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-7">&#182;</a>
-              </div>
-              <h3 id="doubles">Doubles</h3>
-<p>The doubles module provides test doubles that can be used in-place of
-real objects.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Doubles</span></span>
-      <span class="hljs-constant">DoubleFailure</span> = <span class="hljs-constant">Class</span>.new(<span class="hljs-constant">RuntimeError</span>)
-
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>call(unit_of_work)
-        <span class="hljs-keyword">super</span>
-      <span class="hljs-keyword">rescue</span> <span class="hljs-constant">DoubleFailure</span> =&gt; e
-        [<span class="hljs-constant">Failure</span>.new(unit_of_work, e.message, e.backtrace)]
-      <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
         
@@ -262,6 +241,26 @@ real objects.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <h3 id="doubles">Doubles</h3>
+<p>The doubles module provides test doubles that can be used in-place of
+real objects.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Doubles</span></span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>call(unit_of_work)
+        <span class="hljs-keyword">super</span>
+      <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
               <p>It can be configured with the following options:</p>
 <ul>
@@ -289,11 +288,11 @@ when running specs in isolation.</li>
         </li>
         
         
-        <li id="section-9">
+        <li id="section-10">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-9">&#182;</a>
+                <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
               <p>An instance double stands in for an instance of the given class
 reference, given as a string. The class does not need to be loaded, but
@@ -309,11 +308,11 @@ able to be expected.</p>
         </li>
         
         
-        <li id="section-10">
+        <li id="section-11">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-10">&#182;</a>
+                <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
               <p>Simarly, a class double validates that class responds to all expected
 methods, if that class has been loaded.</p>
@@ -327,11 +326,11 @@ methods, if that class has been loaded.</p>
         </li>
         
         
-        <li id="section-11">
+        <li id="section-12">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-11">&#182;</a>
+                <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
               <p>If the doubled class has not been loaded, a null object reference is
 used that allows expecting of all methods.</p>
@@ -351,11 +350,11 @@ used that allows expecting of all methods.</p>
         </li>
         
         
-        <li id="section-12">
+        <li id="section-13">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-12">&#182;</a>
+                <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
               <p>Use <code>verify</code> to assert that a method was called on a double with
 particular arguments. Doubles record all received messages, so <code>verify</code>
@@ -370,11 +369,11 @@ should be called at the end of your test.</p>
         </li>
         
         
-        <li id="section-13">
+        <li id="section-14">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
+                <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
               <p>All messages sent to a double will return <code>nil</code>. Use <code>stub</code> to specify
 a return value instead: <code>stub(double).some_method(1, 2) { &quot;return
@@ -390,11 +389,11 @@ double.</p>
         </li>
         
         
-        <li id="section-14">
+        <li id="section-15">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-14">&#182;</a>
+                <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p>The proxy object captures messages sent to it and passes them through
 to either the <code>_verify</code> of <code>_stub</code> method on the double.</p>
@@ -415,11 +414,11 @@ to either the <code>_verify</code> of <code>_stub</code> method on the double.</
         </li>
         
         
-        <li id="section-15">
+        <li id="section-16">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
+                <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
               <p>Since the double object inherits from <code>BasicObject</code>, virtually every
 method call will be routed through <code>method_missing</code>. From there, the
@@ -452,11 +451,11 @@ the stubs.</p>
         </li>
         
         
-        <li id="section-16">
+        <li id="section-17">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
+                <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <p>The two methods needed on this object to set it up and verify it are
 prefixed by <code>_</code> to try to ensure they don’t clash with any method
@@ -481,7 +480,7 @@ for private methods (if at all).</p>
             <span class="hljs-variable">@received</span>.delete_at(i)
           <span class="hljs-keyword">else</span>
             name, rest = *args
-            <span class="hljs-constant">::Kernel</span>.raise <span class="hljs-constant">DoubleFailure</span>,
+            <span class="hljs-constant">::Kernel</span>.raise <span class="hljs-constant">EvaluateFailed</span>,
               <span class="hljs-string">"Did not receive: %s(%s)\nDid receive:%s\n"</span> % [
                 name,
                 [*rest].map(&amp;<span class="hljs-symbol">:inspect</span>).join(<span class="hljs-string">", "</span>),
@@ -496,11 +495,11 @@ for private methods (if at all).</p>
         </li>
         
         
-        <li id="section-17">
+        <li id="section-18">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p>A reference can be thought of as a “backing object” for a double. It
 provides an API to validate that a method being expected actually
@@ -525,11 +524,11 @@ doubles.</p>
         </li>
         
         
-        <li id="section-18">
+        <li id="section-19">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
+                <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
               <p>A string reference is the “null object” of references, allowing all
 methods to be expected. It is used when nothing is known about the
@@ -543,11 +542,11 @@ referenced class (such as when it has not been loaded).</p>
         </li>
         
         
-        <li id="section-19">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p>Class and Instance references are backed by loaded classes, and
 restrict the messages that can be expected on a double.</p>
@@ -559,7 +558,7 @@ restrict the messages that can be expected on a double.</p>
           name, rest = *args
 
           <span class="hljs-keyword">unless</span> <span class="hljs-variable">@klass</span>.respond_to?(name)
-            raise <span class="hljs-constant">DoubleFailure</span>,
+            raise <span class="hljs-constant">EvaluateFailed</span>,
               <span class="hljs-string">"<span class="hljs-subst">#{<span class="hljs-variable">@klass</span>}</span>.<span class="hljs-subst">#{name}</span> is unimplemented or not public"</span>
           <span class="hljs-keyword">end</span>
         <span class="hljs-keyword">end</span>
@@ -570,7 +569,7 @@ restrict the messages that can be expected on a double.</p>
           name, rest = *args
 
           <span class="hljs-keyword">unless</span> <span class="hljs-variable">@klass</span>.public_instance_methods.<span class="hljs-keyword">include</span>?(name)
-            raise <span class="hljs-constant">DoubleFailure</span>,
+            raise <span class="hljs-constant">EvaluateFailed</span>,
               <span class="hljs-string">"<span class="hljs-subst">#{<span class="hljs-variable">@klass</span>}</span>#<span class="hljs-subst">#{name}</span> is unimplemented or not public"</span>
           <span class="hljs-keyword">end</span>
         <span class="hljs-keyword">end</span>
@@ -579,11 +578,11 @@ restrict the messages that can be expected on a double.</p>
         </li>
         
         
-        <li id="section-20">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <p>The <code>:strict</code> option mixes in this <code>Strict</code> module, which raises rather
 than create a <code>StringReference</code> for unknown classes.</p>
@@ -595,7 +594,7 @@ than create a <code>StringReference</code> for unknown classes.</p>
           ref = <span class="hljs-keyword">if</span> <span class="hljs-keyword">self</span>.<span class="hljs-keyword">class</span>.const_defined?(klass)
             type.new(<span class="hljs-keyword">self</span>.<span class="hljs-keyword">class</span>.const_get(klass))
           <span class="hljs-keyword">else</span>
-            raise <span class="hljs-constant">DoubleFailure</span>, <span class="hljs-string">"<span class="hljs-subst">#{klass}</span> is not a valid class name"</span>
+            raise <span class="hljs-constant">EvaluateFailed</span>, <span class="hljs-string">"<span class="hljs-subst">#{klass}</span> is not a valid class name"</span>
           <span class="hljs-keyword">end</span>
 
           <span class="hljs-keyword">super</span>
@@ -606,11 +605,11 @@ than create a <code>StringReference</code> for unknown classes.</p>
         </li>
         
         
-        <li id="section-21">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <h3 id="rspec-integration">RSpec Integration</h3>
 <p>This RSpec adapter shows two useful techniques: dynamic library loading

@@ -24,6 +24,11 @@
               </a>
             
               
+              <a class="source" href="future.html">
+                future.rb
+              </a>
+            
+              
               <a class="source" href="support.html">
                 support.rb
               </a>
@@ -672,12 +677,14 @@ can be made composable by include the <code>Composable</code> module.</p>
                 <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <ul>
-<li><code>run_start</code> is called before any tests have been scheduled to run.</li>
+<li><code>run_start</code> is called before any tests have been scheduled to run. It
+is passed the current configuration, which is guaranteed to be constant
+for the duration of the run.</li>
 </ul>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_start
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run_start(config)
       puts <span class="hljs-string">"The test run is starting"</span>
     <span class="hljs-keyword">end</span></pre></div></div>
             
@@ -867,11 +874,13 @@ with Rack middleware, this is a very similar concept.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Stacks</span></span>
+  <span class="hljs-constant">XE</span> = <span class="hljs-constant">XSpec::Evaluator</span>
+
   <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Stack</span></span>
-    <span class="hljs-keyword">include</span> <span class="hljs-constant">XSpec::Evaluator::Bottom</span>
-    <span class="hljs-keyword">include</span> <span class="hljs-constant">XSpec::Evaluator::Simple</span>
-    <span class="hljs-keyword">include</span> <span class="hljs-constant">XSpec::Evaluator::Doubles</span>
-    <span class="hljs-keyword">include</span> <span class="hljs-constant">XSpec::Evaluator::Top</span>
+    <span class="hljs-keyword">include</span> <span class="hljs-constant">XE::Bottom</span>
+    <span class="hljs-keyword">include</span> <span class="hljs-constant">XE::Simple</span>
+    <span class="hljs-keyword">include</span> <span class="hljs-constant">XE::Doubles</span>
+    <span class="hljs-keyword">include</span> <span class="hljs-constant">XE::Top</span>
   <span class="hljs-keyword">end</span></pre></div></div>
             
         </li>
@@ -892,9 +901,9 @@ more details.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  extend <span class="hljs-constant">XSpec</span>.dsl(
-    <span class="hljs-symbol">evaluator:</span> <span class="hljs-constant">XSpec::Evaluator</span>.stack {
-      <span class="hljs-keyword">include</span> <span class="hljs-constant">XSpec::Evaluator::Simple</span>
-      <span class="hljs-keyword">include</span> <span class="hljs-constant">XSpec::Evaluator::Doubles</span>
+    <span class="hljs-symbol">evaluator:</span> <span class="hljs-constant">XE</span>.stack {
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">XE::Simple</span>
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">XE::Doubles</span>
     }
   )
 <span class="hljs-keyword">end</span></pre></div></div>
@@ -953,8 +962,9 @@ durations.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ShuffleScheduler</span></span>
-    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run(context, notifier)
-      notifier.run_start
+    <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run(context, config)
+      notifier = config.fetch(<span class="hljs-symbol">:notifier</span>)
+      notifier.run_start(config)
 
       context.nested_units_of_work.sort_by { rand }.each <span class="hljs-keyword">do</span> |uow|
         notifier.evaluate_start(uow)
@@ -987,13 +997,53 @@ durations.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-44">&#182;</a>
               </div>
+              <h2 id="short-ids">Short IDs</h2>
+<p>Each test has a short identifier that can be used to quickly reference it in
+runners. The default implementation uses a hash of the test name, so isn’t
+always unique.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">ShortIds</span></span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-45">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-45">&#182;</a>
+              </div>
+              <p>A custom short ID function can be provided with the <code>short_id</code> option.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  extend <span class="hljs-constant">XSpec</span>.dsl(
+    <span class="hljs-symbol">short_id:</span> -&gt; uow { uow.name[<span class="hljs-number">0</span>..<span class="hljs-number">2</span>] }
+  )
+
+  describe <span class="hljs-string">'custom short id'</span> <span class="hljs-keyword">do</span>
+    it(<span class="hljs-string">'applies to'</span>) {}
+    it(<span class="hljs-string">'each test'</span>) {}
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-46">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-46">&#182;</a>
+              </div>
               <h2 id="running">Running</h2>
 <p>XSpec provides the <code>xspec</code> script, that can be used to run XSpec files. It is
 not required, but provides a number of niceties:</p>
 <ul>
-<li>Adds <code>spec</code> and <code>lib</code> directories to the load path.</li>
-<li>Loads all files passed as arguments.</li>
 <li>Exits non-zero if the run fails.</li>
+<li>Running specific files and specs, use <code>--help</code> option for details.</li>
 </ul>
 <p>(<code>autorun!</code> provides roughly equivalent behaviour.)</p>
 <p><code>xspec</code> requires a global <code>run!</code> method, which will be present if you extend
@@ -1002,7 +1052,7 @@ to provide our own.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">def</span> </span><span class="hljs-keyword">self</span>.run!(*args)
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">def</span> </span><span class="hljs-keyword">self</span>.run!(&amp;block)
   exit <span class="hljs-number">1</span> <span class="hljs-keyword">unless</span> [
     <span class="hljs-constant">Basics</span>,
     <span class="hljs-constant">Assertions</span>,
@@ -1015,8 +1065,9 @@ to provide our own.</p>
     <span class="hljs-constant">Stacks</span>,
     <span class="hljs-constant">BuiltInScheduler</span>,
     <span class="hljs-constant">CustomScheduler</span>,
+    <span class="hljs-constant">ShortIds</span>,
   ].map {|x|
-    x.run!(*args)
+    x.run!(&amp;block)
   }.all?
 <span class="hljs-keyword">end</span></pre></div></div>
             

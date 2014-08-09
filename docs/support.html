@@ -24,6 +24,11 @@
               </a>
             
               
+              <a class="source" href="future.html">
+                future.rb
+              </a>
+            
+              
               <a class="source" href="support.html">
                 support.rb
               </a>
@@ -60,7 +65,8 @@ to be written as executable tests.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">require</span> <span class="hljs-string">'xspec'</span>
+            <div class="content"><div class='highlight'><pre><span class="hljs-variable">$LOAD_PATH</span>.unshift <span class="hljs-constant">File</span>.expand_path(<span class="hljs-string">"../../lib"</span>, __FILE_<span class="hljs-number">_</span>)
+<span class="hljs-keyword">require</span> <span class="hljs-string">'xspec'</span>
 
 <span class="hljs-variable">$initial</span> = <span class="hljs-constant">Object</span>.constants
 
