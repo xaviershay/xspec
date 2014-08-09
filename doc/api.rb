@@ -10,7 +10,8 @@
 # 4. [Notifiers](#notifiers)
 # 5. [Evaluators](#evaluators)
 # 6. [Schedulers](#schedulers)
-# 7. [Running](#running)
+# 7. [Short IDs](#short-ids)
+# 8. [Running](#running)
 require_relative './support'
 
 # ## Basics
