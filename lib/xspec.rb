@@ -12,8 +12,8 @@ module XSpec
   # This enables different options to be specified per DSL, which is at the
   # heart of XSpec's modularity. It is easy to change every component to your
   # liking.
-  def dsl(options = {})
-    options = XSpec.add_defaults(options)
+  def dsl(config = {})
+    config = XSpec.add_defaults(config)
 
     Module.new do
       # Each DSL provides a standard set of methods provided by the [DSL
@@ -24,13 +24,13 @@ module XSpec
       # described in detail in the
       # [`data_structures.rb`](data_structures.html).
       def __xspec_context
-        evaluator = __xspec_opts.fetch(:evaluator)
+        evaluator = __xspec_config.fetch(:evaluator)
         @__xspec_context ||= XSpec::Context.root(evaluator)
       end
 
-      # Some meta-magic is needed to enable the options from local scope above
+      # Some meta-magic is needed to enable the config from local scope above
       # to be available inside the module.
-      define_method(:__xspec_opts) { options }
+      define_method(:__xspec_config) { config }
 
       # `run!` is where the magic happens. Typically called at the end of a
       # file (or by `autorun!`), this method takes all the data that was
@@ -40,7 +40,7 @@ module XSpec
       # set in the initial `XSpec.dsl` call.
       def run!(&overrides)
         overrides ||= -> x { x }
-        config = overrides.(__xspec_opts)
+        config = overrides.(__xspec_config)
         scheduler = config.fetch(:scheduler)
 
         scheduler.run(__xspec_context, config)
