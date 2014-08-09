@@ -12,8 +12,9 @@ module XSpec
         @clock = opts.fetch(:clock, ->{ Time.now.to_f })
       end
 
-      def run(context, notifier)
-        notifier.run_start
+      def run(context, config)
+        notifier = config.fetch(:notifier)
+        notifier.run_start(config)
 
         context.nested_units_of_work.each do |x|
           notifier.evaluate_start(x)
@@ -40,8 +41,8 @@ module XSpec
         @filter    = filter
       end
 
-      def run(context, notifier)
-        scheduler.run(FilteredContext.new(context, filter), notifier)
+      def run(context, config)
+        scheduler.run(FilteredContext.new(context, filter), config)
       end
 
       FilteredContext = Struct.new(:context, :filter) do

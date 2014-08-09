@@ -2,7 +2,8 @@ require 'spec_helper'
 
 describe 'short ids' do
   def short_id_for(name)
-    XSpec::NestedUnitOfWork.new([], XSpec::UnitOfWork.new(name)).short_id
+    XSpec.default_short_id \
+      XSpec::NestedUnitOfWork.new([], XSpec::UnitOfWork.new(name))
   end
 
   it 'is the same for same names' do

@@ -10,6 +10,7 @@ end
 describe 'failures at end notifier' do
   let(:out)      { StringIO.new }
   let(:notifier) { XSpec::Notifier::FailuresAtEnd.new(out) }
+  let(:config)   {{ short_id: -> _ { "XXX" }}}
 
   it 'returns true when no errors are observed' do
     assert notifier.run_finish
@@ -21,10 +22,11 @@ describe 'failures at end notifier' do
       "failed",
       []
     )
+    notifier.run_start(config)
     notifier.evaluate_finish(make_executed_test errors: [failure])
 
     assert !notifier.run_finish
-    assert_include "a b c:\n  failed", out.string
+    assert_include "a b c\n  failed", out.string
   end
 
   it 'cleans lib entries out of backtrace' do
@@ -33,6 +35,7 @@ describe 'failures at end notifier' do
       "failed",
       [File.expand_path('../../../lib', __FILE__) + '/bogus.rb']
     )
+    notifier.run_start(config)
     notifier.evaluate_finish(make_executed_test errors: [failure])
 
     assert !notifier.run_finish
@@ -74,19 +77,21 @@ end
 describe 'documentation notifier' do
   let(:notifier) { XSpec::Notifier::Documentation.new(out) }
   let(:out)      { StringIO.new }
+  let(:config)   {{ short_id: -> uow { 'XXX' }}}
 
   def evaluate_finish(args)
+    notifier.run_start(config)
     notifier.evaluate_finish(make_executed_test args)
     out.string
   end
 
   it 'outputs each context with a header and individual tests' do
-    assert_equal "\na\n  0.001s b\n",
+    assert_equal "\na\n  0.001s XXX b\n",
       evaluate_finish(parents: ['a'], name: 'b')
   end
 
   it 'adds an indent for each nested context' do
-    assert_equal "\na\n  b\n    0.001s c\n",
+    assert_equal "\na\n  b\n    0.001s XXX c\n",
       evaluate_finish(parents: ['a', 'b'], name: 'c')
   end
 
@@ -94,11 +99,11 @@ describe 'documentation notifier' do
     evaluate_finish(parents: ['a', 'b'], name: 'c')
     evaluate_finish(parents: ['a', 'd'], name: 'e')
 
-    assert_equal "\na\n  b\n    0.001s c\n\n  d\n    0.001s e\n", out.string
+    assert_equal "\na\n  b\n    0.001s XXX c\n\n  d\n    0.001s XXX e\n", out.string
   end
 
   it 'ignores contexts with no name' do
-    assert_equal "\na\n  0.001s b\n",
+    assert_equal "\na\n  0.001s XXX b\n",
       evaluate_finish(parents: [nil, 'a', nil], name: 'b')
   end
 
@@ -122,14 +127,17 @@ end
 describe 'colored documentation notifier' do
   let(:notifier) { XSpec::Notifier::ColoredDocumentation.new(out) }
   let(:out)      { StringIO.new }
+  let(:config)   {{ short_id: -> uow { 'XXX' }}}
 
   it 'colors successful tests green' do
+    notifier.run_start(config)
     notifier.evaluate_finish(make_executed_test errors: [])
 
     assert_include "\e[32m\e[0m\n", out.string
   end
 
   it 'colors failed and errored tests red' do
+    notifier.run_start(config)
     notifier.evaluate_finish(make_executed_test errors: [make_failure])
 
     assert_include "\e[31mFAILED\e[0m", out.string
@@ -151,10 +159,11 @@ describe 'null notifier' do
     assert notifier.run_finish
   end
 
-  it_behaves_like_a ComposableNotifier
+  include_context ComposableNotifier
 end
 
 describe 'timings at end' do
+  let(:out)      { StringIO.new }
   let(:notifier) { XSpec::Notifier::TimingsAtEnd.new(out: out) }
 
   it 'always returns true' do

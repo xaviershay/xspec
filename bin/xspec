@@ -45,7 +45,7 @@ if respond_to?(:run!)
     scheduler: __xspec_opts.fetch(:scheduler),
     filter:    -> uow {
       if short_ids.any?
-        short_ids.include?(XSpec.short_id(uow.full_name))
+        short_ids.include?(__xspec_opts.fetch(:short_id).(uow))
       else
         uow.full_name =~ filter
       end

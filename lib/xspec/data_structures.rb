@@ -160,17 +160,6 @@ module XSpec
       (parents + [self]).map(&:name).compact.join(' ')
     end
 
-    def short_id
-      length  = 3
-      base    = 32
-      digest  = Digest::SHA1.hexdigest(full_name).hex
-      bottom  = base ** (length-1)
-      top     = base ** length
-      shifted = digest % (top - bottom) + bottom
-
-      shifted.to_s(base)
-    end
-
     def immediate_parent
       parents.last
     end
@@ -186,7 +175,6 @@ module XSpec
     def name; nested_unit_of_work.name end
     def parents; nested_unit_of_work.parents end
     def full_name; nested_unit_of_work.full_name end
-    def short_id; nested_unit_of_work.short_id end
   end
 
   # A test failure will be reported as a `Failure`, which includes contextual

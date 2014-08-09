@@ -39,11 +39,10 @@ module XSpec
       # It takes an optional parameter that can be used to override any options
       # set in the initial `XSpec.dsl` call.
       def run!(overrides = {})
-        opts = __xspec_opts.merge(overrides)
-        notifier  = opts.fetch(:notifier)
-        scheduler = opts.fetch(:scheduler)
+        config = __xspec_opts.merge(overrides)
+        scheduler = config.fetch(:scheduler)
 
-        scheduler.run(__xspec_context, notifier)
+        scheduler.run(__xspec_context, config)
       end
 
       # It is often convenient to trigger a run after all files have been
