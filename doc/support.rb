@@ -2,6 +2,7 @@
 
 # This configuration is used in the [API documentation](api.html) to enable it
 # to be written as executable tests.
+$LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
 require 'xspec'
 
 $initial = Object.constants

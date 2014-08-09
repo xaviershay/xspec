@@ -12,7 +12,7 @@ extend XSpec.dsl(
 def assert_errors_from_run(context, expected_error_messages)
   context.run!
 
-  notifier = context.__xspec_opts.fetch(:notifier)
+  notifier = context.__xspec_config.fetch(:notifier)
   assert_equal expected_error_messages, notifier.errors.flatten.map(&:message)
 end
 

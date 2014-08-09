@@ -24,7 +24,7 @@ module XSpec
       __xspec_context.create_shared_context(*args, &block)
     end
 
-    def it_behaves_like_a(context)
+    def include_context(context)
       __xspec_context.copy_into_tree(context)
     end
   end
