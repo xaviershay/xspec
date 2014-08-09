@@ -431,6 +431,23 @@ module CustomScheduler
   end
 end
 
+# ## Short IDs
+#
+# Each test has a short identifier that can be used to quickly reference it in
+# runners. The default implementation uses a hash of the test name, so isn't
+# always unique.
+module ShortIds
+  # A custom short ID function can be provided with the `short_id` option.
+  extend XSpec.dsl(
+    short_id: -> uow { uow.name[0..2] }
+  )
+
+  describe 'custom short id' do
+    it('applies to') {}
+    it('each test') {}
+  end
+end
+
 # ## Running
 #
 # XSpec provides the `xspec` script, that can be used to run XSpec files. It is
@@ -456,6 +473,7 @@ def self.run!(&block)
     Stacks,
     BuiltInScheduler,
     CustomScheduler,
+    ShortIds,
   ].map {|x|
     x.run!(&block)
   }.all?
