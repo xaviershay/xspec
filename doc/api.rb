@@ -258,8 +258,10 @@ module Notifiers
   class DiagnosticNotifier
     include XSpec::Notifier::Composable
 
-    # * `run_start` is called before any tests have been scheduled to run.
-    def run_start
+    # * `run_start` is called before any tests have been scheduled to run. It
+    # is passed the current configuration, which is guaranteed to be constant
+    # for the duration of the run.
+    def run_start(config)
       puts "The test run is starting"
     end
 
@@ -403,8 +405,9 @@ module CustomScheduler
   # This example scheduler runs tests in a random order and does not record
   # durations.
   class ShuffleScheduler
-    def run(context, notifier)
-      notifier.run_start
+    def run(context, config)
+      notifier = config.fetch(:notifier)
+      notifier.run_start(config)
 
       context.nested_units_of_work.sort_by { rand }.each do |uow|
         notifier.evaluate_start(uow)
@@ -440,7 +443,7 @@ end
 # `xspec` requires a global `run!` method, which will be present if you extend
 # `XSpec.dsl` into global scope, but in this file we have not done so and need
 # to provide our own.
-def self.run!(*args)
+def self.run!(&block)
   exit 1 unless [
     Basics,
     Assertions,
@@ -454,6 +457,6 @@ def self.run!(*args)
     BuiltInScheduler,
     CustomScheduler,
   ].map {|x|
-    x.run!(*args)
+    x.run!(&block)
   }.all?
 end

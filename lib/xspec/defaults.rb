@@ -7,6 +7,8 @@ require 'xspec/schedulers'
 require 'xspec/evaluators'
 require 'xspec/notifiers'
 
+require 'digest/sha1'
+
 module XSpec
   def default_short_id(uow)
     length  = 3

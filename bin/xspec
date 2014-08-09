@@ -41,16 +41,19 @@ files.each do |f|
 end
 
 if respond_to?(:run!)
-  exit 1 unless run!(scheduler: XSpec::Scheduler::Filter.new(
-    scheduler: __xspec_opts.fetch(:scheduler),
-    filter:    -> uow {
-      if short_ids.any?
-        short_ids.include?(__xspec_opts.fetch(:short_id).(uow))
-      else
-        uow.full_name =~ filter
-      end
-    }
-  ))
+  result = run! {|config|
+    config.update(scheduler: XSpec::Scheduler::Filter.new(
+      scheduler: config.fetch(:scheduler),
+      filter:    -> uow {
+        if short_ids.any?
+          short_ids.include?(config.fetch(:short_id).(uow))
+        else
+          uow.full_name =~ filter
+        end
+      }
+    ))
+  }
+  exit 1 unless result
 else
   $stderr.puts "This script can only be used when XSpec.dsl is mixed in to " +
                "global scope."

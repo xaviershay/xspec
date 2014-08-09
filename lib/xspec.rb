@@ -36,10 +36,11 @@ module XSpec
       # file (or by `autorun!`), this method takes all the data that was
       # accumulated by the DSL methods above and runs it through the scheduler.
       #
-      # It takes an optional parameter that can be used to override any options
+      # It takes an optional block that can be used to override any options
       # set in the initial `XSpec.dsl` call.
-      def run!(overrides = {})
-        config = __xspec_opts.merge(overrides)
+      def run!(&overrides)
+        overrides ||= -> x { x }
+        config = overrides.(__xspec_opts)
         scheduler = config.fetch(:scheduler)
 
         scheduler.run(__xspec_context, config)
