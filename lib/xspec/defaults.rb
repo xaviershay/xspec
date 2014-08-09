@@ -7,7 +7,21 @@ require 'xspec/schedulers'
 require 'xspec/evaluators'
 require 'xspec/notifiers'
 
+require 'digest/sha1'
+
 module XSpec
+  def default_short_id(uow)
+    length  = 3
+    base    = 32
+    digest  = Digest::SHA1.hexdigest(uow.full_name).hex
+    bottom  = base ** (length-1)
+    top     = base ** length
+    shifted = digest % (top - bottom) + bottom
+
+    shifted.to_s(base)
+  end
+  module_function :default_short_id
+
   def add_defaults(options = {})
     # A notifier makes it possible to observe the state of the system, be that
     # progress or details of failing tests.
@@ -19,6 +33,9 @@ module XSpec
     # context. Allows for different matchers and expectation frameworks to be
     # used.
     options[:evaluator] ||= Evaluator::DEFAULT
+
+    options[:short_id] ||= XSpec.method(:default_short_id)
+
 
     # An scheduler is responsible for scheduling units of work and handing them
     # off to the assertion context. Any logic regarding threads, remote

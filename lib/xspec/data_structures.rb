@@ -2,7 +2,7 @@
 
 # XSpec data structures are very dumb. They:
 #
-# * Only contain iteration and creation logic.
+# * Only contain iteration, property, and creation logic.
 # * Do not store recursive references ("everything flows downhill").
 module XSpec
   # A unit of work, usually created by the `it` DSL method, is a labeled,
@@ -85,7 +85,7 @@ module XSpec
       # A shared context is a floating context that isn't part of any context
       # heirachy, so its units of work will not be visible to the root node. It
       # can be brought into any point in the heirachy using `copy_into_tree`
-      # (aliased as `it_behaves_like_a` in the DSL), and this can be done
+      # (aliased as `include_context` in the DSL), and this can be done
       # multiple times, which allows definitions to be reused.
       #
       # This is leaky abstraction, since only units of work are copied from
@@ -156,6 +156,10 @@ module XSpec
     def block; unit_of_work.block; end
     def name;  unit_of_work.name; end
 
+    def full_name
+      (parents + [self]).map(&:name).compact.join(' ')
+    end
+
     def immediate_parent
       parents.last
     end
@@ -170,6 +174,7 @@ module XSpec
   ExecutedUnitOfWork = Struct.new(:nested_unit_of_work, :errors, :duration) do
     def name; nested_unit_of_work.name end
     def parents; nested_unit_of_work.parents end
+    def full_name; nested_unit_of_work.full_name end
   end
 
   # A test failure will be reported as a `Failure`, which includes contextual

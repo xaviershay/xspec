@@ -258,8 +258,10 @@ module Notifiers
   class DiagnosticNotifier
     include XSpec::Notifier::Composable
 
-    # * `run_start` is called before any tests have been scheduled to run.
-    def run_start
+    # * `run_start` is called before any tests have been scheduled to run. It
+    # is passed the current configuration, which is guaranteed to be constant
+    # for the duration of the run.
+    def run_start(config)
       puts "The test run is starting"
     end
 
@@ -361,11 +363,13 @@ end
 # method and leave `Bottom` to actually execute the test. If you are familiar
 # with Rack middleware, this is a very similar concept.
 module Stacks
+  XE = XSpec::Evaluator
+
   module Stack
-    include XSpec::Evaluator::Bottom
-    include XSpec::Evaluator::Simple
-    include XSpec::Evaluator::Doubles
-    include XSpec::Evaluator::Top
+    include XE::Bottom
+    include XE::Simple
+    include XE::Doubles
+    include XE::Top
   end
 
   # The `stack` method is a shorthand way of creating a stack that sandwiches
@@ -375,9 +379,9 @@ module Stacks
   # See the [evaluator code documentation](evaluators.html) for
   # more details.
   extend XSpec.dsl(
-    evaluator: XSpec::Evaluator.stack {
-      include XSpec::Evaluator::Simple
-      include XSpec::Evaluator::Doubles
+    evaluator: XE.stack {
+      include XE::Simple
+      include XE::Doubles
     }
   )
 end
@@ -401,8 +405,9 @@ module CustomScheduler
   # This example scheduler runs tests in a random order and does not record
   # durations.
   class ShuffleScheduler
-    def run(context, notifier)
-      notifier.run_start
+    def run(context, config)
+      notifier = config.fetch(:notifier)
+      notifier.run_start(config)
 
       context.nested_units_of_work.sort_by { rand }.each do |uow|
         notifier.evaluate_start(uow)
@@ -426,20 +431,36 @@ module CustomScheduler
   end
 end
 
+# ## Short IDs
+#
+# Each test has a short identifier that can be used to quickly reference it in
+# runners. The default implementation uses a hash of the test name, so isn't
+# always unique.
+module ShortIds
+  # A custom short ID function can be provided with the `short_id` option.
+  extend XSpec.dsl(
+    short_id: -> uow { uow.name[0..2] }
+  )
+
+  describe 'custom short id' do
+    it('applies to') {}
+    it('each test') {}
+  end
+end
+
 # ## Running
 #
 # XSpec provides the `xspec` script, that can be used to run XSpec files. It is
 # not required, but provides a number of niceties:
-# * Adds `spec` and `lib` directories to the load path.
-# * Loads all files passed as arguments.
 # * Exits non-zero if the run fails.
+# * Running specific files and specs, use `--help` option for details.
 #
 # (`autorun!` provides roughly equivalent behaviour.)
 #
 # `xspec` requires a global `run!` method, which will be present if you extend
 # `XSpec.dsl` into global scope, but in this file we have not done so and need
 # to provide our own.
-def self.run!(*args)
+def self.run!(&block)
   exit 1 unless [
     Basics,
     Assertions,
@@ -452,7 +473,8 @@ def self.run!(*args)
     Stacks,
     BuiltInScheduler,
     CustomScheduler,
+    ShortIds,
   ].map {|x|
-    x.run!(*args)
+    x.run!(&block)
   }.all?
 end

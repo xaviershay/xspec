@@ -21,7 +21,7 @@ extend XSpec.dsl # Use defaults
 describe 'my application' do
   it 'does math' do
     double = instance_double('Calculator')
-    expect(double).add(1, 1) { 2 }
+    stub(double).add(1, 1) { 2 }
 
     assert_equal 2, double.add(1, 1)
   end
@@ -43,9 +43,9 @@ see the colors in this README, but trust me they are quite lovely.
 > xspec example.rb
 
 my application
-  0.000s does math
-  0.011s is slow sometimes
-  0.000s fails - FAILED
+  0.000s 3l1 does math
+  0.011s f0j is slow sometimes
+  0.000s juj fails - FAILED
 
            Timings:
      0.001 #################### 2
@@ -54,11 +54,25 @@ my application
        0.1 ##########           1
 
 
-my application fails:
+juj - my application fails
   "fruit" not present in: "punch"
 
-  example.rb:18:in `block (2 levels) in <top (required)>'
-  bin/xspec:19:in `<main>'
+  test.rb:17:in `block (2 levels) in <top (required)>'
+  bin/xspec:44:in `<main>'
+```
+
+The three-character tag next to each test is its short id. You can use it to
+run a single test:
+
+```
+> xspec -f 3l1
+
+my application
+  0.000s 3l1 does math
+
+           Timings:
+     0.001 #################### 1
+
 ```
 
 ### Customization
@@ -73,11 +87,11 @@ expectations. You could do that:
 require 'xspec'
 
 extend XSpec.dsl(
-  assertion_context: XSpec::AssertionContext.stack {
-    include XSpec::AssertionContext::RSpecExpectations
+  evaluator_context: XSpec::Evaluator.stack {
+    include XSpec::Evaluator::RSpecExpectations
   },
-  notifier: XSpec::Notifiers::Character.new +
-            XSpec::Notifiers::FailuresAtEnd.new
+  notifier: XSpec::Notifier::Character.new +
+            XSpec::Notifier::FailuresAtEnd.new
 )
 
 describe '...' do
@@ -86,7 +100,7 @@ end
 ```
 
 Of course, you can make your own extension classes as well. For details, see
-the "Configuration" section of the documentation.
+the API documentation.
 
 Documentation
 -------------

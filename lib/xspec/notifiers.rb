@@ -5,6 +5,17 @@
 # summarizing the run when it finished.
 module XSpec
   module Notifier
+    # A formatter must implement at least four methods. `run_start` and
+    # `run_finish` are called at the beginning and end of the full spec run
+    # respectively, while `evaluate_start` and `evaluate_finish` are called for
+    # each test. See [API docs](api.html#notifiers) for more information.
+    module EmptyFormatter
+      def run_start(*_); end
+      def evaluate_start(*_); end
+      def evaluate_finish(*_); end
+      def run_finish(*_); true; end
+    end
+
     # Many notifiers play nice with others, and can be composed together in a
     # way that each notifier will have its callback run in turn.
     module Composable
@@ -20,8 +31,8 @@ module XSpec
         @notifiers = notifiers
       end
 
-      def run_start
-        notifiers.each(&:run_start)
+      def run_start(*args)
+        notifiers.each {|x| x.run_start(*args) }
       end
 
       def evaluate_start(*args)
@@ -44,15 +55,12 @@ module XSpec
     # Outputs a single character for each executed unit of work representing
     # the result.
     class Character
+      include EmptyFormatter
       include Composable
 
       def initialize(out = $stdout)
         @out = out
       end
-
-      def run_start; end
-
-      def evaluate_start(*_); end
 
       def evaluate_finish(result)
         @out.print label_for_failure(result.errors[0])
@@ -73,11 +81,11 @@ module XSpec
           else '.'
         end
       end
-
     end
 
     # Renders a histogram of test durations after the entire run is complete.
     class TimingsAtEnd
+      include EmptyFormatter
       include Composable
 
       DEFAULT_SPLITS = [0.001, 0.005, 0.01, 0.1, 1.0, Float::INFINITY]
@@ -90,11 +98,6 @@ module XSpec
         @splits  = splits
         @width   = width
         @out     = out
-      end
-
-      def run_start(*_); end
-
-      def evaluate_start(_)
       end
 
       def evaluate_finish(result)
@@ -148,18 +151,28 @@ module XSpec
       end
     end
 
+    # Provides convenience methods for working with short ids.
+    module ShortIdSupport
+      def run_start(config)
+        super
+        @short_id = config.fetch(:short_id)
+      end
+
+      def short_id_for(x)
+        @short_id.(x)
+      end
+    end
+
     # Outputs error messages and backtraces after the entire run is complete.
     class FailuresAtEnd
+      include EmptyFormatter
       include Composable
+      include ShortIdSupport
 
       def initialize(out = $stdout)
         @errors = []
         @out    = out
       end
-
-      def run_start; end
-
-      def evaluate_start(*_); end
 
       def evaluate_finish(result)
         self.errors += result.errors
@@ -170,7 +183,11 @@ module XSpec
 
         out.puts
         errors.each do |error|
-          out.puts "%s:\n%s\n\n" % [full_name(error.unit_of_work), error.message.lines.map {|x| "  #{x}"}.join("")]
+          out.puts "%s - %s\n%s\n\n" % [
+            short_id_for(error.unit_of_work),
+            error.unit_of_work.full_name,
+            error.message.lines.map {|x| "  #{x}"}.join("")
+          ]
           clean_backtrace(error.caller).each do |line|
             out.puts "  %s" % line
           end
@@ -181,10 +198,6 @@ module XSpec
       end
 
       private
-
-      def full_name(unit_of_work)
-        (unit_of_work.parents + [unit_of_work]).map(&:name).compact.join(' ')
-      end
 
       # A standard backtrace contains many entries for XSpec itself which are
       # not useful for debugging your tests, so they are stripped out.
@@ -204,9 +217,9 @@ module XSpec
     # Includes nicely formatted names and durations of each test in the output,
     # with color.
     class ColoredDocumentation
-      require 'set'
-
+      include EmptyFormatter
       include Composable
+      include ShortIdSupport
 
       VT100_COLORS = {
         :black   => 30,
@@ -219,34 +232,12 @@ module XSpec
         :white   => 37
       }
 
-      def color_code_for(color)
-        VT100_COLORS.fetch(color)
-      end
-
-      def colorize(text, color)
-        "\e[#{color_code_for(color)}m#{text}\e[0m"
-      end
-
-      def decorate(result)
-        name = result.name
-        out = if result.errors.any?
-          colorize(append_failed(name), :red)
-        else
-          colorize(name , :green)
-        end
-        "%.3fs " % result.duration + out
-      end
-
       def initialize(out = $stdout)
         self.indent          = 2
         self.last_seen_names = []
         self.failed          = false
         self.out             = out
       end
-
-      def run_start; end
-
-      def evaluate_start(*_); end
 
       def evaluate_finish(result)
         output_context_header! result.parents.map(&:name).compact
@@ -266,6 +257,28 @@ module XSpec
       protected
 
       attr_accessor :last_seen_names, :indent, :failed, :out
+
+      def color_code_for(color)
+        VT100_COLORS.fetch(color)
+      end
+
+      def colorize(text, color)
+        "\e[#{color_code_for(color)}m#{text}\e[0m"
+      end
+
+      def decorate(result)
+        name = result.name
+        out = if result.errors.any?
+          colorize(append_failed(name), :red)
+        else
+          colorize(name , :green)
+        end
+        "%.3fs %s %s" % [
+          result.duration,
+          short_id_for(result),
+          out,
+        ]
+      end
 
       def output_context_header!(parent_names)
         if parent_names != last_seen_names
@@ -299,11 +312,7 @@ module XSpec
     # Useful as a parent class for other notifiers or for testing.
     class Null
       include Composable
-
-      def run_start; end
-      def evaluate_start(*_); end
-      def evaluate_finish(*_); end
-      def run_finish; true; end
+      include EmptyFormatter
     end
 
     DEFAULT =

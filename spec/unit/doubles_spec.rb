@@ -12,7 +12,7 @@ describe 'doubles assertion context' do
 
   it 'converts double exceptions to failures' do
     result = subject.call(XSpec::UnitOfWork.new(nil, ->{
-      raise XSpec::Evaluator::Doubles::DoubleFailure, "nope"
+      raise XSpec::Evaluator::EvaluateFailed, "nope"
     }))
     assert_equal "nope", result[0].message
   end
@@ -81,7 +81,7 @@ describe 'doubles assertion context' do
           verify(double).foo("b")
         }
         fail "no error raised"
-      rescue XSpec::Evaluator::Doubles::DoubleFailure => e
+      rescue XSpec::Evaluator::EvaluateFailed => e
         assert_include "Did not receive", e.message
         assert_include 'foo("b")', e.message
       end
@@ -96,7 +96,7 @@ describe 'doubles assertion context' do
           verify(double).foo("c")
         }
         fail "no error raised"
-      rescue XSpec::Evaluator::Doubles::DoubleFailure => e
+      rescue XSpec::Evaluator::EvaluateFailed => e
         assert_include "Did not receive", e.message
         assert_include 'foo("b")', e.message
         assert_include "Did receive", e.message
@@ -122,7 +122,7 @@ describe 'doubles assertion context' do
             stub(double).bogus_method { 123 }
           }
           fail "no error raised"
-        rescue XSpec::Evaluator::Doubles::DoubleFailure => e
+        rescue XSpec::Evaluator::EvaluateFailed => e
           assert_include "LoadedClass#bogus_method", e.message
         end
       end
@@ -134,7 +134,7 @@ describe 'doubles assertion context' do
             verify(double).bogus_method { 123 }
           }
           fail "no error raised"
-        rescue XSpec::Evaluator::Doubles::DoubleFailure => e
+        rescue XSpec::Evaluator::EvaluateFailed => e
           assert_include "LoadedClass#bogus_method", e.message
         end
       end
@@ -157,7 +157,7 @@ describe 'doubles assertion context' do
             stub(double).bogus_method { 123 }
           }
           fail "no error raised"
-        rescue XSpec::Evaluator::Doubles::DoubleFailure => e
+        rescue XSpec::Evaluator::EvaluateFailed => e
           assert_include "LoadedClass.bogus_method", e.message
         end
       end
@@ -169,7 +169,7 @@ describe 'doubles assertion context' do
             verify(double).bogus_method
           }
           fail "no error raised"
-        rescue XSpec::Evaluator::Doubles::DoubleFailure => e
+        rescue XSpec::Evaluator::EvaluateFailed => e
           assert_include "LoadedClass.bogus_method", e.message
         end
       end
@@ -190,7 +190,7 @@ describe 'strict doubles assertion context' do
     begin
       subject.instance_double("Bogus")
       fail "no error raised"
-    rescue XSpec::Evaluator::Doubles::DoubleFailure => e
+    rescue XSpec::Evaluator::EvaluateFailed => e
       assert_include "Bogus", e.message
     end
   end
