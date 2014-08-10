@@ -97,30 +97,53 @@ scheduling them.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
+              <p>Most evaluators will use a similar pattern of execution for individual
+tests, captured here in <code>TimedExecutor</code>. Note that parents are
+responsible for actually executing the work, since they have access to
+the necessary evaluation context such as method definitions.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">TimedExecutor</span></span>
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize(opts = {})
+        <span class="hljs-variable">@clock</span> = opts.fetch(<span class="hljs-symbol">:clock</span>, -&gt;{ <span class="hljs-constant">Time</span>.now.to_f })
+      <span class="hljs-keyword">end</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>evaluate_with_duration(uow, notifier)
+        notifier.evaluate_start(uow)
+
+        start_time  = <span class="hljs-variable">@clock</span>.()
+        errors      = uow.immediate_parent.execute(uow)
+        finish_time = <span class="hljs-variable">@clock</span>.()
+
+        result = <span class="hljs-constant">ExecutedUnitOfWork</span>.new(uow, errors, finish_time - start_time)
+        notifier.evaluate_finish(result)
+      <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
               <p>The serial scheduler, unsurprisingly, runs all units of works serially in
-a loop. It is about as simple a scheduler as you can imagine. Parents
-are responsible for actually executing the work.</p>
+a loop. It is about as simple a scheduler as you can imagine.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Serial</span></span>
-      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize(opts = {})
-        <span class="hljs-variable">@clock</span> = opts.fetch(<span class="hljs-symbol">:clock</span>, -&gt;{ <span class="hljs-constant">Time</span>.now.to_f })
-      <span class="hljs-keyword">end</span>
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">TimedExecutor</span>
 
       <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run(context, config)
         notifier = config.fetch(<span class="hljs-symbol">:notifier</span>)
         notifier.run_start(config)
 
         context.nested_units_of_work.each <span class="hljs-keyword">do</span> |x|
-          notifier.evaluate_start(x)
-
-          start_time  = clock.()
-          errors      = x.immediate_parent.execute(x)
-          finish_time = clock.()
-
-          result = <span class="hljs-constant">ExecutedUnitOfWork</span>.new(x, errors, finish_time - start_time)
-          notifier.evaluate_finish(result)
+          evaluate_with_duration x, notifier
         <span class="hljs-keyword">end</span>
 
         notifier.run_finish
@@ -129,9 +152,114 @@ are responsible for actually executing the work.</p>
       protected
 
       <span class="hljs-keyword">attr_reader</span> <span class="hljs-symbol">:clock</span>
-    <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Tests can be run in parallel using the threaded scheduler. For fast
+suites the overhead of creating tests may actually result in slower
+overall times, but the advantage on longer suites can be substantial.</p>
+<p>Be careful about using global resources (such as a database) in parallel
+tests. <code>Thread.current[:xspec_thread]</code> contains a sequential numeric
+identifier for the executing thread, which allows you to set up
+namespaced resources ahead of time.</p>
+<p>Note that notifiers that expect a consistent ordering of tests, such as
+the documentation one, will behave erractically with this scheduler.</p>
 
-    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Filter</span></span>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Threaded</span></span>
+      <span class="hljs-keyword">include</span> <span class="hljs-constant">TimedExecutor</span>
+
+      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize(opts = {})
+        <span class="hljs-keyword">super</span>
+        <span class="hljs-variable">@threads</span> = opts.fetch(<span class="hljs-symbol">:threads</span>, <span class="hljs-number">4</span>)
+      <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Tests are fed to threads via a shared queue. This allows for
+near-optimal processing of tests, since idle threads can continue to
+pick up new work.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run(context, config)
+        notifier = config.fetch(<span class="hljs-symbol">:notifier</span>)
+        notifier.run_start(config)
+
+        queue  = <span class="hljs-constant">Queue</span>.new
+        tracer = <span class="hljs-constant">Object</span>.new
+
+        threads = <span class="hljs-variable">@threads</span>.times.map <span class="hljs-keyword">do</span> |n|
+          <span class="hljs-constant">Thread</span>.new <span class="hljs-keyword">do</span>
+            <span class="hljs-constant">Thread</span>.current[<span class="hljs-symbol">:xspec_thread</span>] = n
+            loop <span class="hljs-keyword">do</span>
+              x = queue.pop
+              <span class="hljs-keyword">break</span> <span class="hljs-keyword">if</span> x == tracer
+              evaluate_with_duration x, notifier
+            <span class="hljs-keyword">end</span>
+          <span class="hljs-keyword">end</span>
+        <span class="hljs-keyword">end</span>
+
+        context.nested_units_of_work.each <span class="hljs-keyword">do</span> |uow|
+          queue &lt;&lt; uow
+        <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>A tracer object is flushed through the system to allow for graceful
+shutdown without having to explicitly kill threads (which would be
+messy).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-variable">@threads</span>.times <span class="hljs-keyword">do</span> |uow|
+          queue &lt;&lt; tracer
+        <span class="hljs-keyword">end</span>
+
+        threads.each(&amp;<span class="hljs-symbol">:value</span>)
+
+        notifier.run_finish
+      <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>To run a subset of a suite, wrap a scheduler with <code>Filter</code>. It takes an
+lambda that must return true for any particular test to be included.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Filter</span></span>
       <span class="hljs-function"><span class="hljs-keyword">def</span> </span>initialize(<span class="hljs-symbol">scheduler:</span>, <span class="hljs-symbol">filter:</span>)
         <span class="hljs-variable">@scheduler</span> = scheduler
         <span class="hljs-variable">@filter</span>    = filter
@@ -148,9 +276,23 @@ are responsible for actually executing the work.</p>
       <span class="hljs-keyword">end</span>
 
       <span class="hljs-keyword">attr_reader</span> <span class="hljs-symbol">:scheduler</span>, <span class="hljs-symbol">:filter</span>
-    <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p><code>Serial</code> is the default scheduler since there are caveats when using the
+others.</p>
 
-    <span class="hljs-constant">DEFAULT</span> = <span class="hljs-constant">Serial</span>.new
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-constant">DEFAULT</span> = <span class="hljs-constant">Serial</span>.new
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span></pre></div></div>
             
