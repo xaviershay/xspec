@@ -22,6 +22,6 @@ Gem::Specification.new do |gem|
   gem.bindir        = "bin"
   gem.executables  << "xspec"
   gem.license       = "Apache 2.0"
-  gem.version       = "0.1.0"
+  gem.version       = "0.2.0"
   gem.has_rdoc      = false
 end
