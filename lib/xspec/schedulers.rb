@@ -70,7 +70,7 @@ module XSpec
       # near-optimal processing of tests, since idle threads can continue to
       # pick up new work.
       def run(context, config)
-        notifier = config.fetch(:notifier)
+        notifier = Notifier::Synchronized.new(config.fetch(:notifier))
         notifier.run_start(config)
 
         queue  = Queue.new
