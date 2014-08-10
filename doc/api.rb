@@ -428,13 +428,16 @@ end
 #
 # * `Serial` runs all tests one at a time in the order they were loaded. (This
 #   is the default.)
-# * `Threaded` uses multiple threads (default of 4) to execute tests.
+# * `Threaded` uses multiple threads (default of 4) to execute tests. Many
+#   notifiers will need to be wrapped in `Notifier::Synchronized` to work
+#   correctly with this scheduler.
 # * `Filter` does not run tests by itself, but restricts the tests to be run by
 #   another scheduler.
 module BuiltInScheduler
   XS = XSpec::Scheduler
 
   extend XSpec.dsl(
+    notifier: XN::Synchronized.new(XN::DEFAULT),
     scheduler: XS::Filter.new(
       scheduler: XS::Threaded.new(threads: 2),
       filter: -> uow { uow.name =~ /focus/ }

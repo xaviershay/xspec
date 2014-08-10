@@ -308,6 +308,31 @@ module XSpec
       end
     end
 
+    # Serializes all calls to a child notifier, useful when using
+    # non-threadsafe notifiers in a threaded scheduler.
+    class Synchronized
+      def initialize(notifier)
+        @notifier = notifier
+        @mutex    = Mutex.new
+      end
+
+      def run_start(*args)
+        @mutex.synchronize { @notifier.run_start(*args) }
+      end
+
+      def evaluate_start(*args)
+        @mutex.synchronize { @notifier.evaluate_start(*args) }
+      end
+
+      def evaluate_finish(*args)
+        @mutex.synchronize { @notifier.evaluate_finish(*args) }
+      end
+
+      def run_finish(*args)
+        @mutex.synchronize { @notifier.run_finish(*args) }
+      end
+    end
+
     # A notifier that does not do anything and always returns successful.
     # Useful as a parent class for other notifiers or for testing.
     class Null

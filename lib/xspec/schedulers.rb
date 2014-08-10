@@ -61,31 +61,6 @@ module XSpec
     class Threaded
       include TimedExecutor
 
-      # All calls to the notifier are serialized so that notifier implementers
-      # do not need to think about race conditions.
-      class SynchronizedNotifier
-        def initialize(notifier)
-          @notifier = notifier
-          @mutex    = Mutex.new
-        end
-
-        def run_start(*args)
-          @mutex.synchronize { @notifier.run_start(*args) }
-        end
-
-        def evaluate_start(*args)
-          @mutex.synchronize { @notifier.evaluate_start(*args) }
-        end
-
-        def evaluate_finish(*args)
-          @mutex.synchronize { @notifier.evaluate_finish(*args) }
-        end
-
-        def run_finish(*args)
-          @mutex.synchronize { @notifier.run_finish(*args) }
-        end
-      end
-
       def initialize(opts = {})
         super
         @threads = opts.fetch(:threads, 4)
@@ -95,7 +70,7 @@ module XSpec
       # near-optimal processing of tests, since idle threads can continue to
       # pick up new work.
       def run(context, config)
-        notifier = SynchronizedNotifier.new(config.fetch(:notifier))
+        notifier = config.fetch(:notifier)
         notifier.run_start(config)
 
         queue  = Queue.new
