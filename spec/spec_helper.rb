@@ -1,6 +1,3 @@
-require 'simplecov'
-SimpleCov.start
-
 require 'xspec'
 
 extend XSpec.dsl(
