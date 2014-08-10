@@ -308,8 +308,8 @@ module XSpec
       end
     end
 
-    # Serializes all calls to a child notifier, useful when using
-    # non-threadsafe notifiers in a threaded scheduler.
+    # Serializes all calls to a child notifier. Used in threaded scheduler so
+    # that notifier implementors do not need to worry about thread safety.
     class Synchronized
       def initialize(notifier)
         @notifier = notifier
