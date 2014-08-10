@@ -1,6 +1,3 @@
-require 'simplecov'
-SimpleCov.start
-
 require 'xspec'
 
 extend XSpec.dsl(
@@ -30,7 +27,7 @@ def with_dsl(opts, &block)
       end
     end.new
 
-    extend XSpec.dsl(opts.merge(notifier: notifier))
+    extend XSpec.dsl({notifier: notifier}.merge(opts))
 
     instance_exec(&block)
   end

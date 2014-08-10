@@ -394,14 +394,6 @@ end
 # responsible for combining the result with timing information and triggering
 # the notifier callbacks.
 
-# `Serial` is the only built-in scheduler, and is the default. It runs all
-# tests one at a time in the order they were loaded.
-module BuiltInScheduler
-  extend XSpec.dsl(
-    scheduler: XSpec::Scheduler::Serial.new
-  )
-end
-
 module CustomScheduler
   # This example scheduler runs tests in a random order and does not record
   # durations.
@@ -430,6 +422,30 @@ module CustomScheduler
 
   it 'executes' do
   end
+end
+
+# #### Built-in Schedulers
+#
+# * `Serial` runs all tests one at a time in the order they were loaded. (This
+#   is the default.)
+# * `Threaded` uses multiple threads (default of 4) to execute tests. Many
+#   notifiers will need to be wrapped in `Notifier::Synchronized` to work
+#   correctly with this scheduler.
+# * `Filter` does not run tests by itself, but restricts the tests to be run by
+#   another scheduler.
+module BuiltInScheduler
+  XS = XSpec::Scheduler
+
+  extend XSpec.dsl(
+    notifier: XN::Synchronized.new(XN::DEFAULT),
+    scheduler: XS::Filter.new(
+      scheduler: XS::Threaded.new(threads: 2),
+      filter: -> uow { uow.name =~ /focus/ }
+    )
+  )
+
+  it('runs this (focus)') {}
+  it('does not run this') {}
 end
 
 # ## Short IDs
