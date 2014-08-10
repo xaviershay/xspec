@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe 'schedulers' do
   let(:recording_notifier) { Class.new do
-      include XSpec::Notifier::EmptyFormatter
+      include XSpec::Notifier::Empty
 
       attr_reader :results
 

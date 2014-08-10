@@ -9,7 +9,7 @@ module XSpec
     # `run_finish` are called at the beginning and end of the full spec run
     # respectively, while `evaluate_start` and `evaluate_finish` are called for
     # each test. See [API docs](api.html#notifiers) for more information.
-    module EmptyFormatter
+    module Empty
       def run_start(*_); end
       def evaluate_start(*_); end
       def evaluate_finish(*_); end
@@ -55,7 +55,7 @@ module XSpec
     # Outputs a single character for each executed unit of work representing
     # the result.
     class Character
-      include EmptyFormatter
+      include Empty
       include Composable
 
       def initialize(out = $stdout)
@@ -85,7 +85,7 @@ module XSpec
 
     # Renders a histogram of test durations after the entire run is complete.
     class TimingsAtEnd
-      include EmptyFormatter
+      include Empty
       include Composable
 
       DEFAULT_SPLITS = [0.001, 0.005, 0.01, 0.1, 1.0, Float::INFINITY]
@@ -165,7 +165,7 @@ module XSpec
 
     # Outputs error messages and backtraces after the entire run is complete.
     class FailuresAtEnd
-      include EmptyFormatter
+      include Empty
       include Composable
       include ShortIdSupport
 
@@ -217,7 +217,7 @@ module XSpec
     # Includes nicely formatted names and durations of each test in the output,
     # with color.
     class ColoredDocumentation
-      include EmptyFormatter
+      include Empty
       include Composable
       include ShortIdSupport
 
@@ -312,7 +312,7 @@ module XSpec
     # Useful as a parent class for other notifiers or for testing.
     class Null
       include Composable
-      include EmptyFormatter
+      include Empty
     end
 
     DEFAULT =
