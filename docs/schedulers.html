@@ -199,7 +199,7 @@ pick up new work.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>      <span class="hljs-function"><span class="hljs-keyword">def</span> </span>run(context, config)
-        notifier = config.fetch(<span class="hljs-symbol">:notifier</span>)
+        notifier = <span class="hljs-constant">Notifier::Synchronized</span>.new(config.fetch(<span class="hljs-symbol">:notifier</span>))
         notifier.run_start(config)
 
         queue  = <span class="hljs-constant">Queue</span>.new

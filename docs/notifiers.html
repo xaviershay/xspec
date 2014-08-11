@@ -509,8 +509,8 @@ with color.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
-              <p>Serializes all calls to a child notifier, useful when using
-non-threadsafe notifiers in a threaded scheduler.</p>
+              <p>Serializes all calls to a child notifier. Used in threaded scheduler so
+that notifier implementors do not need to worry about thread safety.</p>
 
             </div>
             
