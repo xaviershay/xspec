@@ -199,13 +199,13 @@ module XSpec
 
       private
 
+      LIB_DIR = File.expand_path('../..', __FILE__)
+
       # A standard backtrace contains many entries for XSpec itself which are
       # not useful for debugging your tests, so they are stripped out.
       def clean_backtrace(backtrace)
-        lib_dir = File.dirname(File.expand_path('..', __FILE__))
-
         backtrace.reject {|x|
-          File.dirname(x).start_with?(lib_dir)
+          File.dirname(x).start_with?(LIB_DIR)
         }
       end
 
