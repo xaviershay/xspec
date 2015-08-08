@@ -8,7 +8,7 @@
 module XSpec
   module Evaluator
     # A stack is typically book-ended by the top and bottom evaluators, so this
-    # helper is the most commond way to build up a custom stack.
+    # helper is the most common way to build up a custom stack.
     def self.stack(&block)
       Module.new do
         include Bottom
